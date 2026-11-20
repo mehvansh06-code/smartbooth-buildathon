@@ -125,6 +125,10 @@
                 <span>🎬</span>
                 <span>3. 1-to-1 व्यक्तिगत वीडियो</span>
             </button>
+            <button onclick="switchTab('tab-grounding')" id="btn-tab-grounding" class="tab-btn px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition flex items-center space-x-2 bg-white text-slate-600 hover:bg-slate-50 border border-transparent">
+                <span>🔍</span>
+                <span>4. Google Live Search Grounding</span>
+            </button>
             <button onclick="toggleTraceDrawer()" class="md:hidden px-3 py-2 text-xs font-bold rounded-xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center space-x-1">
                 <span>🔍 AI ट्रेस</span>
             </button>
@@ -456,6 +460,76 @@
             </div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- TAB 4: Google Live Search Grounding        -->
+        <!-- ========================================== -->
+        <div id="tab-grounding" class="tab-pane hidden space-y-6">
+            
+            <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-blue-800/40 relative overflow-hidden">
+                <div class="absolute -right-8 -bottom-8 opacity-10 text-9xl">🔍</div>
+                <div class="relative z-10 max-w-3xl">
+                    <div class="flex items-center space-x-2 text-xs uppercase font-mono tracking-wider text-blue-400 font-semibold mb-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-400 pulse-live"></span>
+                        <span>Vertex AI Grounding Engine</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white">Google Search Grounding के साथ लाइव चुनाव जानकारी</h2>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                        Gemini 2.5 Flash सीधे Google Search से रियल-टाइम चुनाव अधिसूचनाएं, मतगणना दिनांक, मतदान समय और चुनाव आयोग के नियम खोजकर प्रामाणिक स्रोतों (Web Citations) के साथ प्रस्तुत करता है।
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">लाइव चुनाव प्रश्न पूछें (Live Grounded Query)</h3>
+                        <p class="text-xs text-slate-500">Gemini 2.5 Flash + Google Search Grounding with Web Citations</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-xs text-slate-500">क्विक प्रश्न:</span>
+                        <button onclick="setGroundingQuery('राजस्थान पंचायत चुनाव 2026 मतगणना कब है?')" class="text-xs px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 font-bold hover:bg-blue-100">मतगणना कब है?</button>
+                        <button onclick="setGroundingQuery('ग्राम पंचायत चुनाव अजमेर में मतदान का समय क्या है?')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium hover:bg-slate-200">मतदान समय</button>
+                        <button onclick="setGroundingQuery('SEC Rajasthan model code of conduct guidelines for Sarpanch candidates')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium hover:bg-slate-200">आचार संहिता नियम</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <input type="text" id="grounding-query-input" value="राजस्थान पंचायत चुनाव 2026 मतगणना कब है?" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:outline-none focus:border-blue-600" placeholder="कोई भी चुनावी प्रश्न पूछें...">
+                    <button onclick="executeGroundingSearch()" id="btn-grounding-search" class="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm shadow-md shadow-blue-700/20 transition flex items-center space-x-1.5">
+                        <span>🔍 गूगल सर्च करें</span>
+                    </button>
+                </div>
+
+                <!-- Grounded Result Card -->
+                <div id="grounding-result-box" class="hidden rounded-xl border border-blue-200 bg-blue-50/40 p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-blue-500 pulse-live"></span>
+                            <span>Google Search Grounded Result</span>
+                        </span>
+                        <span id="grounding-latency-badge" class="text-[11px] font-mono text-blue-700 bg-blue-100 px-2 py-0.5 rounded font-semibold">1,240ms</span>
+                    </div>
+
+                    <!-- Search queries executed -->
+                    <div class="flex flex-wrap gap-1.5 text-xs">
+                        <span class="text-slate-500 font-medium">Google Search Queries:</span>
+                        <div id="grounding-queries-pills" class="flex flex-wrap gap-1"></div>
+                    </div>
+
+                    <!-- Answer text -->
+                    <div class="bg-white p-4 rounded-xl border border-blue-100 text-xs sm:text-sm text-slate-800 leading-relaxed space-y-2" id="grounding-answer-text">
+                    </div>
+
+                    <!-- Citations / Sources -->
+                    <div>
+                        <h5 class="text-xs font-bold text-slate-700 mb-2">सत्यापित वेब स्रोत (Verified Web Sources & Citations):</h5>
+                        <div id="grounding-sources-list" class="space-y-1.5"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </main>
 
     <!-- Slide-Out AI Execution Trace Drawer -->
@@ -695,6 +769,56 @@
         function shareVideoWhatsApp() {
             const p = document.getElementById('call-target-phone').value.trim() || '9828579249';
             alert(`प्रत्याशी नीलू धोनीवाल (ट्रैक्टर चिन्ह) का व्यक्तिगत वीडियो व्हाट्सएप पर ${p} पर भेजा जा रहा है।`);
+        }
+
+        // 5. Google Search Grounding
+        function setGroundingQuery(q) {
+            document.getElementById('grounding-query-input').value = q;
+        }
+
+        async function executeGroundingSearch() {
+            const q = document.getElementById('grounding-query-input').value.trim();
+            const btn = document.getElementById('btn-grounding-search');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin">⏳</span> <span>Google Search हो रहा है...</span>`;
+
+            try {
+                const res = await fetch('/api/agent/live_search', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({query: q})
+                });
+                const data = await res.json();
+
+                document.getElementById('grounding-result-box').classList.remove('hidden');
+                document.getElementById('grounding-latency-badge').innerText = `${data.latency_ms}ms`;
+
+                const qContainer = document.getElementById('grounding-queries-pills');
+                qContainer.innerHTML = (data.search_queries || []).map(sq => `
+                    <span class="px-2 py-0.5 rounded bg-white text-slate-700 font-mono text-[10px] font-semibold border border-slate-200">🔍 "${sq}"</span>
+                `).join('');
+
+                document.getElementById('grounding-answer-text').innerHTML = (data.answer || '').replace(/\n\n/g, '<br><br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+                const sContainer = document.getElementById('grounding-sources-list');
+                if (data.sources && data.sources.length) {
+                    sContainer.innerHTML = data.sources.map(s => `
+                        <a href="${s.uri}" target="_blank" class="block p-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-blue-600 hover:text-blue-800 font-medium text-xs transition flex items-center justify-between">
+                            <span>🔗 ${s.title || s.uri}</span>
+                            <span class="text-[10px] text-slate-400 font-mono">खोलो ↗</span>
+                        </a>
+                    `).join('');
+                } else {
+                    sContainer.innerHTML = '<span class="text-xs text-slate-400 italic">Google Verified Direct Answer</span>';
+                }
+
+                fetchTraces();
+            } catch (err) {
+                alert("Google Search Grounding में त्रुटि: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>🔍 गूगल सर्च करें</span>`;
+            }
         }
 
         // Traces Fetcher

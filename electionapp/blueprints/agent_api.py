@@ -63,6 +63,13 @@ def generate_personalized_video():
     )
     return jsonify(res)
 
+@agent_bp.route("/live_search", methods=["POST"])
+def live_election_search():
+    data = request.get_json() or {}
+    query = data.get("query", "Rajasthan Panchayat election 2026 counting date")
+    res = buildathon_agent.search_live_election_info(query)
+    return jsonify(res)
+
 @agent_bp.route("/command", methods=["POST"])
 def execute_command():
     data = request.get_json() or {}

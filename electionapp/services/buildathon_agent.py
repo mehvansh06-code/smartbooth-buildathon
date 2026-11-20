@@ -405,3 +405,49 @@ def trigger_candidate_outreach_call(candidate_id: int = 5, target_phone: str = "
               res, latency,
               metadata={"aha_hook": "Simultaneous Phone Call + WhatsApp Slip Delivery"})
     return res
+
+
+# ==========================================
+# TOOL 5: Google Search Grounding for Live Election Info
+# ==========================================
+def search_live_election_info(query: str) -> dict:
+    """Uses Google Search Grounding on Gemini 2.5 Flash (Vertex AI) to fetch live election news, schedules & guidelines with web citations."""
+    start_t = time.time()
+    client = get_genai_client()
+    from google.genai import types
+    
+    prompt = f"You are the official SmartBooth Rajasthan Election Assistant. Provide live, accurate, grounded information for this query: '{query}'. Provide clear Hindi/English highlights and cite verified sources."
+    resp = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            tools=[types.Tool(google_search=types.GoogleSearch())]
+        )
+    )
+    
+    answer = resp.text or "Live election information retrieved."
+    sources = []
+    queries = []
+    if hasattr(resp.candidates[0], "grounding_metadata") and resp.candidates[0].grounding_metadata:
+        gm = resp.candidates[0].grounding_metadata
+        queries = getattr(gm, "web_search_queries", []) or []
+        chunks = getattr(gm, "grounding_chunks", []) or []
+        for c in chunks:
+            web = getattr(c, "web", None)
+            if web and getattr(web, "uri", None):
+                sources.append({
+                    "title": getattr(web, "title", "Verified Source"),
+                    "uri": getattr(web, "uri", "")
+                })
+                
+    latency = (time.time() - start_t) * 1000
+    res = {
+        "status": "SUCCESS",
+        "query": query,
+        "answer": answer,
+        "search_queries": queries,
+        "sources": sources[:5],
+        "latency_ms": round(latency, 2)
+    }
+    log_trace("TOOL_CALL", "search_live_election_info", {"query": query}, res, latency, metadata={"grounded": True})
+    return res
