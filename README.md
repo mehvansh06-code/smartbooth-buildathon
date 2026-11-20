@@ -27,7 +27,6 @@ The entire production stack is deployed and operational on Google Cloud Platform
 | **Google Cloud VM** | `smartbooth-demo` | Ubuntu 24.04 LTS (x86_64), `asia-south1-a` (Mumbai) |
 | **Public IPv4** | `8.231.107.200` | Direct HTTP/Nginx Reverse Proxy |
 | **Canonical Domain** | `https://build.smartbooth.in` | Cloudflare SSL + Edge Caching |
-| **Stage Demo Console** | `https://build.smartbooth.in/demo` | Real-time dual-pane stage demo cockpit |
 | **Systemd Service** | `smartbooth.service` | Gunicorn WSGI workers on `127.0.0.1:5030` |
 | **Database** | `voter_platform` (PostgreSQL) | Active partition `voters_t5` (Gram Panchayat Sarana, Ajmer) |
 | **LLM Engine** | **Gemini 2.5 Flash** | Vertex AI (`project-de57b711-daa3-47db-9c0`, `us-central1`) |
