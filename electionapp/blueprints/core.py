@@ -129,8 +129,29 @@ def _render_page(template_name: str, active_page: str):
 
 
 @core_bp.route('/')
-@core_bp.route('/hub')
 def index():
+    host = (request.host or '').split(':')[0].lower()
+    is_buildathon = 'build.smartbooth.in' in host or host == '8.231.107.200'
+    view = request.args.get('view')
+
+    # On build.smartbooth.in, root is the 3-Pipeline Showcase Landing Page unless explicitly visiting portal or tenant
+    if is_buildathon and not view and not request.args.get('tenant'):
+        return render_template('landing_pipelines.html')
+
+    if session.get('role') == 'karyakarta':
+        slug = session.get('tenant_slug') or getattr(g, 'tenant_slug', '')
+        return redirect(f"/my-voters?tenant={slug}" if slug else "/my-voters")
+    return _render_page('hub.html', active_page='hub')
+
+
+@core_bp.route('/pipelines')
+@core_bp.route('/landing')
+def landing_pipelines():
+    return render_template('landing_pipelines.html')
+
+
+@core_bp.route('/hub')
+def hub():
     if session.get('role') == 'karyakarta':
         slug = session.get('tenant_slug') or getattr(g, 'tenant_slug', '')
         return redirect(f"/my-voters?tenant={slug}" if slug else "/my-voters")
