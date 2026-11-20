@@ -59,8 +59,21 @@ def get_db_connection():
 
 def get_genai_client():
     from google import genai
+    api_key = os.environ.get("GEMINI_API_KEY")
+    use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "True").lower() in ("true", "1")
     project = os.environ.get("GOOGLE_CLOUD_PROJECT", "project-de57b711-daa3-47db-9c0")
     location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
+    
+    if use_vertex and project:
+        try:
+            return genai.Client(vertexai=True, project=project, location=location)
+        except Exception as e:
+            logger.warning(f"Vertex AI init failed: {e}. Attempting GEMINI_API_KEY.")
+            if api_key:
+                return genai.Client(api_key=api_key)
+            raise e
+    elif api_key:
+        return genai.Client(api_key=api_key)
     return genai.Client(vertexai=True, project=project, location=location)
 
 
@@ -597,3 +610,16 @@ def search_live_election_info(query: str) -> dict:
     }
     log_trace("TOOL_CALL", "search_live_election_info", {"query": query}, res, latency, metadata={"grounded": True})
     return res
+
+
+# ==========================================
+# TOOL 6: Natural Language Database Q&A
+# ==========================================
+def answer_database_question(question: str, gram_panchayat: str = "Sarana", tenant_id: int = 5) -> dict:
+    """Answers arbitrary election questions from the voter database (counts, wards, age, caste, families) using Gemini 2.5 Flash and PostgreSQL."""
+    from electionapp.services import db_qa_service
+    return db_qa_service.ask_database_question(
+        question=question,
+        tenant_id=tenant_id,
+        campaign_slug=gram_panchayat.lower()
+    )
