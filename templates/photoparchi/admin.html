@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="hi" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>फोटो पर्ची एडमिन (PhotoParchi Admin) — parchi.smartbooth.in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans Devanagari', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', 'Noto Sans Devanagari', sans-serif; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col text-slate-800 antialiased selection:bg-amber-100 selection:text-amber-900">
+
+  {% if not is_authenticated %}
+  <!-- ========================================== -->
+  <!-- Standalone Admin PIN Login Screen          -->
+  <!-- ========================================== -->
+  <div class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-amber-950">
+    <div class="w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100/10">
+      <div class="text-center space-y-3">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-amber-500/30">
+          🪪
+        </div>
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight">PhotoParchi Admin</h1>
+          <p class="text-xs font-bold text-amber-700 bg-amber-50 inline-block px-3 py-1 rounded-full mt-1.5 border border-amber-200">
+            parchi.smartbooth.in
+          </p>
+        </div>
+        <p class="text-xs text-slate-500 font-medium">
+          राजस्थान पंचायत चुनाव 2026 • फोटो पर्ची एक्सेस कोड प्रबंधन
+        </p>
+      </div>
+
+      <div id="loginAlert" class="hidden mt-5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+        <span>⚠️</span><span id="loginAlertText">अमान्य एडमिन पिन</span>
+      </div>
+
+      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="mt-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">
+            गुप्त एडमिन पिन (Secret Admin PIN)
+          </label>
+          <input
+            type="password"
+            id="adminPinInput"
+            required
+            autocomplete="current-password"
+            placeholder="एडमिन पिन दर्ज करें..."
+            class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm font-semibold tracking-wider text-slate-900 bg-slate-50"
+          >
+        </div>
+
+        <button
+          type="submit"
+          id="loginSubmitBtn"
+          class="w-full py-3.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 active:scale-[0.98] text-white font-extrabold text-sm shadow-lg shadow-amber-600/30 transition cursor-pointer flex items-center justify-center gap-2"
+        >
+          <span>लॉगिन करें (Unlock Admin)</span>
+          <span>→</span>
+        </button>
+      </form>
+
+      <div class="mt-6 pt-5 border-t border-slate-100 text-center">
+        <a href="/photoparchi" class="text-xs font-bold text-slate-500 hover:text-amber-700 transition flex items-center justify-center gap-1">
+          <span>← पर्ची जनरेटर पोर्टल खोलें</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function handleAdminLogin(e) {
+      e.preventDefault();
+      const pin = document.getElementById('adminPinInput').value.trim();
+      const btn = document.getElementById('loginSubmitBtn');
+      const alertBox = document.getElementById('loginAlert');
+      const alertText = document.getElementById('loginAlertText');
+
+      if (!pin) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>सत्यापित किया जा रहा है...</span>';
+      alertBox.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/photoparchi/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pin: pin })
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alertText.textContent = data.error || 'अमान्य एडमिन पिन';
+          alertBox.classList.remove('hidden');
+          btn.disabled = false;
+          btn.innerHTML = '<span>लॉगिन करें (Unlock Admin)</span><span>→</span>';
+        }
+      } catch (err) {
+        alertText.textContent = 'सर्वर से संपर्क नहीं हो सका।';
+        alertBox.classList.remove('hidden');
+        btn.disabled = false;
+        btn.innerHTML = '<span>लॉगिन करें (Unlock Admin)</span><span>→</span>';
+      }
+    }
+  </script>
+
+  {% else %}
+  <!-- ========================================== -->
+  <!-- Standalone PhotoParchi Admin Dashboard     -->
+  <!-- ========================================== -->
+
+  <!-- Top Navbar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-700 text-white flex items-center justify-center text-xl shadow-md">
+          🪪
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-black text-slate-900 text-base sm:text-lg leading-tight">PhotoParchi Admin</span>
+            <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-amber-200">
+              कंट्रोल रूम
+            </span>
+          </div>
+          <p class="text-[11px] font-semibold text-slate-500 hidden sm:block">
+            parchi.smartbooth.in • एक्सेस कोड व भुगतान प्रबंधन
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <a
+          href="/photoparchi"
+          target="_blank"
+          class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 border border-slate-200"
+          title="पर्ची जनरेटर पोर्टल खोलें"
+        >
+          <span>पर्ची पोर्टल ↗</span>
+        </a>
+        <button
+          type="button"
+          onclick="openCreateCodeModal()"
+          class="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-amber-600/20 cursor-pointer"
+        >
+          <span>+</span><span>नया कोड</span>
+        </button>
+        <button
+          type="button"
+          onclick="handleAdminLogout()"
+          class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs px-3 py-2 rounded-xl transition border border-rose-200 cursor-pointer"
+          title="लॉगआउट"
+        >
+          लॉगआउट
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- KPI Summary Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">कुल जारी कोड</div>
+        <div id="statTotalCodes" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</div>
+        <div class="text-[11px] font-medium text-slate-400 mt-0.5">सभी अभियान</div>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+        <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider">सक्रिय कोड</div>
+        <div id="statActiveCodes" class="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">0</div>
+        <div class="text-[11px] font-medium text-slate-400 mt-0.5">वर्तमान में उपयोग योग्य</div>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+        <div class="text-xs font-bold text-amber-700 uppercase tracking-wider">सशुल्क / मुफ़्त</div>
+        <div id="statPaidCodes" class="text-2xl sm:text-3xl font-black text-amber-700 mt-1">0 / 0</div>
+        <div class="text-[11px] font-medium text-slate-400 mt-0.5">सशुल्क (Paid) / निःशुल्क (Free)</div>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+        <div class="text-xs font-bold text-blue-600 uppercase tracking-wider">कुल डाउनलोड</div>
+        <div id="statTotalUses" class="text-2xl sm:text-3xl font-black text-blue-600 mt-1">0</div>
+        <div class="text-[11px] font-medium text-slate-400 mt-0.5">जनरेट की गई पर्चियां</div>
+      </div>
+    </div>
+
+    <!-- Filter & Action Toolbar -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2 flex-1 min-w-[240px]">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="कोड या अभियान खोजें..."
+          oninput="debounceSearch()"
+          class="w-full sm:max-w-xs px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50"
+        >
+        <select
+          id="filterTypeSelect"
+          onchange="filterCodesByType()"
+          class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+        >
+          <option value="ALL">सभी पद (All Types)</option>
+          <option value="PANCHAYAT">सरपंच (Sarpanch)</option>
+          <option value="WARD_PANCH">वार्ड पंच (Ward Panch)</option>
+          <option value="PANCHAYAT_SAMITI">पंचायत समिति सदस्य</option>
+          <option value="ZILA_PARISHAD">जिला परिषद सदस्य</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          onclick="loadCodes()"
+          class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl border border-slate-200 transition cursor-pointer flex items-center gap-1.5"
+          title="ताज़ा करें"
+        >
+          <span>🔄 ताज़ा करें</span>
+        </button>
+        <button
+          type="button"
+          onclick="openCreateCodeModal()"
+          class="bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-xs cursor-pointer flex items-center gap-1"
+        >
+          <span>+ नया कोड जारी करें</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Codes Table Container (Full-Width Card) -->
+    <div class="w-full bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+      <div class="overflow-x-auto w-full">
+        <table class="w-full min-w-[760px] text-left text-xs border-collapse">
+          <thead class="bg-slate-50/90 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[11px]">
+            <tr>
+              <th class="px-5 py-3.5 w-[22%]">एक्सेस कोड व अनलॉक लिंक</th>
+              <th class="px-4 py-3.5 w-[15%]">चुनाव पद / अभियान</th>
+              <th class="px-4 py-3.5 w-[16%]">अनुमत पर्ची प्रारूप</th>
+              <th class="px-4 py-3.5 w-[16%]">शुल्क व भुगतान स्थिति</th>
+              <th class="px-4 py-3.5 w-[11%] text-center">उपयोग (Uses)</th>
+              <th class="px-4 py-3.5 w-[10%] text-center">स्थिति (Status)</th>
+              <th class="px-5 py-3.5 w-[10%] text-right">कार्रवाई</th>
+            </tr>
+          </thead>
+          <tbody id="codesTableBody" class="divide-y divide-slate-100 text-slate-700 font-medium">
+            <tr>
+              <td colspan="7" class="px-4 py-12 text-center text-slate-400 font-bold">
+                कोड लोड किए जा रहे हैं...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- Minimal Create Code Modal                   -->
+  <!-- ========================================== -->
+  <div id="createCodeModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg font-black">
+            🎟️
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-900">नया एक्सेस कोड जारी करें</h3>
+            <p class="text-[11px] font-semibold text-slate-500">उम्मीदवार के लिए पर्ची अनलॉक कोड</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="closeCreateCodeModal()"
+          class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form id="createCodeForm" onsubmit="handleCreateCode(event)" class="space-y-4">
+        
+        <!-- 1. Campaign Type Selection -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">
+            1. चुनाव पद (Campaign Type) *
+          </label>
+          <select
+            id="modalCampaignType"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+            <option value="PANCHAYAT" selected>सरपंच पद (Sarpanch Campaign)</option>
+            <option value="WARD_PANCH">वार्ड पंच पद (Ward Panch)</option>
+            <option value="PANCHAYAT_SAMITI">पंचायत समिति सदस्य (PS Member)</option>
+            <option value="ZILA_PARISHAD">जिला परिषद सदस्य (ZP Member)</option>
+          </select>
+        </div>
+
+        <!-- 2. Allowed Formats Checkboxes -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">
+            2. अनुमत पर्ची प्रारूप (Allowed Slip Formats) *
+          </label>
+          <div class="grid grid-cols-2 gap-2.5">
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50/50 cursor-pointer text-xs font-bold text-slate-800">
+              <input type="checkbox" id="modalAllowPhoto" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+              <span>फोटो सहित पर्ची</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50/50 cursor-pointer text-xs font-bold text-slate-800">
+              <input type="checkbox" id="modalAllowWithoutPhoto" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+              <span>बिना फोटो पर्ची</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 3. Amount Field -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">
+            3. शुल्क राशि (Amount in ₹)
+          </label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-xs font-bold text-slate-400">₹</span>
+            <input
+              type="number"
+              id="modalPriceAmount"
+              min="0"
+              step="1"
+              value="0"
+              placeholder="0 (मुफ़्त) अथवा 499..."
+              class="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+          </div>
+          <p class="text-[10px] font-semibold text-slate-400 mt-1">
+            0 रखने पर मुफ़्त अनलॉक होगा। राशि डालने पर उम्मीदवार को पहले भुगतान करना होगा।
+          </p>
+        </div>
+
+        <!-- 4. Usage Limit Field (Max Uses) -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold text-slate-700">
+              4. अधिकतम उपयोग सीमा (Usage Limit / Max Uses) *
+            </label>
+            <span class="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+              कुल बार
+            </span>
+          </div>
+
+          <div class="relative">
+            <input
+              type="number"
+              id="modalMaxUses"
+              min="1"
+              max="10000"
+              step="1"
+              value="1"
+              oninput="handleMaxUsesInput(this.value)"
+              placeholder="उदा. 1 अथवा 10 अथवा 500..."
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+          </div>
+
+          <label class="flex items-center gap-2 mt-2.5 cursor-pointer text-xs font-medium text-slate-600">
+            <input type="checkbox" id="modalIsSingleCampaign" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+            <span>एकल अभियान लॉक (पर्ची डाउनलोड होते ही कोड स्वतः बर्न हो जाएगा)</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-2">
+          <button
+            type="submit"
+            id="modalSubmitBtn"
+            class="w-full py-3 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 active:scale-[0.98] text-white font-extrabold text-xs shadow-md shadow-amber-600/20 transition cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span>+ कोड जनरेट करें</span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastBox" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700/50 flex items-center gap-2.5 text-xs font-bold animate-in fade-in slide-in-from-bottom-3 duration-200">
+    <span id="toastIcon">📋</span>
+    <span id="toastText">लिंक कॉपी किया गया!</span>
+  </div>
+
+  <script>
+    let allCodes = [];
+
+    // Load codes on start
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCodes();
+    });
+
+    async function handleAdminLogout() {
+      try {
+        await fetch('/api/photoparchi/admin/logout', { method: 'POST' });
+      } catch (e) {}
+      window.location.reload();
+    }
+
+    async function loadCodes() {
+      const tbody = document.getElementById('codesTableBody');
+      tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-12 text-center text-slate-400 font-bold">ताज़ा कोड लोड हो रहे हैं...</td></tr>`;
+
+      try {
+        const res = await fetch('/api/photoparchi/admin/codes/list');
+        const data = await res.json();
+        if (data.success) {
+          allCodes = data.codes || [];
+          updateStats(allCodes);
+          renderCodesTable(allCodes);
+        } else {
+          tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-rose-500 font-bold">त्रुटि: ${data.error || 'लोड नहीं हो सका'}</td></tr>`;
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-rose-500 font-bold">सर्वर से संपर्क नहीं हुआ।</td></tr>`;
+      }
+    }
+
+    function updateStats(codes) {
+      document.getElementById('statTotalCodes').textContent = codes.length;
+      const activeCount = codes.filter(c => c.is_active).length;
+      document.getElementById('statActiveCodes').textContent = activeCount;
+
+      const paidCount = codes.filter(c => Number(c.price_amount) > 0).length;
+      const freeCount = codes.length - paidCount;
+      document.getElementById('statPaidCodes').textContent = `${paidCount} / ${freeCount}`;
+
+      const totalUses = codes.reduce((acc, c) => acc + (c.times_used || 0), 0);
+      document.getElementById('statTotalUses').textContent = totalUses.toLocaleString('en-IN');
+    }
+
+    function renderCodesTable(codes) {
+      const tbody = document.getElementById('codesTableBody');
+      if (!codes || codes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-12 text-center text-slate-400 font-bold">कोई कोड उपलब्ध नहीं है। ऊपर दिए गए बटन से नया कोड बनाएं।</td></tr>`;
+        return;
+      }
+
+      const typeLabels = {
+        'PANCHAYAT': 'सरपंच पद',
+        'WARD_PANCH': 'वार्ड पंच',
+        'PANCHAYAT_SAMITI': 'पंचायत समिति',
+        'ZILA_PARISHAD': 'जिला परिषद'
+      };
+
+      tbody.innerHTML = codes.map(c => {
+        const typeBadge = typeLabels[c.campaign_type] || c.campaign_type || 'सरपंच';
+        const price = Number(c.price_amount || 0);
+        const isPaid = price > 0;
+        const paymentStatus = c.payment_status || (isPaid ? 'PENDING' : 'FREE');
+
+        let priceBadge = '';
+        if (!isPaid) {
+          priceBadge = `<span class="bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-1 rounded-lg border border-emerald-200">मुफ़्त (Free)</span>`;
+        } else if (paymentStatus === 'PAID') {
+          priceBadge = `<span class="bg-emerald-500 text-white font-black px-2.5 py-1 rounded-lg shadow-2xs">₹${price} • PAID</span>`;
+        } else {
+          priceBadge = `<span class="bg-amber-100 text-amber-900 font-extrabold px-2.5 py-1 rounded-lg border border-amber-300">₹${price} • PENDING</span>`;
+        }
+
+        const formats = [];
+        if (c.allow_with_photo) formats.push('📷 फोटो');
+        if (c.allow_without_photo) formats.push('📄 बिना फोटो');
+        const formatText = formats.join(' + ') || 'सभी';
+
+        const shareUrl = `https://parchi.smartbooth.in/photoparchi?code=${encodeURIComponent(c.code)}`;
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <!-- Code & 1-Click Link -->
+            <td class="px-5 py-3.5">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-black text-slate-900 text-xs bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                  ${c.code}
+                </span>
+                <button
+                  type="button"
+                  onclick="copyUnlockLink('${c.code}')"
+                  class="bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-[11px] px-2.5 py-1 rounded-lg border border-amber-200 transition cursor-pointer flex items-center gap-1"
+                  title="अनलॉक लिंक कॉपी करें"
+                >
+                  <span>🔗 लिंक कॉपी</span>
+                </button>
+              </div>
+            </td>
+
+            <!-- Type -->
+            <td class="px-4 py-3.5">
+              <span class="bg-indigo-50 text-indigo-700 font-bold px-2.5 py-0.5 rounded-md text-[11px] border border-indigo-100 inline-block">
+                ${typeBadge}
+              </span>
+            </td>
+
+            <!-- Formats -->
+            <td class="px-4 py-3.5 text-[11px] font-semibold text-slate-600">
+              ${formatText}
+            </td>
+
+            <!-- Price & Payment -->
+            <td class="px-4 py-3.5">
+              ${priceBadge}
+            </td>
+
+            <!-- Uses -->
+            <td class="px-4 py-3.5 text-center">
+              <div class="font-bold text-xs text-slate-800">
+                ${c.times_used || 0} / ${c.max_uses || 1}
+              </div>
+            </td>
+
+            <!-- Status Toggle -->
+            <td class="px-4 py-3.5 text-center">
+              <button
+                type="button"
+                onclick="toggleCode(${c.id})"
+                class="font-extrabold text-[11px] px-2.5 py-1 rounded-full cursor-pointer transition ${
+                  c.is_active
+                    ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-300'
+                    : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                }"
+              >
+                ${c.is_active ? '● सक्रिय' : '○ निष्क्रिय'}
+              </button>
+            </td>
+
+            <!-- Action -->
+            <td class="px-5 py-3.5 text-right">
+              <a
+                href="${shareUrl}"
+                target="_blank"
+                class="text-amber-700 hover:text-amber-600 font-extrabold text-xs hover:underline inline-flex items-center gap-0.5"
+              >
+                <span>खोलें</span>
+                <span>↗</span>
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function copyUnlockLink(code) {
+      const url = `https://parchi.smartbooth.in/photoparchi?code=${encodeURIComponent(code)}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => showToast(`अनलॉक लिंक कॉपी किया गया:\n${url}`));
+      } else {
+        const inp = document.createElement('input');
+        inp.value = url;
+        document.body.appendChild(inp);
+        inp.select();
+        document.execCommand('copy');
+        document.body.removeChild(inp);
+        showToast(`अनलॉक लिंक कॉपी किया गया!`);
+      }
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      const text = document.getElementById('toastText');
+      text.textContent = msg;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 3500);
+    }
+
+    function debounceSearch() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const type = document.getElementById('filterTypeSelect').value;
+      applyFilters(q, type);
+    }
+
+    function filterCodesByType() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const type = document.getElementById('filterTypeSelect').value;
+      applyFilters(q, type);
+    }
+
+    function applyFilters(searchQuery, campaignType) {
+      let filtered = allCodes;
+      if (campaignType && campaignType !== 'ALL') {
+        filtered = filtered.filter(c => c.campaign_type === campaignType);
+      }
+      if (searchQuery) {
+        filtered = filtered.filter(c => 
+          (c.code && c.code.toLowerCase().includes(searchQuery)) ||
+          (c.campaign_name && c.campaign_name.toLowerCase().includes(searchQuery))
+        );
+      }
+      renderCodesTable(filtered);
+    }
+
+    async function toggleCode(codeId) {
+      try {
+        const res = await fetch('/api/photoparchi/admin/codes/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: codeId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadCodes();
+        } else {
+          alert(data.error || 'टॉगल विफल रहा');
+        }
+      } catch (err) {
+        alert('सर्वर से संपर्क नहीं हो सका');
+      }
+    }
+
+    function openCreateCodeModal() {
+      document.getElementById('createCodeModal').classList.remove('hidden');
+    }
+
+    function closeCreateCodeModal() {
+      document.getElementById('createCodeModal').classList.add('hidden');
+    }
+
+    function handleMaxUsesInput(val) {
+      const num = parseInt(val, 10);
+      const chk = document.getElementById('modalIsSingleCampaign');
+      if (chk) {
+        // Automatically check single campaign if 1, uncheck if greater than 1
+        chk.checked = (num === 1);
+      }
+    }
+
+    async function handleCreateCode(e) {
+      e.preventDefault();
+      const campaignType = document.getElementById('modalCampaignType').value;
+      const allowPhoto = document.getElementById('modalAllowPhoto').checked;
+      const allowWithoutPhoto = document.getElementById('modalAllowWithoutPhoto').checked;
+      const priceAmount = parseFloat(document.getElementById('modalPriceAmount').value || '0');
+      const maxUses = parseInt(document.getElementById('modalMaxUses').value || '1', 10);
+      const isSingleCampaign = document.getElementById('modalIsSingleCampaign').checked;
+
+      if (!allowPhoto && !allowWithoutPhoto) {
+        alert('कम से कम एक प्रारूप (फोटो सहित अथवा बिना फोटो) अवश्य चुनें।');
+        return;
+      }
+
+      const submitBtn = document.getElementById('modalSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>जनरेट हो रहा है...</span>';
+
+      try {
+        const res = await fetch('/api/photoparchi/admin/codes/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            campaign_type: campaignType,
+            allow_with_photo: allowPhoto,
+            allow_without_photo: allowWithoutPhoto,
+            price_amount: priceAmount,
+            max_uses: maxUses,
+            is_single_campaign: isSingleCampaign
+          })
+        });
+
+        const data = await res.json();
+        if (data.success && data.code) {
+          closeCreateCodeModal();
+          showToast(`कोड ${data.code.code} तैयार हुआ!`);
+          loadCodes();
+        } else {
+          alert(data.error || 'कोड निर्माण विफल रहा');
+        }
+      } catch (err) {
+        alert('सर्वर से संपर्क नहीं हो सका');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>+ कोड जनरेट करें</span>';
+      }
+    }
+  </script>
+
+  {% endif %}
+
+</body>
+</html>

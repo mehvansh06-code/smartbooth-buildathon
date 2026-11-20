@@ -1,0 +1,231 @@
+<!-- MODAL: MARK FAMILY AS OUTSIDE VOTER -->
+  <div id="markOutsideModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full border border-slate-300 overflow-hidden space-y-0">
+      <div class="bg-indigo-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">✈️</span>
+          <div>
+            <h3 id="markOutsideModalTitle" class="font-bold text-sm">Mark as Outside Voters (प्रवासी मतदाता)</h3>
+            <p id="markOutsideModalSubtitle" class="text-[11px] text-indigo-200">Save calling contact number and notes for election coordination</p>
+          </div>
+        </div>
+        <button onclick="closeMarkOutsideModal()" class="text-white/70 hover:text-white text-xl font-bold leading-none">&times;</button>
+      </div>
+
+      <div class="p-5 space-y-4 text-xs">
+        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span id="markOutsideListLabel" class="text-[10px] font-black text-indigo-900 uppercase">Selected Voters (मतदाता सूची):</span>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="selectTargetVoterOnlyOutside()" id="btnSelectTargetOnly" class="text-[10px] text-indigo-700 font-bold hover:underline hidden">👤 Only This Person</button>
+              <span id="sepSelectTargetOnly" class="text-slate-300 hidden">|</span>
+              <button type="button" onclick="toggleAllFamilyOutside(true)" class="text-[10px] text-indigo-700 font-bold hover:underline">👨‍👩‍👧 Entire Family</button>
+              <span class="text-slate-300">|</span>
+              <button type="button" onclick="toggleAllFamilyOutside(false)" class="text-[10px] text-slate-500 font-medium hover:underline">❌ None</button>
+            </div>
+          </div>
+          <div id="markOutsideFamilyMeta" class="text-[11px] font-bold text-indigo-800"></div>
+          <div id="markOutsideFamilyList" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            <div class="text-slate-400 py-2 text-center">Loading voters...</div>
+          </div>
+        </div>
+
+        <div>
+          <label id="markOutsidePhoneLabel" class="block font-bold text-slate-800 mb-1">
+            📞 Contact Mobile Number (कॉलिंग नंबर):
+          </label>
+          <div class="flex gap-2">
+            <span class="flex items-center bg-slate-100 border border-slate-300 rounded-md px-2.5 text-xs font-bold text-slate-600">+91</span>
+            <input 
+              type="tel" 
+              id="markOutsidePhone" 
+              maxlength="10" 
+              placeholder="e.g. 9829012345"
+              class="flex-1 px-3 py-2 text-sm font-bold rounded-md border border-slate-300 focus:outline-none focus:border-indigo-600 text-slate-900"
+            >
+          </div>
+          <span class="text-[10px] text-slate-500 block mt-0.5">Campaign volunteers will call this number to coordinate voting day participation.</span>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-800 mb-1">
+            📠 Calling Notes / Remarks (टिपॠपणी / आने की योजना):
+          </label>
+          <input 
+            type="text" 
+            id="markOutsideNotes" 
+            placeholder="e.g. Resides in Jaipur / Bangalore, confirmed will come on voting day..."
+            class="w-full px-3 py-2 text-xs rounded-md border border-slate-300 focus:outline-none focus:border-indigo-600 text-slate-900"
+          >
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-800 mb-1">
+            👥 Assigned Karyakarta (वोट लाने की जिम्मेदारी / कार्यकर्ता):
+          </label>
+          <select id="markOutsideKaryakarta" class="w-full px-3 py-2 text-xs font-bold rounded-md border border-slate-300 focus:outline-none focus:border-indigo-600 text-slate-900 bg-white">
+            <option value="">-- No Karyakarta Assigned (कार्यकर्ता चुनें) --</option>
+          </select>
+          <span class="text-[10px] text-slate-500 block mt-0.5">Select a karyakarta responsible for following up and bringing this family to vote.</span>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+          <button id="markOutsideDeleteBtn" type="button" onclick="unmarkCurrentModalFamily()" class="hidden px-3 py-2 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold border border-rose-200 text-xs transition">
+            ✕ Remove from Outside
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button onclick="closeMarkOutsideModal()" class="px-3.5 py-2 rounded-md border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition">Cancel</button>
+            <button onclick="saveOutsideFamily()" class="px-5 py-2 rounded-md bg-indigo-700 hover:bg-indigo-800 text-white font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+              <span id="markOutsideSaveBtnText">💾 Save Outside Voters</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: OUTSIDE VOTERS DASHBOARD -->
+  <div id="outsideVotersModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 md:p-6">
+    <div class="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[92vh] flex flex-col border border-slate-300 overflow-hidden">
+      
+      <!-- Top Title Bar -->
+      <div class="bg-indigo-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">✈️</span>
+          <div>
+            <h3 class="font-black text-sm md:text-base leading-tight">{{ CAMPAIGN.election.ward_name_en }} — Outside / Non-Resident Voters Dashboard</h3>
+            <p class="text-[11px] text-indigo-200">प्रवासी परिवार सूची एवं कॉलिंग ट्रैकर (One Number per Family)</p>
+          </div>
+        </div>
+        <button onclick="closeOutsideVotersModal()" class="text-white/70 hover:text-white text-2xl font-bold leading-none">&times;</button>
+      </div>
+
+      <!-- KPI Summary Cards Bar -->
+      <div class="bg-indigo-50/70 p-3 border-b border-indigo-100 grid grid-cols-3 gap-3 text-xs">
+        <div class="bg-white p-2.5 rounded-lg border border-indigo-100 shadow-2xs">
+          <span class="text-[10px] uppercase font-bold text-slate-500 block">Total Outside Voters:</span>
+          <strong id="kpiOutsideTotal" class="text-indigo-950 font-black text-base">0</strong>
+        </div>
+        <div class="bg-white p-2.5 rounded-lg border border-indigo-100 shadow-2xs">
+          <span class="text-[10px] uppercase font-bold text-slate-500 block">Outside Families:</span>
+          <strong id="kpiOutsideFamilies" class="text-purple-800 font-black text-base">0</strong>
+        </div>
+        <div class="bg-white p-2.5 rounded-lg border border-indigo-100 shadow-2xs">
+          <span class="text-[10px] uppercase font-bold text-slate-500 block">Families with Phone:</span>
+          <strong id="kpiOutsideWithPhone" class="text-emerald-700 font-black text-base">0</strong>
+        </div>
+      </div>
+
+      <!-- Filter Toolbar -->
+      <div class="p-3 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Search box -->
+          <input 
+            type="text" 
+            id="outsideSearchInput" 
+            placeholder="Search voter name, relative, mobile, house..." 
+            oninput="loadOutsideVotersData()" 
+            class="px-3 py-1.5 text-xs rounded-md border border-slate-300 w-56 sm:w-64 focus:outline-none focus:border-indigo-600 bg-slate-50 font-semibold"
+          >
+
+          <!-- Part / Ward filter -->
+          <select id="outsidePartFilter" data-filter-key="{{ 'ward_no' if (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat) else 'part_no' }}" onchange="loadOutsideVotersData()" class="bg-slate-50 border border-slate-300 rounded-md px-2 py-1.5 text-xs font-semibold text-slate-800 max-w-[240px] truncate">
+            {% if IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat %}
+              {# LOCAL BODY ELECTION (Gram Panchayat, Nagar Palika, Zila Parishad) #}
+              {% if WARDS and WARDS|length > 1 %}
+                <option value="">सभी वार्ड (All {{ WARDS|length }} Wards)</option>
+                <optgroup label="📍 वार्डवार (Ward-Wise)">
+                  {% for w_no, w_info in WARDS.items() %}
+                    <option value="ward:{{ w_no }}">
+                      वार्ड {{ w_no }}
+                    </option>
+                  {% endfor %}
+                </optgroup>
+
+              {% elif WARDS and WARDS|length == 1 %}
+                {% set single_ward_no = (WARDS.keys()|list)[0] %}
+                <option value="">समस्त भाग (वार्ड {{ single_ward_no }})</option>
+                <optgroup label="📋 वार्ड {{ single_ward_no }} के भाग (भाग संख्या / Parts)">
+                  {% for p_no, b_info in BOOTHS.items() %}
+                    {% set b_name = (b_info.name or b_info.booth_name or ('भाग ' ~ p_no))|replace('\ufffd', '')|replace(' ं', '') %}
+                    {% set clean_name = b_name %}
+                    {% if b_info.booth_no and clean_name.startswith(b_info.booth_no|string ~ ' - ') %}
+                      {% set clean_name = clean_name[((b_info.booth_no|string|length) + 3):] %}
+                    {% elif clean_name.startswith(p_no|string ~ ' - ') %}
+                      {% set clean_name = clean_name[((p_no|string|length) + 3):] %}
+                    {% endif %}
+                    <option value="part:{{ p_no }}">
+                      भाग {{ p_no }}{% if b_info.booth_no and b_info.booth_no|string != p_no|string %} (बूथ {{ b_info.booth_no }}){% endif %} — {{ clean_name }}
+                    </option>
+                  {% endfor %}
+                </optgroup>
+
+              {% else %}
+                <option value="">सभी वार्ड व मतदान केंद्र (All Areas)</option>
+                {% for p_no, b_info in BOOTHS.items() %}
+                  {% set b_name = (b_info.name or b_info.booth_name or ('भाग ' ~ p_no))|replace('\ufffd', '')|replace(' ं', '') %}
+                  <option value="{{ p_no }}">
+                    {{ b_name }}
+                  </option>
+                {% endfor %}
+              {% endif %}
+
+            {% else %}
+              {# STATE ASSEMBLY / VIDHAN SABHA (Strictly Booth-Wise) #}
+              <option value="">सभी मतदान केंद्र (All {{ BOOTHS|length }} Booths)</option>
+              {% for p_no, b_info in BOOTHS.items() %}
+                {% set b_name = b_info.name or b_info.booth_name or ('भाग ' ~ p_no) %}
+                <option value="{{ p_no }}">
+                  {% if b_info.booth_no and b_name.startswith(b_info.booth_no|string ~ ' - ') %}
+                    भाग {{ p_no }} (बूथ {{ b_name }})
+                  {% elif b_name.startswith(p_no ~ ' - ') %}
+                    भाग {{ b_name }}
+                  {% elif b_info.booth_no and b_info.booth_no|string != p_no|string %}
+                    भाग {{ p_no }} (बूथ {{ b_info.booth_no }}) — {{ b_name }}
+                  {% else %}
+                    भाग {{ p_no }} — {{ b_name }}
+                  {% endif %}
+                </option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="/api/outside_voters/export" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-md text-xs transition shadow-2xs flex items-center gap-1.5">
+            <span>📥 Export Calling List (Excel)</span>
+          </a>
+          <button onclick="loadOutsideVotersData()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-2.5 py-1.5 rounded-md text-xs transition border border-slate-300">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Outside Voters Table -->
+      <div class="p-3 overflow-y-auto flex-1 text-xs">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 text-[11px] uppercase border-b border-slate-200 sticky top-0">
+              <th class="p-2.5 text-center w-28">Part / Area</th>
+              <th class="p-2.5">Family Members (Outside Voters)</th>
+              <th class="p-2.5 w-44">Family Contact Phone</th>
+              <th class="p-2.5 w-36">Assigned Karyakarta</th>
+              <th class="p-2.5 w-44">Calling Notes</th>
+              <th class="p-2.5 text-center w-36">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="outsideTableBody" class="divide-y divide-slate-200 text-slate-800">
+            <tr><td colspan="6" class="p-8 text-center text-slate-400">Loading outside families...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-50 px-4 py-2.5 border-t border-slate-200 flex items-center justify-between text-xs">
+        <span class="text-slate-500 font-medium">Tip: Click the green phone icon to call or WhatsApp to send family voter slip directly.</span>
+        <button onclick="closeOutsideVotersModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-1.5 rounded-md text-xs">Close</button>
+      </div>
+
+    </div>
+  </div>

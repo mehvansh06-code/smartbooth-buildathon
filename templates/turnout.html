@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}{{ CAMPAIGN.election.ward_name_en }} — Live Election Turnout{% endblock %}
+{% block content %}
+<!-- VIEW: ELECTION DAY LIVE TURNOUT & POLLING DASHBOARD -->
+  <div id="turnoutViewContainer" class=" max-w-7xl mx-auto px-4 py-4 space-y-4">
+    <!-- Top Actions Row -->
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <h2 class="text-sm md:text-base font-black text-slate-900 flex items-center gap-2">
+          <span>🗳️ Election Day Live Turnout & Polling Pulse</span>
+        </h2>
+        <span class="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse">LIVE</span>
+      </div>
+      <button onclick="loadTurnoutData()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+        <span>🔄 Refresh Live Data</span>
+      </button>
+    </div>
+
+    <!-- Live Turnout Big Metrics Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div class="bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs">
+        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">कुल मतदाता (Total)</div>
+        <div class="text-2xl font-black text-slate-900 mt-1" id="turnoutStatTotal">--</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">समस्त {{ BOOTHS|length }} मतदान केंद्र</div>
+      </div>
+      <div class="bg-emerald-50 rounded-xl border border-emerald-200 p-3.5 shadow-xs">
+        <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">मतदान सम्पन्न (Voted)</div>
+        <div class="text-2xl font-black text-emerald-700 mt-1" id="turnoutStatVoted">--</div>
+        <div class="text-[11px] text-emerald-600 font-semibold mt-0.5" id="turnoutStatSubVoted">पुरुष: -- | महिला: --</div>
+      </div>
+      <div class="bg-blue-50 rounded-xl border border-blue-200 p-3.5 shadow-xs">
+        <div class="text-[11px] font-bold text-blue-800 uppercase tracking-wider">टर्नआउट प्रतिशत (Turnout %)</div>
+        <div class="text-2xl font-black text-blue-700 mt-1" id="turnoutStatPct">0.0%</div>
+        <div class="w-full bg-blue-200 h-1.5 rounded-full mt-1.5 overflow-hidden">
+          <div id="turnoutProgressBar" class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="bg-amber-50 rounded-xl border border-amber-200 p-3.5 shadow-xs">
+        <div class="text-[11px] font-bold text-amber-800 uppercase tracking-wider">मतदान शेष (Pending)</div>
+        <div class="text-2xl font-black text-amber-700 mt-1" id="turnoutStatPending">--</div>
+        <div class="text-[11px] text-amber-600 font-semibold mt-0.5">अभी वोट डालना बाकी</div>
+      </div>
+      <div class="col-span-2 lg:col-span-1 bg-indigo-50 rounded-xl border border-indigo-200 p-3.5 shadow-xs">
+        <div class="text-[11px] font-bold text-indigo-800 uppercase tracking-wider">पक्के समर्थक टर्नआउट</div>
+        <div class="text-2xl font-black text-indigo-900 mt-1" id="turnoutStatFavoredPct">0.0%</div>
+        <div class="text-[11px] text-indigo-700 font-semibold mt-0.5" id="turnoutStatFavoredRatio">0 / 0 वोट पड़े</div>
+      </div>
+    </div>
+
+  </div>
+
+
+{% include '_modals.html' %}
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/app_state.js?v={{ APP_VERSION }}"></script>
+<script src="/static/js/turnout_live.js?v={{ APP_VERSION }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof switchView === 'function') switchView('turnout');
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,460 @@
+{% extends 'base.html' %}
+{% from 'modals/_ward_sheet_modal.html' import ward_sheet_trigger, ward_sheet_modal, ward_select_options with context %}
+{% block title %}मतदाता सूची, पर्ची व प्रिंट केंद्र — {{ CAMPAIGN.election.app_title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-5 space-y-3 sm:space-y-4 safe-bottom-padding">
+
+  <!-- TOP BANNER & CONTROLS -->
+  <div class="bg-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-lg border border-slate-800 space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl sm:text-2xl">🖨️</span>
+            <h1 class="text-base sm:text-lg font-black text-white leading-tight">
+              मतदाता सूची, पर्ची व प्रिंट केंद्र
+            </h1>
+            <span class="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">A4 Ready</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">
+            {{ CAMPAIGN.election.ward_name_hi or CAMPAIGN.election.ward_name_en }} · प्रत्याशी: <strong class="text-amber-300">{{ CAMPAIGN.candidate.name_hi or CAMPAIGN.candidate.name_en or 'प्रत्याशी' }}</strong>
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button 
+          type="button" 
+          onclick="printCurrentReport()" 
+          class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md cursor-pointer active:scale-95"
+          title="सीधे प्रिंट करें (Direct Browser Print)"
+        >
+          <span>🖨️</span>
+          <span>A4 प्रिंट करें</span>
+        </button>
+
+        <button 
+          type="button" 
+          onclick="downloadCurrentPdf()" 
+          class="bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-black text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md cursor-pointer active:scale-95"
+          title="PDF फ़ाइल डाउनलोड करें (Download Vector PDF)"
+        >
+          <span>📥</span>
+          <span>PDF डाउनलोड</span>
+        </button>
+
+        <button 
+          type="button" 
+          onclick="downloadCurrentExcel()" 
+          class="bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 hover:text-white font-black text-xs px-3 py-2 rounded-xl transition flex items-center gap-1.5 border border-slate-700 cursor-pointer active:scale-95"
+          title="एक्सेल शीट डाउनलोड करें (Download Excel .xlsx)"
+        >
+          <span>📊</span>
+          <span>Excel (.xlsx)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Counter Pill Bar -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800 text-xs">
+      <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
+        <div class="text-[10px] font-bold text-slate-400 uppercase">मैचिंग कुल मतदाता</div>
+        <div id="statTotalVoters" class="text-lg sm:text-xl font-black text-white mt-0.5">0</div>
+      </div>
+      <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
+        <div class="text-[10px] font-bold text-slate-400 uppercase">A4 पृष्ठ अनुमान</div>
+        <div id="statTotalPages" class="text-lg sm:text-xl font-black text-emerald-400 mt-0.5">0 पेज</div>
+      </div>
+      <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
+        <div class="text-[10px] font-bold text-slate-400 uppercase">सक्रिय प्रारूप (Format)</div>
+        <div id="statActivePreset" class="text-xs font-black text-indigo-300 mt-1 truncate">12-Up मतदाता पर्ची</div>
+      </div>
+      <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-bold text-slate-400 uppercase">लाइव स्थिति</div>
+          <div id="statStatusText" class="text-xs font-black text-slate-300 mt-0.5">लोड हो रहा है...</div>
+        </div>
+        <button type="button" onclick="refreshReportPreview()" class="text-slate-400 hover:text-white text-base p-1" title="रिफ्रेश">🔄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 PRESET SELECTION CHIPS -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-xs space-y-2">
+    <div class="flex items-center justify-between">
+      <span class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+        <span>⚡</span>
+        <span>त्वरित रिपोर्ट व पर्ची प्रारूप (Select Preset):</span>
+      </span>
+      <span class="text-[11px] font-bold text-slate-400 hidden sm:inline">1-टैप में लोड करें</span>
+    </div>
+
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs font-bold" style="-webkit-overflow-scrolling: touch;">
+      <!-- Preset 1: Parchi 12-Up (Primary) -->
+      <button 
+        type="button" 
+        id="btnPresetParchi" 
+        onclick="selectReportPreset('parchi')" 
+        class="preset-chip px-3.5 py-2 rounded-xl transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 bg-indigo-600 text-white font-black shadow-xs ring-2 ring-indigo-600/30"
+      >
+        <span>🎟️</span>
+        <span>मतदाता पर्ची (12-Up कटिंग शीट)</span>
+      </button>
+
+      <!-- Preset 2: A to Z Alphabetical -->
+      <button 
+        type="button" 
+        id="btnPresetAz" 
+        onclick="selectReportPreset('az')" 
+        class="preset-chip px-3.5 py-2 rounded-xl transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+      >
+        <span>🔤</span>
+        <span>A-Z वर्णमाला सूची</span>
+      </button>
+
+      <!-- Preset 3: Mobile Collection Sheet -->
+      <button 
+        type="button" 
+        id="btnPresetMobile" 
+        onclick="selectReportPreset('mobile_sheet')" 
+        class="preset-chip px-3.5 py-2 rounded-xl transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+      >
+        <span>📱</span>
+        <span>मोबाइल सर्वे पत्रक (रिक्त बॉक्स)</span>
+      </button>
+
+      <!-- Preset 4: Booth / Ward Roll 1..N -->
+      <button 
+        type="button" 
+        id="btnPresetRoll" 
+        onclick="selectReportPreset('roll')" 
+        class="preset-chip px-3.5 py-2 rounded-xl transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+      >
+        <span>📋</span>
+        <span>वार्ड / बूथवार सूची (1..N)</span>
+      </button>
+
+      <!-- Preset 5: Caste & Community -->
+      <button 
+        type="button" 
+        id="btnPresetCaste" 
+        onclick="selectReportPreset('caste')" 
+        class="preset-chip px-3.5 py-2 rounded-xl transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+      >
+        <span>🏷️</span>
+        <span>जाति व समुदाय सूची</span>
+      </button>
+
+      <!-- Preset 6: Samarthak / Sentiment -->
+      <button 
+        type="button" 
+        id="btnPresetSamarthak" 
+        onclick="selectReportPreset('samarthak')" 
+        class="preset-chip px-3.5 py-2 rounded-xl transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+      >
+        <span>⭐</span>
+        <span>पक्के समर्थक सूची (100)</span>
+      </button>
+
+      <!-- Preset 7: Outside / Migrant -->
+      <button 
+        type="button" 
+        id="btnPresetOutside" 
+        onclick="selectReportPreset('outside')" 
+        class="preset-chip px-3.5 py-2 rounded-xl transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+      >
+        <span>✈️</span>
+        <span>प्रवासी मतदाता कॉलिंग सूची</span>
+      </button>
+
+      <!-- Preset 8: Unvoted GOTV -->
+      <button 
+        type="button" 
+        id="btnPresetUnvoted" 
+        onclick="selectReportPreset('unvoted')" 
+        class="preset-chip px-3.5 py-2 rounded-xl transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+      >
+        <span>🔴</span>
+        <span>शेष मतदाता (जिन्होंने वोट नहीं डाला)</span>
+      </button>
+
+      <!-- Preset 9: Counting Sheet -->
+      <button 
+        type="button" 
+        id="btnPresetCounting" 
+        onclick="selectReportPreset('counting_sheet')" 
+        class="preset-chip px-3.5 py-2 rounded-xl transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+      >
+        <span>🗳️</span>
+        <span>मतगणना सारणी (Counting Sheet)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MULTI-DIMENSIONAL FILTER CONTROLS -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-xs space-y-3">
+    <div class="flex items-center justify-between">
+      <span class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+        <span>🔍</span>
+        <span>फिल्टर समायोजन (Filters & Sorting):</span>
+      </span>
+      <button 
+        type="button" 
+        onclick="resetReportFilters()" 
+        class="text-xs font-bold text-slate-500 hover:text-slate-800 underline cursor-pointer"
+      >
+        रीसेट करें (Reset)
+      </button>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 text-xs">
+      
+      <!-- Filter 1: Ward / Booth -->
+      <div>
+        <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+          {% if IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat %}
+            वार्ड / केंद्र (Ward/Booth):
+          {% else %}
+            मतदान केंद्र (बूथ):
+          {% endif %}
+        </label>
+        {{ ward_sheet_trigger('repWardFilterModal', 'repWardFilter', 'repSelectedWardLabel', 'वार्ड' if (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat or WARDS) else 'भाग') }}
+        <select 
+          id="repWardFilter" 
+          data-filter-key="{{ 'ward_no' if (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat) else 'part_no' }}"
+          onchange="triggerReportFilterChange()" 
+          class="sr-only"
+        >
+          {{ ward_select_options() }}
+        </select>
+      </div>
+
+      <!-- Filter 2: Community / Caste Tag -->
+      <div>
+        <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+          समुदाय (Caste/Tag):
+        </label>
+        <select 
+          id="repCasteFilter" 
+          onchange="triggerReportFilterChange()" 
+          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition"
+        >
+          <option value="all">समस्त समुदाय (All)</option>
+          {% if COMMUNITY_TAGS %}
+            {% for c_tag in COMMUNITY_TAGS %}
+              <option value="{{ c_tag }}">{{ c_tag }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+
+      <!-- Filter 3: Supporter Sentiment -->
+      <div>
+        <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+          समर्थक श्रेणी (Sentiment):
+        </label>
+        <select 
+          id="repCategoryFilter" 
+          onchange="triggerReportFilterChange()" 
+          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition"
+        >
+          <option value="all">सभी श्रेणी (All)</option>
+          <option value="100">⭐ पक्के समर्थक (100)</option>
+          <option value="50">⚖️ संशय / 50-50</option>
+          <option value="0">⚪ सामान्य / अनमार्कड</option>
+          <option value="-1">🚫 विरोधी (-1)</option>
+        </select>
+      </div>
+
+      <!-- Filter 4: Mobile Presence -->
+      <div>
+        <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+          मोबाइल स्थिति (Mobile):
+        </label>
+        <select 
+          id="repMobileFilter" 
+          onchange="triggerReportFilterChange()" 
+          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition"
+        >
+          <option value="all">समस्त (All)</option>
+          <option value="with_phone">📱 केवल जिनके मोबाइल हैं</option>
+          <option value="no_phone">📝 केवल बिना मोबाइल वाले</option>
+        </select>
+      </div>
+
+      <!-- Filter 5: Residence Status -->
+      <div>
+        <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+          निवास स्थिति (Residence):
+        </label>
+        <select 
+          id="repResidenceFilter" 
+          onchange="triggerReportFilterChange()" 
+          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition"
+        >
+          <option value="all">समस्त (Local + Outside)</option>
+          <option value="local_only">🏡 केवल स्थानीय (Local Only)</option>
+          <option value="outside_only">✈ केवल प्रवासी (Outside Only)</option>
+        </select>
+      </div>
+
+      <!-- Filter 6: Voting Status -->
+      <div>
+        <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+          मतदान स्थिति (Turnout):
+        </label>
+        <select 
+          id="repVotingFilter" 
+          onchange="triggerReportFilterChange()" 
+          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition"
+        >
+          <option value="all">समस्त मतदाता (All)</option>
+          <option value="unvoted">🔴 केवल बाकी / शेष (Unvoted)</option>
+          <option value="voted">🟢 केवल मतदान संपन्न (Voted)</option>
+        </select>
+      </div>
+
+      <!-- Filter 7: Gender -->
+      <div>
+        <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+          लिंग (Gender):
+        </label>
+        <select 
+          id="repGenderFilter" 
+          onchange="triggerReportFilterChange()" 
+          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition"
+        >
+          <option value="all">सभी (All)</option>
+          <option value="M">पुरुष (Male)</option>
+          <option value="F">महिला (Female)</option>
+        </select>
+      </div>
+
+      <!-- Filter 8: Sort Order -->
+      <div>
+        <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+          क्रमबद्धता (Sort Order):
+        </label>
+        <select 
+          id="repSortFilter" 
+          onchange="triggerReportFilterChange()" 
+          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition"
+        >
+          <option value="serial">क्रम संख्या (Serial 1..N)</option>
+          <option value="house">मकान नं. (House No)</option>
+          <option value="az_en">A to Z (English Name)</option>
+          <option value="az_hi">अ से ज्ञ (हिन्दी नाम)</option>
+          <option value="age">आयु अनुसार (Age)</option>
+        </select>
+      </div>
+
+      <!-- Filter 9: Parchi Density Toggle (Visible for Parchi) -->
+      <div id="parchiDensityWrapper" class="col-span-2">
+        <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+          पर्ची पृष्ठ घनत्व (Parchi Sheet Density):
+        </label>
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl cursor-pointer text-xs font-bold text-slate-800">
+            <input type="radio" name="parchiDensity" value="12" checked onchange="triggerReportFilterChange()" class="text-indigo-600">
+            <span>12 पर्ची / A4 पेज (मानक 2×6)</span>
+          </label>
+          <label class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl cursor-pointer text-xs font-bold text-slate-800">
+            <input type="radio" name="parchiDensity" value="10" onchange="triggerReportFilterChange()" class="text-indigo-600">
+            <span>10 पर्ची / A4 पेज (बड़ा फॉन्ट 2×5)</span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PREVIEW SECTION: TABS (PARCHI SLIPS VS TABLE LIST) -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+    <!-- Preview Tab Switcher -->
+    <div class="p-3 sm:p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2">
+      <div class="flex items-center gap-2">
+        <button 
+          type="button" 
+          id="tabPreviewParchi" 
+          onclick="setPreviewTab('parchi')" 
+          class="px-3.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer bg-indigo-600 text-white shadow-xs"
+        >
+          🎟️ पर्ची प्रारूप (Slip Preview)
+        </button>
+        <button 
+          type="button" 
+          id="tabPreviewTable" 
+          onclick="setPreviewTab('table')" 
+          class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-200 text-slate-700 hover:bg-slate-300"
+        >
+          📋 तालिका प्रारूप (Table View)
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-500 font-semibold">
+        <span>पूर्वावलोकन: </span>
+        <strong id="previewDisplayCount" class="text-slate-800">प्रथम 12 रिकॉर्ड</strong>
+        <span> (कुल: </span>
+        <strong id="previewTotalMatchCount" class="text-indigo-700">0</strong>
+        <span>)</span>
+      </div>
+    </div>
+
+    <!-- Container 1: Parchi Slips Preview Grid -->
+    <div id="parchiPreviewContainer" class="p-3 sm:p-5 bg-slate-100/60 overflow-y-auto max-h-[600px]">
+      <div id="parchiGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl mx-auto">
+        <div class="col-span-full py-12 text-center text-slate-400 font-bold text-sm">
+          डेटा लोड हो रहा है...
+        </div>
+      </div>
+    </div>
+
+    <!-- Container 2: Table List Preview -->
+    <div id="tablePreviewContainer" class="hidden overflow-x-auto max-h-[600px]">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead class="bg-slate-100 text-slate-700 font-black sticky top-0 border-b border-slate-200 z-10">
+          <tr>
+            <th class="p-2.5 text-center w-12">क्र.सं.</th>
+            <th class="p-2.5 text-center w-16">वार्ड/भाग</th>
+            <th class="p-2.5">मतदाता का नाम</th>
+            <th class="p-2.5">संबंधी का नाम</th>
+            <th class="p-2.5 text-center w-24">EPIC No.</th>
+            <th class="p-2.5 text-center w-16">मकान नं.</th>
+            <th class="p-2.5 text-center w-16">आयु/लिंग</th>
+            <th class="p-2.5 text-center w-28">मोबाइल नंबर</th>
+            <th class="p-2.5">समुदाय / जाति</th>
+            <th class="p-2.5 text-center w-20">श्रेणी</th>
+          </tr>
+        </thead>
+        <tbody id="tablePreviewBody" class="divide-y divide-slate-100 text-slate-800">
+          <tr>
+            <td colspan="10" class="p-8 text-center text-slate-400 font-bold">
+              डेटा लोड हो रहा है...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Hidden iframe for instant direct browser print -->
+  <iframe id="reportPrintFrame" style="position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;"></iframe>
+
+</div>
+{{ ward_sheet_modal('repWardFilterModal', 'repWardFilter', 'repSelectedWardLabel') }}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  window.CAMPAIGN_INFO = {
+    slug: {{ (current_tenant or tenant_slug or '')|tojson }},
+    wardTitle: {{ (CAMPAIGN.election.ward_name_hi or CAMPAIGN.election.ward_name_en or '')|tojson }},
+    candidateName: {{ (CAMPAIGN.candidate.name_hi or CAMPAIGN.candidate.name_en or '')|tojson }},
+    symbol: {{ (CAMPAIGN.candidate.symbol or CAMPAIGN.election.symbol or '🚜 ट्रैक्टर')|tojson }}
+  };
+</script>
+<script src="/static/js/reports.js?v={{ APP_VERSION }}"></script>
+{% endblock %}

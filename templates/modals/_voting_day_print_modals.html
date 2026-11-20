@@ -1,0 +1,413 @@
+<!-- ========================================================================= -->
+<!-- 1. LIVE BOOTH MARKING SHEET MODAL (Ward 82 Style 20x30 Matrix)            -->
+<!-- ========================================================================= -->
+<div id="vdMarkingSheetModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-5">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full flex flex-col border border-slate-300 max-h-[92vh] overflow-hidden animate-in fade-in duration-200">
+    
+    <!-- Modal Header -->
+    <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">📝</span>
+        <div>
+          <h3 class="font-black text-sm text-white leading-tight">
+            बूथ अंकन पत्रक · Live Marking Sheet
+          </h3>
+          <p id="vdMarkingModalSubtitle" class="text-[11px] text-slate-400 font-semibold">
+            लोड हो रहा है...
+          </p>
+        </div>
+      </div>
+      <button type="button" onclick="vdCloseMarkingSheetModal()" class="text-white/70 hover:text-white text-2xl font-bold leading-none cursor-pointer">&times;</button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-4 sm:p-5 space-y-4 overflow-y-auto text-xs">
+      
+      <!-- Summary Alert / Info -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-emerald-950 space-y-1">
+        <div class="font-black text-xs flex items-center gap-1.5">
+          <span>🎯</span>
+          <span>बूथ एजेंट अंकन पत्रक (A4 साइज, 1-2 पेज प्रारूप)</span>
+        </div>
+        <p class="text-[11px] text-emerald-800 leading-relaxed font-medium">
+          यह पत्रक 20 कॉलम × 30 पंक्तियों (प्रति पेज 600 क्रम संख्या) के उच्च-सघनता प्रारूप में तैयार होगा। सॉफ्टवेयर में दर्ज वोट हरे चेक (<strong class="text-emerald-900">✓ हरा</strong>), प्रवासी मतदाता (<strong class="text-amber-800">✈ एम्बर</strong>) एवं दोहराव/डुप्लीकेट (<strong class="text-rose-800"><s>43</s> DUP</strong>) रूप में चिह्नित रहेंगे।
+        </p>
+      </div>
+
+      <!-- Quick Options -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- Sheet Mode -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+          <label class="block font-black text-slate-800 text-[11px] uppercase tracking-wider">
+            संस्करण प्रकार (Sheet Mode):
+          </label>
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+              <input type="radio" name="vdSheetModeRadio" value="live" checked class="text-emerald-600 focus:ring-emerald-500">
+              <span>🔴 ताज़ा लाइव संस्करण (Pre-Filled with Current Votes)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+              <input type="radio" name="vdSheetModeRadio" value="blank" class="text-emerald-600 focus:ring-emerald-500">
+              <span>⚪ ब्लैंक संस्करण (Blank Sheet for Morning 7 AM Start)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Live Statistics Preview -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+          <span class="block font-black text-slate-800 text-[11px] uppercase tracking-wider">
+            वर्तमान स्थिति (Live Stats):
+          </span>
+          <div class="grid grid-cols-3 gap-1.5 text-center">
+            <div class="bg-white p-2 rounded-lg border border-slate-200">
+              <div class="text-[10px] text-slate-500 font-bold">कुल मतदाता</div>
+              <div id="vdModalTotalCount" class="font-black text-slate-900 text-sm">0</div>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-emerald-200 text-emerald-700">
+              <div class="text-[10px] font-bold">मतदान हुआ</div>
+              <div id="vdModalVotedCount" class="font-black text-sm">0</div>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-amber-200 text-amber-700">
+              <div class="text-[10px] font-bold">शेष बाकी</div>
+              <div id="vdModalPendingCount" class="font-black text-sm">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Badges Checkboxes -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+        <span class="block font-black text-slate-800 text-[11px] uppercase tracking-wider">
+          विशेष चिह्न सम्मिलित करें (Include Indicators):
+        </span>
+        <div class="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-700">
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" id="vdIncOutsideCb" checked class="text-emerald-600 rounded">
+            <span>✈ प्रवासी मतदाता (Outside Voters)</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" id="vdIncDupCb" checked class="text-emerald-600 rounded">
+            <span>[DUP] डुप्लीकेट / दोहराव (Duplicate Alerts)</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" id="vdIncDeceasedCb" checked class="text-emerald-600 rounded">
+            <span>🕊️ शांत / फोत (Deceased Voters)</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" id="vdIncSupporterCb" checked class="text-emerald-600 rounded">
+            <span>★ पक्के समर्थक संकेत (Category 100)</span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div class="bg-slate-100 px-5 py-3.5 flex items-center justify-end gap-2.5 border-t border-slate-200 shrink-0">
+      <button 
+        type="button" 
+        onclick="vdCloseMarkingSheetModal()" 
+        class="bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer"
+      >
+        रद्द करें (Cancel)
+      </button>
+      <button 
+        type="button" 
+        onclick="vdPrintMarkingSheet()" 
+        class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black px-5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+      >
+        <span>🖨️</span>
+        <span>पत्रक प्रिंट करें (Print Sheet)</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ========================================================================= -->
+<!-- 2. FILTERABLE UNVOTED VOTER LIST MODAL                                   -->
+<!-- ========================================================================= -->
+<div id="vdUnvotedModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-5">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full flex flex-col border border-slate-300 max-h-[92vh] overflow-hidden animate-in fade-in duration-200">
+    
+    <!-- Modal Header -->
+    <div class="bg-indigo-950 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🖨️</span>
+        <div>
+          <h3 class="font-black text-sm text-white leading-tight">
+            शेष मतदाता सूची · Unvoted Voter Canvassing List
+          </h3>
+          <p class="text-[11px] text-indigo-200 font-semibold">
+            फिल्टर अनुसार शेष मतदाताओं की सूची देखें एवं प्रिंट करें
+          </p>
+        </div>
+      </div>
+      <button type="button" onclick="vdCloseUnvotedModal()" class="text-white/70 hover:text-white text-2xl font-bold leading-none cursor-pointer">&times;</button>
+    </div>
+
+    <!-- Filter Bar Controls -->
+    <div class="bg-slate-50 border-b border-slate-200 p-3 sm:p-4 space-y-2.5 shrink-0">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-xs">
+        
+        <!-- Filter 1: Community Filter -->
+        <div>
+          <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+            समुदाय (Community):
+          </label>
+          <select 
+            id="vdUnvotedCasteSelect" 
+            onchange="vdFilterUnvotedList()" 
+            class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600"
+          >
+            <option value="all">सभी समुदाय (All Communities)</option>
+            <!-- Injected dynamically -->
+          </select>
+        </div>
+
+        <!-- Filter 2: Supporter / Category -->
+        <div>
+          <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+            श्रेणी (Sentiment):
+          </label>
+          <select 
+            id="vdUnvotedCategorySelect" 
+            onchange="vdFilterUnvotedList()" 
+            class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600"
+          >
+            <option value="all">सभी शेष (All Unvoted)</option>
+            <option value="100">⭐ पक्के समर्थक (100)</option>
+            <option value="50">⚖️ 50-50 वोटर (50)</option>
+            <option value="0">⚪ सामान्य / अनमार्कड (0)</option>
+            <option value="-1">🚫 विरोधी (-1)</option>
+          </select>
+        </div>
+
+        <!-- Filter 3: Local vs Outside -->
+        <div>
+          <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+            निवास स्थिति (Residence):
+          </label>
+          <select 
+            id="vdUnvotedOutsideSelect" 
+            onchange="vdFilterUnvotedList()" 
+            class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600"
+          >
+            <option value="local_only">🏡 केवल स्थानीय (Local Only)</option>
+            <option value="all">समस्त (Local + Outside)</option>
+            <option value="outside_only">✈ केवल प्रवासी (Outside Only)</option>
+          </select>
+        </div>
+
+        <!-- Filter 4: Gender -->
+        <div>
+          <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+            लिंग (Gender):
+          </label>
+          <select 
+            id="vdUnvotedGenderSelect" 
+            onchange="vdFilterUnvotedList()" 
+            class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600"
+          >
+            <option value="all">सभी (All)</option>
+            <option value="M">पुरुष (Male)</option>
+            <option value="F">महिला (Female)</option>
+          </select>
+        </div>
+
+        <!-- Filter 5: Life / Deduplication Status -->
+        <div>
+          <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+            स्थिति (Life/Status):
+          </label>
+          <select 
+            id="vdUnvotedLifeStatusSelect" 
+            onchange="vdFilterUnvotedList()" 
+            class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600"
+          >
+            <option value="active_only">✅ केवल जीवित व मान्य (Exclude Deceased/DUP)</option>
+            <option value="all">समस्त (All)</option>
+            <option value="deceased_only">🕊️ केवल शांत / फोत (Deceased Only)</option>
+            <option value="duplicate_only">⚠️ केवल डुप्लीकेट (Duplicates Only)</option>
+          </select>
+        </div>
+
+        <!-- Filter 6: Sort By -->
+        <div>
+          <label class="block font-black text-slate-700 text-[10px] uppercase mb-1">
+            क्रमबद्ध (Sort By):
+          </label>
+          <select 
+            id="vdUnvotedSortSelect" 
+            onchange="vdFilterUnvotedList()" 
+            class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600"
+          >
+            <option value="serial">क्रम संख्या (Serial No)</option>
+            <option value="house">मकान नं. (House No)</option>
+            <option value="name">नाम (Name)</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Live Match Counter Pill -->
+      <div class="flex items-center justify-between pt-1">
+        <div class="text-xs font-bold text-slate-600">
+          <span>मैचिंग शेष मतदाता: </span>
+          <span id="vdUnvotedMatchCount" class="bg-indigo-100 text-indigo-900 px-2 py-0.5 rounded-full font-black">0</span>
+        </div>
+        <div class="text-[11px] text-slate-500 font-medium hidden sm:block">
+          💡 फील्ड कार्यकर्ताओं हेतु घर-घर संपर्क सूची
+        </div>
+      </div>
+    </div>
+
+    <!-- Voter Table Preview Body -->
+    <div class="overflow-y-auto flex-1 min-h-[240px] px-3 sm:px-4 pb-3">
+      <table class="w-full text-left border-separate border-spacing-0 text-xs">
+        <thead class="sticky top-0 z-20 shadow-xs">
+          <tr>
+            <th class="sticky top-0 z-20 bg-slate-100 p-2.5 text-slate-700 font-black border-b border-slate-200 text-center w-12">क्र.सं.</th>
+            <th class="sticky top-0 z-20 bg-slate-100 p-2.5 text-slate-700 font-black border-b border-slate-200">मतदाता का नाम</th>
+            <th class="sticky top-0 z-20 bg-slate-100 p-2.5 text-slate-700 font-black border-b border-slate-200">पिता / पति</th>
+            <th class="sticky top-0 z-20 bg-slate-100 p-2.5 text-slate-700 font-black border-b border-slate-200 text-center w-16">मकान नं.</th>
+            <th class="sticky top-0 z-20 bg-slate-100 p-2.5 text-slate-700 font-black border-b border-slate-200 text-center w-16">आयु/लिंग</th>
+            <th class="sticky top-0 z-20 bg-slate-100 p-2.5 text-slate-700 font-black border-b border-slate-200">समुदाय</th>
+            <th class="sticky top-0 z-20 bg-slate-100 p-2.5 text-slate-700 font-black border-b border-slate-200">मोबाइल</th>
+            <th class="sticky top-0 z-20 bg-slate-100 p-2.5 text-slate-700 font-black border-b border-slate-200 text-center w-16">स्थिति</th>
+          </tr>
+        </thead>
+        <tbody id="vdUnvotedTableBody" class="divide-y divide-slate-100 text-slate-800">
+          <tr>
+            <td colspan="8" class="p-8 text-center text-slate-400 font-bold">
+              डेटा लोड हो रहा है...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div class="bg-slate-100 px-5 py-3.5 flex items-center justify-between border-t border-slate-200 shrink-0">
+      <div class="text-xs text-slate-500 font-bold">
+        <span>प्रिंट पृष्ठ अनुमान: </span>
+        <span id="vdUnvotedPageEstimate" class="font-black text-slate-800">1 पेज</span>
+      </div>
+      <div class="flex items-center gap-2.5">
+        {% if ENABLE_VOICE_MODULE and (has_all or 'voice' in user_mods) %}
+        <button type="button" onclick="vdOpenVoiceCallingModal()" class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black px-4 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+          <span>📞</span><span>कॉल अनवोटेड</span>
+        </button>
+        {% endif %}
+        <button 
+          type="button" 
+          onclick="vdCloseUnvotedModal()" 
+          class="bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer"
+        >
+          बंद करें (Close)
+        </button>
+        <button 
+          type="button" 
+          onclick="vdPrintUnvotedList()" 
+          class="bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-black px-5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+        >
+          <span>🖨️</span>
+          <span>A4 सूची प्रिंट करें (Print Canvassing List)</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 3. SLIDE-UP MOBILE SHEET: VOICE CALLING MODAL (Blast Unvoted Voters)       -->
+<!-- ========================================================================= -->
+{% if ENABLE_VOICE_MODULE %}
+<div id="vdVoiceCallingModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-[60] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-w-lg w-full flex flex-col border border-slate-300 max-h-[92vh] overflow-hidden animate-in slide-in-from-bottom sm:zoom-in duration-200">
+    <!-- Header -->
+    <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">📢</span>
+        <div>
+          <h3 class="font-black text-sm text-white leading-tight">
+            वॉयस कॉल प्रचार · Voice Blast (Unvoted Voters)
+          </h3>
+          <p id="vdVoiceModalSubtitle" class="text-[11px] text-slate-400 font-semibold">
+            बूथ के शेष मतदाताओं को स्वचालित ऑडियो कॉल प्रसारण
+          </p>
+        </div>
+      </div>
+      <button type="button" onclick="vdCloseVoiceCallingModal()" class="text-white/70 hover:text-white text-2xl font-bold leading-none cursor-pointer">&times;</button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-4 sm:p-5 space-y-4 overflow-y-auto text-xs">
+      <!-- Balance & Stats Cards -->
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-slate-50 border border-slate-200 p-2.5 rounded-xl">
+          <div class="text-[10px] text-slate-500 font-bold uppercase">कुल शेष अनवोटेड</div>
+          <div id="vdVoiceUnvotedTotal" class="font-black text-slate-900 text-base mt-0.5">0</div>
+        </div>
+        <div class="bg-indigo-50 border border-indigo-200 p-2.5 rounded-xl">
+          <div class="text-[10px] text-indigo-700 font-bold uppercase">अद्वितीय मोबाइल</div>
+          <div id="vdVoiceUniqueMobiles" class="font-black text-indigo-900 text-base mt-0.5">0</div>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl">
+          <div class="text-[10px] text-emerald-700 font-bold uppercase">वॉलेट शेष</div>
+          <div id="vdVoiceBalanceDisplay" class="font-black text-emerald-800 text-base mt-0.5">--</div>
+        </div>
+      </div>
+
+      <!-- Info Alert -->
+      <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs font-medium space-y-1">
+        <div class="font-black flex items-center gap-1.5">
+          <span>⚡</span>
+          <span>1-क्लिक स्वचालित वॉयस ब्रॉडकास्ट</span>
+        </div>
+        <p class="text-[11px] text-amber-800 leading-relaxed">
+          परिवार के एक मोबाइल नंबर पर केवल एक ही कॉल की जाएगी (स्मार्ट डिडुप्लीकेशन)। कॉल प्रारंभ करने से पूर्व नीचे अनुमोदित ऑडियो संदेश चुनें।
+        </p>
+      </div>
+
+      <!-- Approved Sound Selector -->
+      <div>
+        <label class="block font-black text-slate-800 text-xs mb-1.5">
+          🔊 अनुमोदित ऑडियो संदेश चुनें (Select Approved Sound) *
+        </label>
+        <select id="vdVoiceSoundSelect" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-600 cursor-pointer">
+          <option value="">ऑडियो संदेश लोड हो रहे हैं...</option>
+        </select>
+        <p class="text-[10px] text-slate-400 mt-1">
+          कैरियर गेटवे द्वारा स्वीकृत संदेश ही सूची में प्रदर्शित हैं।
+        </p>
+      </div>
+
+      <!-- Status banner -->
+      <div id="vdVoiceStatusBanner" class="hidden p-3 rounded-xl text-xs font-bold"></div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="bg-slate-50 px-5 py-3.5 flex items-center justify-between border-t border-slate-200 shrink-0">
+      <button 
+        type="button" 
+        onclick="vdCloseVoiceCallingModal()" 
+        class="bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer"
+      >
+        रद्द करें
+      </button>
+      <button 
+        type="button" 
+        id="btnLaunchVoiceBlast"
+        onclick="vdLaunchVoiceBlast()" 
+        class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black px-5 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <span>📞</span>
+        <span id="btnLaunchVoiceBlastText">कॉल शुरू करें (Launch Voice Blast)</span>
+      </button>
+    </div>
+  </div>
+</div>
+{% endif %}

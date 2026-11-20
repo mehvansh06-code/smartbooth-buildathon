@@ -1,0 +1,636 @@
+<!-- UNIFIED VOTER PROFILE & TAGGING MODAL -->
+<div id="voterProfileModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 overflow-hidden animate-in fade-in duration-200 max-h-[92vh] flex flex-col">
+
+    <!-- Header -->
+    <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">✏️</span>
+        <div>
+          <h3 class="font-black text-sm text-white leading-tight" id="vpmVoterName">Edit Voter</h3>
+          <p class="text-[11px] text-slate-400" id="vpmVoterSub">Part # · Sl # · EPIC #</p>
+        </div>
+      </div>
+      <button type="button" onclick="closeVoterProfileModal()" class="text-white/70 hover:text-white text-2xl font-bold leading-none cursor-pointer">&times;</button>
+    </div>
+
+    <form id="voterProfileForm" class="p-4 space-y-3 text-xs overflow-y-auto flex-1" autocomplete="off" onsubmit="event.preventDefault(); return false;" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <input type="hidden" id="vpmVoterId" value="">
+
+      <!-- ── Multi-Voter Batch Panel (collapsed by default, shown when >1 voter) ── -->
+      <div id="vpmSelectedVotersContainer" class="hidden">
+        <!-- Collapsed summary bar -->
+        <button type="button" id="vpmPanelToggle"
+          onclick="vpmToggleVoterPanel()"
+          class="w-full flex items-center justify-between bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2.5 cursor-pointer hover:bg-indigo-100/70 transition select-none">
+          <div class="flex items-center gap-2 text-[11px] font-black text-indigo-950">
+            <span>👥</span>
+            <span id="vpmPanelSummaryText">2 voters selected</span>
+            <span id="vpmSelectedBatchCount" class="bg-indigo-600 text-white px-2 py-0.5 rounded-full text-[10px] font-black"></span>
+          </div>
+          <span id="vpmPanelChevron" class="text-indigo-500 text-[10px] font-bold">Details ▾</span>
+        </button>
+
+        <!-- Expanded voter details (hidden by default) -->
+        <div id="vpmPanelExpanded" class="hidden border border-indigo-200 border-t-0 rounded-b-xl bg-indigo-50/60 px-3 pb-3 pt-2 space-y-2">
+          <div id="vpmSelectedChipsList" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto"></div>
+          <div id="vpmMukhiyaHint" class="text-[10px] text-indigo-800 font-semibold flex items-center justify-between pt-1">
+            <span>👑 Tap any voter above to set as Family Head</span>
+            <span id="vpmCurrentMukhiyaBadge" class="text-[9px] bg-amber-100 text-amber-900 border border-amber-300 px-1.5 rounded font-black hidden"></span>
+          </div>
+          <input type="hidden" id="vpmSelectedMukhiyaId" value="">
+          <label class="flex items-center gap-2 pt-1.5 border-t border-indigo-200/80 cursor-pointer select-none text-indigo-950 font-bold text-[11px]">
+            <input type="checkbox" id="vpmConsolidateFamily" checked onchange="window.toggleVpmConsolidateFamily?.(this.checked)" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+            <span>👨‍👩‍👧 Consolidate into one family</span>
+          </label>
+          <div class="text-[10px] text-indigo-600 font-semibold">⚡ Changes below apply to all selected voters.</div>
+        </div>
+      </div>
+
+      <!-- ── Tab Bar ── -->
+      <div class="flex border-b-2 border-slate-100 -mx-1" id="vpmTabBar">
+        <button type="button" onclick="vpmSwitchTab('quick', this)"
+          class="vpm-tab-btn flex-1 py-2 text-[11px] font-black text-blue-600 border-b-2 border-blue-600 -mb-[2px] transition cursor-pointer flex items-center justify-center gap-1.5">
+          <span>🎯</span>
+          <span>मुख्य टैग (Quick Tag)</span>
+        </button>
+        <button type="button" onclick="vpmSwitchTab('details', this)"
+          class="vpm-tab-btn flex-1 py-2 text-[11px] font-black text-slate-400 border-b-2 border-transparent -mb-[2px] hover:text-slate-600 transition cursor-pointer flex items-center justify-center gap-1.5">
+          <span>📋</span>
+          <span>अन्य विवरण (More Details)</span>
+          <span id="vpmMoreDetailsBadge" class="w-1.5 h-1.5 rounded-full bg-indigo-500 hidden"></span>
+        </button>
+      </div>
+
+      <!-- ══════════════════════════════════════════ -->
+      <!-- TAB: QUICK TAG (PRIMARY)                   -->
+      <!-- ══════════════════════════════════════════ -->
+      <div id="vpmTab-quick" class="vpm-tab-pane space-y-3.5">
+
+        <!-- 1. Mobile Number -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <p class="text-[11px] font-black text-slate-800 leading-tight">
+              Mobile Number
+              <label id="vpmPhoneLabel" class="inline text-[10px] font-semibold text-slate-400 ml-1 normal-case">(मोबाइल नंबर)</label>
+            </p>
+            <span class="text-[10px] text-slate-400 font-semibold">कॉल व व्हाट्सएप</span>
+          </div>
+          <div class="flex gap-2">
+            <span class="flex items-center bg-slate-100 border border-slate-300 rounded-lg px-2.5 font-bold text-slate-600 text-xs shrink-0">+91</span>
+            <input type="tel" inputmode="numeric" id="vpmPhone" name="sb_contact_phone_input_no_autofill" maxlength="10" placeholder="10-digit mobile"
+              autocomplete="new-password" data-lpignore="true" data-form-type="other" data-1p-ignore="true" autocorrect="off" spellcheck="false"
+              class="flex-1 px-3 py-2 text-sm font-mono font-bold rounded-lg border border-slate-300 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-500 bg-white">
+          </div>
+        </div>
+
+        <!-- 2. Political Sentiment — Hero buttons -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <p class="text-[11px] font-black text-slate-800 leading-tight">
+              Political Sentiment
+              <span class="text-[10px] text-slate-400 ml-1 font-semibold normal-case">(राजनीतिक रुझान)</span>
+            </p>
+          </div>
+          <div class="grid grid-cols-4 gap-2" id="vpmSentimentButtonGroup">
+            <button type="button" onclick="setVpmSentiment(100)"
+              class="vpm-sentiment-btn flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl border-2 border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-400 text-slate-500 hover:text-emerald-700 font-bold transition cursor-pointer"
+              data-cat="100">
+              <span class="text-xl leading-none">🟢</span>
+              <span class="text-[10px]">Sure</span>
+              <span class="text-[9px] opacity-60">पक्का</span>
+            </button>
+            <button type="button" onclick="setVpmSentiment(50)"
+              class="vpm-sentiment-btn flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl border-2 border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 text-slate-500 hover:text-amber-700 font-bold transition cursor-pointer"
+              data-cat="50">
+              <span class="text-xl leading-none">🟡</span>
+              <span class="text-[10px]">50-50</span>
+              <span class="text-[9px] opacity-40">–</span>
+            </button>
+            <button type="button" onclick="setVpmSentiment(-1)"
+              class="vpm-sentiment-btn flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl border-2 border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-400 text-slate-500 hover:text-rose-700 font-bold transition cursor-pointer"
+              data-cat="-1">
+              <span class="text-xl leading-none">🔴</span>
+              <span class="text-[10px]">Opposed</span>
+              <span class="text-[9px] opacity-60">विरोधी</span>
+            </button>
+            <button type="button" onclick="setVpmSentiment(0)"
+              class="vpm-sentiment-btn flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl border-2 border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-400 text-slate-500 font-bold transition cursor-pointer"
+              data-cat="0">
+              <span class="text-xl leading-none">⚪</span>
+              <span class="text-[10px]">Neutral</span>
+              <span class="text-[9px] opacity-60">सामान्य</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Community Tag -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <p class="text-[11px] font-black text-slate-800 leading-tight">
+              Community Tag
+              <span class="text-[10px] text-slate-400 ml-1 font-semibold normal-case">(समुदाय / उपनाम टैग)</span>
+            </p>
+          </div>
+          <input type="text" id="vpmCaste" name="sb_caste_tag_input_no_autofill" autocomplete="off" data-lpignore="true" data-form-type="other" placeholder="Search or type tag…"
+            class="w-full px-3 py-2 text-xs font-bold rounded-lg border border-slate-300 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-500">
+          <!-- First 3 chips always visible; rest toggle via "More" -->
+          <div class="flex flex-wrap gap-1 mt-1.5 items-center" id="vpmCasteChips">
+            {% set all_tags = (CAMPAIGN.community_tags or COMMUNITY_TAGS or []) %}
+            {% for c in all_tags[:3] %}
+              <button type="button" onclick="selectVpmCasteChip('{{ c.tag }}')"
+                class="px-2 py-0.5 rounded-full bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-800 font-semibold text-[10px] border border-slate-200 cursor-pointer">{{ c.label }}</button>
+            {% endfor %}
+            {% if all_tags|length > 3 %}
+              <button type="button" onclick="vpmToggleMoreChips(this)"
+                data-expanded="false"
+                class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[10px] border border-indigo-200 cursor-pointer vpm-more-chips-btn">
+                +{{ all_tags|length - 3 }} More ▾
+              </button>
+              <span class="hidden vpm-extra-chips flex flex-wrap gap-1 contents">
+                {% for c in all_tags[3:] %}
+                  <button type="button" onclick="selectVpmCasteChip('{{ c.tag }}')"
+                    class="px-2 py-0.5 rounded-full bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-800 font-semibold text-[10px] border border-slate-200 cursor-pointer">{{ c.label }}</button>
+                {% endfor %}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+      </div><!-- /tab-quick -->
+
+      <!-- ══════════════════════════════════════════ -->
+      <!-- TAB: DETAILS / MORE                       -->
+      <!-- ══════════════════════════════════════════ -->
+      <div id="vpmTab-details" class="vpm-tab-pane hidden space-y-3">
+
+        <!-- Special Status — Accordion -->
+        <div>
+          <button type="button" id="vpmSpecialAccBtn" onclick="vpmToggleSpecialStatus()"
+            class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-black text-slate-600 transition cursor-pointer select-none">
+            <span>⚠️ Special Status (विशेष स्थिति)</span>
+            <span id="vpmSpecialArrow" class="text-[10px] transition-transform duration-200">▼</span>
+          </button>
+          <div id="vpmSpecialBody" class="hidden flex-col gap-2 pt-2">
+            <!-- Outside Voter -->
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200 cursor-pointer select-none hover:bg-indigo-100/60 transition">
+              <input type="checkbox" id="vpmIsOutside" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer" onchange="vpmUpdateDetailsBadge()">
+              <div class="flex-1 min-w-0">
+                <span class="text-xs font-black text-indigo-950 block">✈️ Outside Voter</span>
+                <span class="text-[10px] text-indigo-600 block">Shows in migrant list &amp; Election Day caller</span>
+              </div>
+            </label>
+            <!-- Deceased -->
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-100/80 border border-slate-300 cursor-pointer select-none hover:bg-slate-200/70 transition">
+              <input type="checkbox" id="vpmIsDeceased" class="w-4 h-4 rounded text-slate-700 focus:ring-slate-500 cursor-pointer" onchange="vpmUpdateDetailsBadge()">
+              <div class="flex-1 min-w-0">
+                <span class="text-xs font-black text-slate-900 block">🕊️ Deceased Voter</span>
+                <span class="text-[10px] text-slate-500 block">Marked silent on slip &amp; polling day list</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Assigned Karyakarta -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <div>
+              <p class="text-[11px] font-black text-slate-800 leading-tight">Assigned Worker</p>
+              <p class="text-[10px] text-slate-400">दायित्व सौंपा गया कार्यकर्ता</p>
+            </div>
+            <button type="button" id="vpmBtnToggleNewKarya" onclick="window.vpmToggleNewKaryakartaForm()"
+              class="text-[11px] font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-lg transition flex items-center gap-1 cursor-pointer active:scale-95 shadow-2xs">
+              <span>➕</span>
+              <span id="vpmToggleNewKaryaText">नया कार्यकर्ता</span>
+            </button>
+          </div>
+          <select id="vpmAssignedKaryakarta" onchange="window.vpmHandleKaryakartaSelectChange(this)" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 transition">
+            <option value="">-- Unassigned --</option>
+            <option value="__NEW__" class="font-bold text-indigo-600 bg-indigo-50">➕ नया कार्यकर्ता जोड़ें... (+ Add New)</option>
+          </select>
+
+          <!-- Inline Quick Add Form Container -->
+          <div id="vpmNewKaryakartaBox" class="hidden mt-2 p-3 rounded-xl bg-indigo-50/70 border border-indigo-200/90 shadow-xs space-y-2.5 transition-all duration-200">
+            <div class="flex items-center justify-between border-b border-indigo-100 pb-1.5">
+              <span class="text-[11px] font-black text-indigo-950 flex items-center gap-1">
+                <span>➕</span>
+                <span>नया कार्यकर्ता जोड़ें (Quick Add Worker)</span>
+              </span>
+              <button type="button" onclick="window.vpmToggleNewKaryakartaForm(false)" class="text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer p-0.5" title="बंद करें">✕</button>
+            </div>
+
+            <div class="space-y-2">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 mb-0.5">कार्यकर्ता का नाम (Full Name) *</label>
+                <input type="text" id="vpmNewKaryaName" placeholder="उदा: रमेश शर्मा" autocomplete="off"
+                  class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600">
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 mb-0.5">मोबाइल नंबर (Mobile) *</label>
+                  <input type="tel" inputmode="numeric" maxlength="10" id="vpmNewKaryaPhone" placeholder="10-अंकीय नंबर" autocomplete="off"
+                    class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 mb-0.5">वार्ड / बूथ (Ward/Booth)</label>
+                  <select id="vpmNewKaryaBooth" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 truncate">
+                    <option value="0">समस्त केंद्र (General)</option>
+                    {% if IS_WARD_ELECTION or (CAMPAIGN and (CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat)) %}
+                      {% if WARDS and WARDS|length > 1 %}
+                        <optgroup label="📍 वार्डवार (Ward-Wise)">
+                          {% for w_no, w_info in WARDS.items() %}
+                            <option value="ward:{{ w_no }}">वार्ड {{ w_no }}</option>
+                          {% endfor %}
+                        </optgroup>
+                      {% elif WARDS and WARDS|length == 1 %}
+                        {% set single_ward_no = (WARDS.keys()|list)[0] %}
+                        <optgroup label="📋 वार्ड {{ single_ward_no }} के भाग">
+                          {% for p_no, b_info in (BOOTHS or {}).items() %}
+                            <option value="part:{{ p_no }}">भाग {{ p_no }}</option>
+                          {% endfor %}
+                        </optgroup>
+                      {% else %}
+                        {% for p_no, b_info in (BOOTHS or {}).items() %}
+                          <option value="{{ p_no }}">भाग {{ p_no }}</option>
+                        {% endfor %}
+                      {% endif %}
+                    {% else %}
+                      {% for p_no, b_info in (BOOTHS or {}).items() %}
+                        <option value="{{ p_no }}">भाग {{ p_no }}</option>
+                      {% endfor %}
+                    {% endif %}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 mb-0.5">क्षेत्र / पन्ना (Area / Role)</label>
+                <input type="text" id="vpmNewKaryaArea" placeholder="उदा: जाटा बास / पन्ना प्रमुख" autocomplete="off"
+                  class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-600">
+              </div>
+
+              <div id="vpmNewKaryaError" class="hidden text-[11px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-1 rounded-md"></div>
+
+              <div class="flex items-center justify-end gap-2 pt-1 border-t border-indigo-100">
+                <button type="button" onclick="window.vpmToggleNewKaryakartaForm(false)"
+                  class="px-2.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-200/60 rounded-md transition cursor-pointer">
+                  रद्द करें
+                </button>
+                <button type="button" id="vpmBtnSaveNewKarya" onclick="window.vpmSaveNewKaryakarta()"
+                  class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black px-3.5 py-1.5 text-xs rounded-lg shadow-sm transition flex items-center gap-1 cursor-pointer">
+                  <span>💾</span>
+                  <span id="vpmBtnSaveNewKaryaText">जोड़ें व चुनें (Save & Assign)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Family Head Name -->
+        <div>
+          <p class="text-[11px] font-black text-slate-800 leading-tight">👨‍👩‍👧 Family Head Name</p>
+          <p class="text-[10px] text-slate-400 mb-1.5">परिवार / मुखिया का नाम</p>
+          <input type="text" id="vpmFamilyHeadName" name="sb_fam_head_input_no_autofill" autocomplete="off" data-lpignore="true" data-form-type="other" placeholder="e.g. Jivraj Nathu Kumhar ka Ghar"
+            class="w-full px-3 py-1.5 text-xs font-bold text-slate-800 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600" oninput="vpmUpdateDetailsBadge()">
+        </div>
+
+        <!-- Notes -->
+        <div>
+          <p class="text-[11px] font-black text-slate-800 leading-tight">Notes</p>
+          <p class="text-[10px] text-slate-400 mb-1.5">टिप्पणी</p>
+          <input type="text" id="vpmNotes" name="sb_notes_input_no_autofill" autocomplete="off" data-lpignore="true" data-form-type="other" placeholder="e.g. Call after 8pm / needs transport"
+            class="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600" oninput="vpmUpdateDetailsBadge()">
+        </div>
+
+      </div><!-- /tab-details -->
+
+    </form><!-- /modal body -->
+
+    <!-- Sticky Footer -->
+    <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center gap-2 shrink-0">
+      <button type="button" onclick="closeVoterProfileModal()"
+        class="px-4 py-2 rounded-lg border border-slate-300 font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer text-xs">
+        Cancel
+      </button>
+      {% if ((current_user.role if current_user else '') or session.get('role', '')) != 'viewer' %}
+      <button type="button" id="btnSaveVoterProfile" onclick="saveVoterProfileDetails()"
+        class="flex-1 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-black shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 text-xs">
+        <span>💾</span>
+        <span>Save</span>
+      </button>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Inline Quick Add Karyakarta ────────────────────────────────
+function vpmToggleNewKaryakartaForm(forceState) {
+  const box = document.getElementById('vpmNewKaryakartaBox');
+  const toggleBtn = document.getElementById('vpmToggleNewKaryaText');
+  const errBox = document.getElementById('vpmNewKaryaError');
+  if (!box) return;
+
+  const willShow = typeof forceState === 'boolean' ? forceState : box.classList.contains('hidden');
+  if (errBox) { errBox.classList.add('hidden'); errBox.textContent = ''; }
+
+  if (willShow) {
+    box.classList.remove('hidden');
+    if (toggleBtn) toggleBtn.textContent = 'बंद करें (Close)';
+
+    // Auto-focus name field
+    const nameInput = document.getElementById('vpmNewKaryaName');
+    setTimeout(() => nameInput?.focus(), 50);
+
+    // Smart pre-fill booth/ward based on active voter
+    const boothSelect = document.getElementById('vpmNewKaryaBooth');
+    if (boothSelect) {
+      if (boothSelect.options.length <= 1 && window.BOOTHS_DATA && typeof window.BOOTHS_DATA === 'object') {
+        const boothKeys = Object.keys(window.BOOTHS_DATA);
+        if (boothKeys.length > 0) {
+          boothKeys.forEach(p => {
+            const bInfo = window.BOOTHS_DATA[p] || {};
+            const opt = document.createElement('option');
+            opt.value = p;
+            opt.textContent = `भाग ${p}${bInfo.name ? ' — ' + bInfo.name : ''}`;
+            boothSelect.appendChild(opt);
+          });
+        }
+      }
+
+      const voter = (window._vpmCurrentVoters && window._vpmCurrentVoters[0]) || null;
+      if (voter) {
+        const targetWard = voter.ward_no;
+        const targetPart = voter.part_no || voter.booth_no;
+        let matched = false;
+        if (targetWard) {
+          for (let i = 0; i < boothSelect.options.length; i++) {
+            if (boothSelect.options[i].value === `ward:${targetWard}`) {
+              boothSelect.selectedIndex = i;
+              matched = true;
+              break;
+            }
+          }
+        }
+        if (!matched && targetPart) {
+          for (let i = 0; i < boothSelect.options.length; i++) {
+            const val = boothSelect.options[i].value;
+            if (val === `part:${targetPart}` || val === String(targetPart)) {
+              boothSelect.selectedIndex = i;
+              matched = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+  } else {
+    box.classList.add('hidden');
+    if (toggleBtn) toggleBtn.textContent = 'नया कार्यकर्ता';
+  }
+}
+window.vpmToggleNewKaryakartaForm = vpmToggleNewKaryakartaForm;
+
+function vpmHandleKaryakartaSelectChange(sel) {
+  if (!sel) return;
+  if (sel.value === '__NEW__') {
+    vpmToggleNewKaryakartaForm(true);
+    sel.value = '';
+  }
+  if (typeof vpmUpdateDetailsBadge === 'function') {
+    vpmUpdateDetailsBadge();
+  }
+}
+window.vpmHandleKaryakartaSelectChange = vpmHandleKaryakartaSelectChange;
+
+async function vpmSaveNewKaryakarta() {
+  const nameEl = document.getElementById('vpmNewKaryaName');
+  const phoneEl = document.getElementById('vpmNewKaryaPhone');
+  const boothEl = document.getElementById('vpmNewKaryaBooth');
+  const areaEl = document.getElementById('vpmNewKaryaArea');
+  const errBox = document.getElementById('vpmNewKaryaError');
+  const saveBtn = document.getElementById('vpmBtnSaveNewKarya');
+  const saveBtnText = document.getElementById('vpmBtnSaveNewKaryaText');
+
+  const name = nameEl?.value?.trim() || '';
+  let phone = phoneEl?.value?.trim() || '';
+  const booth_no = boothEl?.value || '0';
+  const area = areaEl?.value?.trim() || '';
+
+  const showError = (msg) => {
+    if (errBox) {
+      errBox.textContent = msg;
+      errBox.classList.remove('hidden');
+    } else {
+      window.showToast?.(msg, 'warning');
+    }
+  };
+
+  if (errBox) { errBox.classList.add('hidden'); errBox.textContent = ''; }
+
+  if (!name) {
+    showError('कृपया कार्यकर्ता का नाम दर्ज करें (Name is required)');
+    nameEl?.focus();
+    return;
+  }
+
+  if (!phone) {
+    showError('कृपया 10-अंकीय मोबाइल नंबर दर्ज करें (Phone is required)');
+    phoneEl?.focus();
+    return;
+  }
+
+  phone = phone.replace(/[^0-9]/g, '');
+  if (phone.length === 12 && phone.startsWith('91')) phone = phone.slice(2);
+  if (phone.length === 11 && phone.startsWith('0')) phone = phone.slice(1);
+  if (phone.length !== 10) {
+    showError('कृपया मान्य 10-अंकीय मोबाइल नंबर दर्ज करें (10-digit mobile required)');
+    phoneEl?.focus();
+    return;
+  }
+
+  if (saveBtn) saveBtn.disabled = true;
+  if (saveBtnText) saveBtnText.textContent = 'जोड़ रहे हैं... (Saving...)';
+
+  const curTenant = window.CURRENT_TENANT || new URLSearchParams(window.location.search).get('tenant') || '';
+
+  try {
+    const res = await fetch(`/api/karyakartas/save?tenant=${encodeURIComponent(curTenant)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, booth_no, area })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'कार्यकर्ता जोड़ने में विफल (Failed to save)');
+    }
+
+    const newId = data.id;
+    const cleanBooth = (booth_no && !booth_no.startsWith('0')) ? booth_no.replace('ward:', 'वार्ड ').replace('part:', 'भाग ') : '-';
+
+    // Update select element directly
+    const sel = document.getElementById('vpmAssignedKaryakarta');
+    if (sel) {
+      const opt = document.createElement('option');
+      opt.value = String(newId);
+      opt.textContent = `${name} (बूथ ${cleanBooth})`;
+      sel.appendChild(opt);
+      sel.value = String(newId);
+    }
+
+    if (typeof window.invalidateVpmKaryakartasCache === 'function') {
+      window.invalidateVpmKaryakartasCache();
+    }
+
+    vpmUpdateDetailsBadge();
+
+    // Reset & close
+    if (nameEl) nameEl.value = '';
+    if (phoneEl) phoneEl.value = '';
+    if (areaEl) areaEl.value = '';
+    vpmToggleNewKaryakartaForm(false);
+
+    window.showToast?.(`कार्यकर्ता '${name}' सफलतापूर्वक जोड़ा गया व चुना गया!`, 'success');
+  } catch (err) {
+    showError(err.message || 'त्रुटि: पुनः प्रयास करें');
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+    if (saveBtnText) saveBtnText.textContent = 'जोड़ें व चुनें (Save & Assign)';
+  }
+}
+window.vpmSaveNewKaryakarta = vpmSaveNewKaryakarta;
+
+// ── Tab switching ──────────────────────────────────────────────
+function vpmSwitchTab(tabId, btn) {
+  document.querySelectorAll('.vpm-tab-pane').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.vpm-tab-btn').forEach(b => {
+    b.classList.remove('text-blue-600', 'border-blue-600');
+    b.classList.add('text-slate-400', 'border-transparent');
+  });
+  const pane = document.getElementById('vpmTab-' + tabId);
+  if (pane) pane.classList.remove('hidden');
+  if (btn) {
+    btn.classList.remove('text-slate-400', 'border-transparent');
+    btn.classList.add('text-blue-600', 'border-blue-600');
+  }
+}
+
+// ── Voter panel expand/collapse ────────────────────────────────
+function vpmToggleVoterPanel() {
+  const expanded = document.getElementById('vpmPanelExpanded');
+  const chevron  = document.getElementById('vpmPanelChevron');
+  const isOpen   = !expanded.classList.contains('hidden');
+  if (isOpen) {
+    expanded.classList.add('hidden');
+    if (chevron) chevron.textContent = 'Details ▾';
+  } else {
+    expanded.classList.remove('hidden');
+    if (chevron) chevron.textContent = 'Hide ▲';
+  }
+}
+
+// ── Special status accordion ───────────────────────────────────
+function vpmToggleSpecialStatus() {
+  const body   = document.getElementById('vpmSpecialBody');
+  const arrow  = document.getElementById('vpmSpecialArrow');
+  const btn    = document.getElementById('vpmSpecialAccBtn');
+  const isOpen = !body.classList.contains('hidden');
+  if (isOpen) {
+    body.classList.add('hidden');
+    body.classList.remove('flex');
+    if (arrow) arrow.style.transform = '';
+    if (btn)   btn.classList.remove('bg-slate-100');
+  } else {
+    body.classList.remove('hidden');
+    body.classList.add('flex');
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+    if (btn)   btn.classList.add('bg-slate-100');
+  }
+}
+
+// ── Details Badge Indicator ──────────────────────────────────
+function vpmUpdateDetailsBadge() {
+  const badge = document.getElementById('vpmMoreDetailsBadge');
+  if (!badge) return;
+  const outside  = document.getElementById('vpmIsOutside')?.checked;
+  const deceased = document.getElementById('vpmIsDeceased')?.checked;
+  const worker   = document.getElementById('vpmAssignedKaryakarta')?.value;
+  const famHead  = document.getElementById('vpmFamilyHeadName')?.value?.trim();
+  const notes    = document.getElementById('vpmNotes')?.value?.trim();
+  const hasExtra = Boolean(outside || deceased || worker || famHead || notes);
+  badge.classList.toggle('hidden', !hasExtra);
+}
+
+// Auto-open accordion when a status is already set (called from openBulkProfileModal / populateModalFields)
+function vpmOpenSpecialIfSet() {
+  const outside  = document.getElementById('vpmIsOutside');
+  const deceased = document.getElementById('vpmIsDeceased');
+  const body     = document.getElementById('vpmSpecialBody');
+  if (body && body.classList.contains('hidden')) {
+    if ((outside && outside.checked) || (deceased && deceased.checked)) {
+      vpmToggleSpecialStatus();
+    }
+  }
+  vpmUpdateDetailsBadge();
+}
+
+// ── More chips toggle ──────────────────────────────────────────
+function vpmToggleMoreChips(btn) {
+  const chips = btn.closest('#vpmCasteChips').querySelectorAll('.vpm-extra-chips');
+  const expanded = btn.dataset.expanded === 'true';
+  chips.forEach(el => el.classList.toggle('hidden', expanded));
+  btn.dataset.expanded = expanded ? 'false' : 'true';
+  const extraCount = chips[0] ? chips[0].querySelectorAll('button').length : 0;
+  btn.textContent = expanded ? `+${extraCount} More ▾` : 'Less ▴';
+}
+
+// ── Reset tab to Quick Tag on every modal open ────────────────
+// Patch into the existing open functions via MutationObserver on modal visibility
+(function () {
+  const observer = new MutationObserver(() => {
+    const modal = document.getElementById('voterProfileModal');
+    if (!modal) return;
+    if (!modal.classList.contains('hidden')) {
+      // Reset to Quick Tag tab
+      const firstTab = document.querySelector('#vpmTabBar .vpm-tab-btn');
+      if (firstTab) vpmSwitchTab('quick', firstTab);
+      // Collapse inline karyakarta form
+      if (typeof vpmToggleNewKaryakartaForm === 'function') {
+        vpmToggleNewKaryakartaForm(false);
+      }
+      // Collapse voter panel back to summary
+      const expanded = document.getElementById('vpmPanelExpanded');
+      const chevron  = document.getElementById('vpmPanelChevron');
+      if (expanded) expanded.classList.add('hidden');
+      if (chevron)  chevron.textContent = 'Details ▾';
+      // Collapse special status
+      const specBody = document.getElementById('vpmSpecialBody');
+      const arrow    = document.getElementById('vpmSpecialArrow');
+      if (specBody && !specBody.classList.contains('hidden')) {
+        specBody.classList.add('hidden');
+        specBody.classList.remove('flex');
+        if (arrow) arrow.style.transform = '';
+      }
+      // Then re-open special status accordion if flags are already checked & update badge
+      setTimeout(vpmOpenSpecialIfSet, 0);
+    }
+  });
+  // Start observing once DOM is ready
+  function attachObserver() {
+    const modal = document.getElementById('voterProfileModal');
+    if (modal) {
+      observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+    } else {
+      setTimeout(attachObserver, 300);
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachObserver);
+  } else {
+    attachObserver();
+  }
+})();
+</script>

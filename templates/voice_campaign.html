@@ -1,0 +1,756 @@
+{% extends 'base.html' %}
+{% block title %}वॉइस ब्रॉडकास्ट (Voice OBD Campaign) — {{ CAMPAIGN.election.ward_name_en }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-24 space-y-6">
+
+  <!-- Header Card with Live Quota Pill -->
+  <div class="bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-sky-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="space-y-1">
+      <div class="flex items-center gap-2.5">
+        <span class="text-3xl">📢</span>
+        <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">वॉइस ब्रॉडकास्ट कमान केंद्र (Voice OBD Blast)</h1>
+      </div>
+      <p class="text-xs sm:text-sm text-sky-200">
+        कैंडिडेट की अपनी आवाज में 30-सेकंड पल्स ऑटोमेटेड वॉइस कॉल · 3 सरल चरणों में अभियान
+      </p>
+    </div>
+
+    <!-- Live Quota Balance Pill -->
+    <div class="bg-slate-950/80 rounded-2xl p-3.5 border border-sky-500/40 flex items-center gap-4 shrink-0 shadow-inner">
+      <div>
+        <div class="text-[10px] text-sky-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>उपलब्ध वॉइस क्रेडिट</span>
+        </div>
+        <div class="text-2xl font-black text-sky-300 font-mono" id="voiceBalanceDisplay">...</div>
+      </div>
+      <button 
+        onclick="refreshVoiceQuota()"
+        class="p-2.5 rounded-xl bg-sky-900/60 hover:bg-sky-800 active:scale-95 text-sky-200 transition cursor-pointer"
+        title="रिफ्रेश करें"
+      >
+        🔄
+      </button>
+    </div>
+  </div>
+
+  <!-- 3-Step Wizard Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
+    <!-- ========================================================================= -->
+    <!-- STEP 1: AUDIO SELECTION / MIC RECORDER / UPLOAD                          -->
+    <!-- ========================================================================= -->
+    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="flex items-center justify-center w-7 h-7 rounded-xl bg-sky-100 text-sky-700 font-black text-sm">1</span>
+          <h2 class="text-base font-black text-slate-900">ऑडियो संदेश (Audio)</h2>
+        </div>
+        <span class="text-[11px] font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-lg">30s पल्स बिलिंग</span>
+      </div>
+
+      <!-- Audio Source Sub-Tabs -->
+      <div class="flex rounded-xl bg-slate-100 p-1 text-xs font-bold gap-1">
+        <button 
+          id="tabBtnSaved"
+          type="button" 
+          onclick="switchAudioTab('saved')"
+          class="flex-1 py-1.5 px-2 rounded-lg transition text-slate-700 bg-white shadow-xs font-black text-center"
+        >
+          📂 सहेजे ऑडियो
+        </button>
+        <button 
+          id="tabBtnMic"
+          type="button" 
+          onclick="switchAudioTab('mic')"
+          class="flex-1 py-1.5 px-2 rounded-lg transition text-slate-600 hover:text-slate-900 text-center"
+        >
+          🎙️ माइक रिकॉर्ड
+        </button>
+        <button 
+          id="tabBtnFile"
+          type="button" 
+          onclick="switchAudioTab('file')"
+          class="flex-1 py-1.5 px-2 rounded-lg transition text-slate-600 hover:text-slate-900 text-center"
+        >
+          📁 फ़ाइल अपलोड
+        </button>
+      </div>
+
+      <!-- Tab 1: Saved Audios Dropdown & Review Player -->
+      <div id="tabContentSaved" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">सक्रिय ऑडियो चुनें (Select Approved Audio)</label>
+          <select 
+            id="soundSelect" 
+            onchange="onAudioSelected()"
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-sky-600 cursor-pointer"
+          >
+            <option value="">लोड हो रहा है...</option>
+          </select>
+        </div>
+
+        <!-- Selected Audio Details & Review Player -->
+        <div id="audioReviewCard" class="hidden bg-slate-50 rounded-2xl p-3 border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between text-[11px] font-bold">
+            <span class="text-slate-500">पूर्वावलोकन (Preview):</span>
+            <span id="audioPulseBadge" class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md font-mono">--s · -- क्रेडिट</span>
+          </div>
+          <audio id="soundReviewPlayer" controls class="w-full h-8 mt-1 rounded-lg"></audio>
+        </div>
+      </div>
+
+      <!-- Tab 2: Live Inbuilt Browser Mic Recorder -->
+      <div id="tabContentMic" class="hidden space-y-3">
+        <div class="bg-sky-50/70 border border-sky-200 rounded-2xl p-4 text-center space-y-3">
+          <div class="text-xs text-slate-600 font-medium">
+            ब्राउज़र से सीधे उम्मीदवार का वॉइस मैसेज रिकॉर्ड करें:
+          </div>
+
+          <!-- Timer & Pulse Indicator -->
+          <div class="space-y-1">
+            <div id="micTimer" class="text-3xl font-black font-mono text-slate-900 tracking-wider">00:00</div>
+            <div id="micPulseIndicator" class="text-xs font-bold text-slate-500">0s · 1 क्रेडिट प्रति कॉल (30s पल्स)</div>
+          </div>
+
+          <!-- Record Controls -->
+          <div class="flex items-center justify-center gap-2 pt-1">
+            <button 
+              type="button" 
+              id="btnStartRecord" 
+              onclick="startRecording()" 
+              class="bg-rose-600 hover:bg-rose-500 text-white font-black px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow-md active:scale-95"
+            >
+              <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+              <span>रिकॉर्डिंग शुरू करें</span>
+            </button>
+            <button 
+              type="button" 
+              id="btnStopRecord" 
+              onclick="stopRecording()" 
+              disabled
+              class="bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white font-black px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5 active:scale-95 cursor-pointer"
+            >
+              <span>⏹️</span>
+              <span>रोकें (Done)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recorded Preview Card (hidden until recorded) -->
+        <div id="micPreviewCard" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2.5">
+          <div class="text-xs font-bold text-slate-700">सुने व सहेजें (Review & Save):</div>
+          <audio id="micAudioPreview" controls class="w-full h-8 rounded-lg"></audio>
+          <input 
+            type="text" 
+            id="micLabelInput" 
+            placeholder="ऑडियो शीर्षक (उदा. मुख्य अपील संदेश)" 
+            class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-800 focus:outline-none focus:border-sky-600"
+          />
+          <div class="flex items-center gap-2">
+            <button 
+              type="button" 
+              onclick="resetRecording()"
+              class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-1.5 rounded-xl text-xs transition"
+            >
+              पुनः रिकॉर्ड
+            </button>
+            <button 
+              type="button" 
+              id="btnSaveMicAudio"
+              onclick="uploadRecordedMicAudio()" 
+              class="w-2/3 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-1.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm"
+            >
+              <span>⬆️</span>
+              <span>सहेजें व सक्रिय करें</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: File Upload -->
+      <div id="tabContentFile" class="hidden space-y-3">
+        <input 
+          type="text" 
+          id="uploadSoundName" 
+          placeholder="ऑडियो शीर्षक (उदा. appeal_final)" 
+          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-sky-600"
+        />
+        <input 
+          type="file" 
+          id="audioFileInput" 
+          accept="audio/wav,audio/mp3,audio/m4a,audio/aac,audio/ogg,audio/opus"
+          class="w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer"
+        />
+        <p class="text-[11px] text-slate-400">सभी ऑडियो प्रारूप (MP3, M4A, WhatsApp वॉयस नोट) टेलीकॉम 8kHz WAV में स्वतः परिवर्तित होंगे।</p>
+        <button 
+          id="btnUploadAudio"
+          onclick="handleAudioUpload()"
+          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+        >
+          <span>⬆️</span>
+          <span>कैरियर गेटवे पर अपलोड करें</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- STEP 2: TARGET AUDIENCE & TIMING                                         -->
+    <!-- ========================================================================= -->
+    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="flex items-center justify-center w-7 h-7 rounded-xl bg-indigo-100 text-indigo-700 font-black text-sm">2</span>
+          <h2 class="text-base font-black text-slate-900">लक्षित मतदाता व समय (Target & Time)</h2>
+        </div>
+      </div>
+
+      <!-- Target Selection Type (Big Cards) -->
+      <div class="space-y-2.5">
+        <label class="relative flex items-start gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50/50 border-slate-200">
+          <input type="radio" name="targetType" value="all" checked class="mt-1 text-indigo-600 focus:ring-indigo-500" onchange="onTargetConfigChanged()">
+          <div>
+            <div class="text-xs font-black text-slate-900">समस्त मतदाता (All Voters)</div>
+            <div class="text-[11px] text-slate-500">सूची के सभी मतदाताओं के मोबाइल नंबरों पर कॉल</div>
+          </div>
+        </label>
+
+        <label class="relative flex items-start gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50/50 border-slate-200">
+          <input type="radio" name="targetType" value="unvoted" class="mt-1 text-indigo-600 focus:ring-indigo-500" onchange="onTargetConfigChanged()">
+          <div>
+            <div class="text-xs font-black text-slate-900">शेष बिना मतदान वाले (Unvoted GOTV)</div>
+            <div class="text-[11px] text-slate-500">जिन्होंने अभी तक मतदान नहीं किया (मतदान दिवस टर्नआउट पुश)</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Booth Filter -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-700">बूथ / भाग फ़िल्टर (Booth Filter)</label>
+        <select 
+          id="targetBooth" 
+          onchange="onTargetConfigChanged()"
+          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 cursor-pointer"
+        >
+          <option value="all">समस्त बूथ (All Booths)</option>
+          {% for b_no, b_name in booths.items() %}
+          <option value="{{ b_no }}">बूथ {{ b_no }} — {{ b_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Call Limits -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-700">अधिकतम कॉल सीमा (Batch Limit)</label>
+        <input 
+          type="number" 
+          id="dispatchLimit" 
+          value="500" 
+          min="1" 
+          max="10000"
+          onchange="onTargetConfigChanged()"
+          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600"
+        />
+      </div>
+
+      <!-- Timing & TRAI Window -->
+      <div class="border-t border-slate-100 pt-3 space-y-2">
+        <label class="block text-xs font-black text-slate-800">कॉल प्रसारण समय (Timing)</label>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50 cursor-pointer text-xs font-bold">
+            <input type="radio" name="timingOption" value="now" checked onchange="toggleTimingInput()" class="text-indigo-600">
+            <span>तुरंत भेजें (Now)</span>
+          </label>
+          <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50 cursor-pointer text-xs font-bold">
+            <input type="radio" name="timingOption" value="schedule" onchange="toggleTimingInput()" class="text-indigo-600">
+            <span>शेड्यूल करें (Later)</span>
+          </label>
+        </div>
+
+        <div id="scheduleTimeContainer" class="hidden pt-1">
+          <input 
+            type="time" 
+            id="scheduleTimeInput" 
+            min="09:00" 
+            max="21:00" 
+            value="10:00"
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none"
+          />
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-[11px] text-amber-900 space-y-0.5">
+          <div class="font-bold flex items-center gap-1">
+            <span>⚖️</span>
+            <span>ट्राई (TRAI) विधिक समय सीमा:</span>
+          </div>
+          <p class="text-amber-800">प्रचार कॉल केवल सुबह 09:00 AM से रात 09:00 PM IST के बीच ही अनुमत हैं।</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- STEP 3: 1-CLICK LAUNCH & LIVE ESTIMATE                                    -->
+    <!-- ========================================================================= -->
+    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="flex items-center justify-center w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 font-black text-sm">3</span>
+          <h2 class="text-base font-black text-slate-900">लांच व पुष्टि (Launch)</h2>
+        </div>
+        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">लाइव अनुमान</span>
+      </div>
+
+      <!-- Realtime Reach & Cost Summary Card -->
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+        <div class="flex justify-between items-center text-xs pb-2 border-b border-slate-200">
+          <span class="text-slate-500 font-medium">कुल लक्षित मतदाता:</span>
+          <span id="estTargetVoters" class="font-black text-slate-900">...</span>
+        </div>
+        <div class="flex justify-between items-center text-xs pb-2 border-b border-slate-200">
+          <span class="text-slate-500 font-medium">अद्वितीय मोबाइल (1 कॉल/परिवार):</span>
+          <span id="estUniqueMobiles" class="font-black text-indigo-700 font-mono">...</span>
+        </div>
+        <div class="flex justify-between items-center text-xs pb-2 border-b border-slate-200">
+          <span class="text-slate-500 font-medium">प्रति कॉल पल्स क्रेडिट:</span>
+          <span id="estCreditsPerCall" class="font-black text-slate-900 font-mono">1 क्रेडिट</span>
+        </div>
+        <div class="flex justify-between items-center text-xs pb-2 border-b border-slate-200">
+          <span class="text-slate-700 font-bold">आवश्यक कुल क्रेडिट:</span>
+          <span id="estTotalCredits" class="font-black text-emerald-700 font-mono text-sm">...</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-500 font-medium">वर्तमान उपलब्ध बैलेंस:</span>
+          <span id="estBalance" class="font-black text-slate-900 font-mono">...</span>
+        </div>
+
+        <!-- Quota Warning -->
+        <div id="estQuotaWarning" class="hidden bg-rose-50 border border-rose-200 rounded-xl p-2.5 text-xs text-rose-800 font-bold">
+          ⚠️ आपके पास पर्याप्त क्रेडिट नहीं हैं। कृपया एडमिन से संपर्क कर क्रेडिट रिचार्ज कराएं।
+        </div>
+      </div>
+
+      <!-- Wave Progress Bar (Active during launch) -->
+      <div id="waveProgressContainer" class="hidden space-y-2">
+        <div class="flex justify-between text-xs font-bold text-slate-700">
+          <span id="waveProgressText">प्रसारण प्रगति (500 कॉल्स/तरंग)...</span>
+          <span id="waveProgressPercent">0%</span>
+        </div>
+        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+          <div id="waveProgressBar" class="bg-gradient-to-r from-sky-500 to-indigo-600 h-3 rounded-full transition-all duration-300 w-0"></div>
+        </div>
+      </div>
+
+      <!-- Dispatch Button -->
+      <button 
+        id="btnDispatchVoice"
+        type="button"
+        onclick="launchVoiceCampaign()"
+        class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black py-3.5 rounded-2xl text-sm shadow-lg hover:shadow-xl transition transform active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <span>🚀</span>
+        <span id="btnDispatchText">वॉइस कॉल ब्रॉडकास्ट शुरू करें</span>
+      </button>
+
+      <!-- Status Result Alert -->
+      <div id="dispatchResultCard" class="hidden rounded-2xl p-4 border text-xs font-bold transition"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let recordedBlob = null;
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let recordTimerInterval = null;
+  let recordSeconds = 0;
+  let audioCache = [];
+
+  // ==========================================
+  // TAB NAVIGATION
+  // ==========================================
+  function switchAudioTab(tab) {
+    document.getElementById('tabContentSaved').classList.toggle('hidden', tab !== 'saved');
+    document.getElementById('tabContentMic').classList.toggle('hidden', tab !== 'mic');
+    document.getElementById('tabContentFile').classList.toggle('hidden', tab !== 'file');
+
+    const updateBtn = (btnId, active) => {
+      const el = document.getElementById(btnId);
+      if (active) {
+        el.className = 'flex-1 py-1.5 px-2 rounded-lg transition text-slate-800 bg-white shadow-xs font-black text-center';
+      } else {
+        el.className = 'flex-1 py-1.5 px-2 rounded-lg transition text-slate-600 hover:text-slate-900 text-center';
+      }
+    };
+    updateBtn('tabBtnSaved', tab === 'saved');
+    updateBtn('tabBtnMic', tab === 'mic');
+    updateBtn('tabBtnFile', tab === 'file');
+  }
+
+  function toggleTimingInput() {
+    const isSchedule = document.querySelector('input[name="timingOption"]:checked').value === 'schedule';
+    document.getElementById('scheduleTimeContainer').classList.toggle('hidden', !isSchedule);
+  }
+
+  // ==========================================
+  // LIVE MIC RECORDER (MediaRecorder API)
+  // ==========================================
+  async function startRecording() {
+    recordedChunks = [];
+    recordSeconds = 0;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+      mediaRecorder = new MediaRecorder(stream, { mimeType });
+
+      mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) recordedChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        recordedBlob = new Blob(recordedChunks, { type: mimeType });
+        const previewEl = document.getElementById('micAudioPreview');
+        previewEl.src = URL.createObjectURL(recordedBlob);
+        document.getElementById('micPreviewCard').classList.remove('hidden');
+        stream.getTracks().forEach(t => t.stop());
+      };
+
+      mediaRecorder.start(250);
+      document.getElementById('btnStartRecord').disabled = true;
+      document.getElementById('btnStopRecord').disabled = false;
+      document.getElementById('micPreviewCard').classList.add('hidden');
+
+      recordTimerInterval = setInterval(() => {
+        recordSeconds++;
+        const mins = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+        const secs = String(recordSeconds % 60).padStart(2, '0');
+        document.getElementById('micTimer').textContent = `${mins}:${secs}`;
+
+        const credits = Math.max(1, Math.ceil(recordSeconds / 30));
+        document.getElementById('micPulseIndicator').textContent = `${recordSeconds}s · ${credits} क्रेडिट प्रति कॉल (30s पल्स)`;
+      }, 1000);
+
+    } catch (err) {
+      alert('माइक्रोफोन अनुमति नहीं मिली या डिवाइस समर्थित नहीं है: ' + err.message);
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    clearInterval(recordTimerInterval);
+    document.getElementById('btnStartRecord').disabled = false;
+    document.getElementById('btnStopRecord').disabled = true;
+  }
+
+  function resetRecording() {
+    recordedBlob = null;
+    recordedChunks = [];
+    document.getElementById('micPreviewCard').classList.add('hidden');
+    document.getElementById('micTimer').textContent = '00:00';
+    document.getElementById('micPulseIndicator').textContent = '0s · 1 क्रेडिट प्रति कॉल (30s पल्स)';
+  }
+
+  async function uploadRecordedMicAudio() {
+    if (!recordedBlob) {
+      alert('कृपया पहले ऑडियो रिकॉर्ड करें');
+      return;
+    }
+    const label = document.getElementById('micLabelInput').value.trim() || 'माइक संदेश';
+    const btn = document.getElementById('btnSaveMicAudio');
+
+    btn.disabled = true;
+    btn.textContent = 'सहेजा जा रहा है...';
+
+    const formData = new FormData();
+    formData.append('display_label', label);
+    formData.append('sound_name', label);
+    formData.append('audio_file', recordedBlob, 'mic_recording.webm');
+
+    try {
+      const res = await fetch('/api/voice/upload_audio', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('ऑडियो सफलतापूर्वक अपलोड व सक्रिय हुआ!');
+        resetRecording();
+        switchAudioTab('saved');
+        await loadApprovedSounds(data.audio_id);
+      } else {
+        alert('अपलोड त्रुटि: ' + (data.error || 'अज्ञात समस्या'));
+      }
+    } catch (e) {
+      alert('नेटवर्क त्रुटि: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span>⬆️</span><span>सहेजें व सक्रिय करें</span>';
+    }
+  }
+
+  // ==========================================
+  // FILE UPLOAD
+  // ==========================================
+  async function handleAudioUpload() {
+    const nameInput = document.getElementById('uploadSoundName');
+    const fileInput = document.getElementById('audioFileInput');
+    const btn = document.getElementById('btnUploadAudio');
+
+    const soundName = nameInput.value.trim();
+    if (!soundName) {
+      alert('कृपया ऑडियो शीर्षक दर्ज करें');
+      return;
+    }
+    if (!fileInput.files || fileInput.files.length === 0) {
+      alert('कृपया ऑडियो फ़ाइल चुनें (.mp3, .m4a, .wav, .aac)');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('sound_name', soundName);
+    formData.append('display_label', soundName);
+    formData.append('audio_file', fileInput.files[0]);
+
+    btn.disabled = true;
+    btn.textContent = 'अपलोड व ट्रांसकोडिंग जारी...';
+
+    try {
+      const res = await fetch('/api/voice/upload_audio', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('ऑडियो सफलतापूर्वक अपलोड हुआ!');
+        nameInput.value = '';
+        fileInput.value = '';
+        switchAudioTab('saved');
+        await loadApprovedSounds(data.audio_id);
+      } else {
+        alert('अपलोड त्रुटि: ' + (data.error || 'अज्ञात समस्या'));
+      }
+    } catch (e) {
+      alert('नेटवर्क त्रुटि: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span>⬆️</span><span>कैरियर गेटवे पर अपलोड करें</span>';
+    }
+  }
+
+  // ==========================================
+  // APPROVED SOUNDS & AUDIENCE ESTIMATE
+  // ==========================================
+  async function loadApprovedSounds(selectAudioId = null) {
+    const sel = document.getElementById('soundSelect');
+    sel.innerHTML = '<option value="">लोड हो रहा है...</option>';
+    try {
+      const res = await fetch('/api/voice/sounds');
+      const data = await res.json();
+      sel.innerHTML = '';
+      audioCache = data.sounds || [];
+      if (data.success && audioCache.length > 0) {
+        audioCache.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.audio_id ? String(s.audio_id) : (s.sound_name || '');
+          opt.dataset.audioId = s.audio_id || '';
+          opt.dataset.carrierName = s.carrier_sound_name || s.sound_name || '';
+          opt.dataset.duration = s.duration_seconds || 0;
+          opt.dataset.credits = s.credits_per_call || 1;
+          const durText = s.duration_seconds ? `${s.duration_seconds}s` : '30s';
+          const credText = `${s.credits_per_call || 1} क्रेडिट`;
+          opt.textContent = `[स्वीकृत] ${s.display_label || s.sound_name} — ${durText} (${credText})`;
+          sel.appendChild(opt);
+        });
+
+        if (selectAudioId) {
+          sel.value = String(selectAudioId);
+        }
+        onAudioSelected();
+      } else {
+        sel.innerHTML = '<option value="">कोई अनुमोदित ऑडियो उपलब्ध नहीं</option>';
+      }
+    } catch (e) {
+      sel.innerHTML = '<option value="">ऑडियो लोड करने में असमर्थ</option>';
+    }
+  }
+
+  function onAudioSelected() {
+    const sel = document.getElementById('soundSelect');
+    const opt = sel.options[sel.selectedIndex];
+    const reviewCard = document.getElementById('audioReviewCard');
+    const player = document.getElementById('soundReviewPlayer');
+    const badge = document.getElementById('audioPulseBadge');
+
+    if (!opt || !opt.value) {
+      reviewCard.classList.add('hidden');
+      return;
+    }
+
+    const audioId = opt.dataset.audioId;
+    const dur = opt.dataset.duration || 0;
+    const cred = opt.dataset.credits || 1;
+
+    badge.textContent = `${dur}s · ${cred} क्रेडिट प्रति कॉल`;
+    if (audioId) {
+      player.src = `/api/voice/audio/${audioId}`;
+      reviewCard.classList.remove('hidden');
+    } else {
+      reviewCard.classList.add('hidden');
+    }
+
+    updateEstimate();
+  }
+
+  function onTargetConfigChanged() {
+    updateEstimate();
+  }
+
+  async function updateEstimate() {
+    const sel = document.getElementById('soundSelect');
+    const opt = sel.options[sel.selectedIndex];
+    const audioId = opt ? opt.dataset.audioId : null;
+    const soundName = opt ? opt.dataset.carrierName || sel.value : '';
+    const targetType = document.querySelector('input[name="targetType"]:checked')?.value || 'all';
+    const boothVal = document.getElementById('targetBooth')?.value || 'all';
+
+    const payload = {
+      target_type: targetType,
+      booths: boothVal === 'all' ? [] : [boothVal],
+      audio_id: audioId ? parseInt(audioId, 10) : null,
+      sound_name: soundName
+    };
+
+    try {
+      const res = await fetch('/api/voice/estimate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('estTargetVoters').textContent = data.target_voters.toLocaleString('en-IN');
+        document.getElementById('estUniqueMobiles').textContent = data.unique_mobiles.toLocaleString('en-IN');
+        document.getElementById('estCreditsPerCall').textContent = `${data.credits_per_call} क्रेडिट (${data.duration_seconds}s)`;
+        document.getElementById('estTotalCredits').textContent = `${data.total_credits_needed.toLocaleString('en-IN')} क्रेडिट`;
+        document.getElementById('estBalance').textContent = `${data.balance.toLocaleString('en-IN')} क्रेडिट`;
+
+        const hasEnough = data.balance >= data.total_credits_needed;
+        document.getElementById('estQuotaWarning').classList.toggle('hidden', hasEnough);
+
+        const btnText = document.getElementById('btnDispatchText');
+        btnText.textContent = `वॉइस कॉल ब्रॉडकास्ट शुरू करें (${data.total_credits_needed} क्रेडिट)`;
+      }
+    } catch (e) {
+      console.warn("Estimate fetch failed:", e);
+    }
+  }
+
+  async function refreshVoiceQuota() {
+    const disp = document.getElementById('voiceBalanceDisplay');
+    disp.textContent = '...';
+    try {
+      const res = await fetch('/api/voice/balance');
+      const data = await res.json();
+      if (data.success && data.quota) {
+        disp.textContent = data.quota.available.toLocaleString('en-IN');
+      } else {
+        disp.textContent = '0';
+      }
+    } catch (e) {
+      disp.textContent = 'त्रुटि';
+    }
+  }
+
+  // ==========================================
+  // 1-CLICK DISPATCH
+  // ==========================================
+  async function launchVoiceCampaign() {
+    const sel = document.getElementById('soundSelect');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value) {
+      alert('कृपया पहले एक अनुमोदित ऑडियो संदेश चुनें');
+      return;
+    }
+
+    const audioId = opt.dataset.audioId;
+    const soundName = opt.dataset.carrierName || sel.value;
+    const targetType = document.querySelector('input[name="targetType"]:checked')?.value || 'all';
+    const boothVal = document.getElementById('targetBooth')?.value || 'all';
+    const limit = parseInt(document.getElementById('dispatchLimit').value) || 500;
+
+    const confirmMsg = `क्या आप ${limit} मतदाताओं को यह वॉइस ब्रॉडकास्ट भेजना चाहते हैं?`;
+    if (!confirm(confirmMsg)) return;
+
+    const btn = document.getElementById('btnDispatchVoice');
+    const btnText = document.getElementById('btnDispatchText');
+    const resCard = document.getElementById('dispatchResultCard');
+    const progressContainer = document.getElementById('waveProgressContainer');
+    const progressBar = document.getElementById('waveProgressBar');
+    const progressText = document.getElementById('waveProgressText');
+    const progressPercent = document.getElementById('waveProgressPercent');
+
+    btn.disabled = true;
+    btnText.textContent = 'ब्रॉडकास्ट प्रगति पर है...';
+    resCard.classList.add('hidden');
+    progressContainer.classList.remove('hidden');
+    progressBar.style.width = '30%';
+    progressPercent.textContent = '30%';
+    progressText.textContent = 'तरंग 1: नंबर वैधीकरण व कोटा आरक्षण...';
+
+    try {
+      const res = await fetch('/api/voice/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audio_id: audioId ? parseInt(audioId, 10) : null,
+          sound_name: soundName,
+          target_type: targetType,
+          booths: boothVal === 'all' ? [] : [boothVal],
+          limit: limit,
+          bypass_window: 1
+        })
+      });
+
+      progressBar.style.width = '90%';
+      progressPercent.textContent = '90%';
+      progressText.textContent = 'तरंग 2: टेलीकॉम गेटवे कॉल सबमिशन...';
+
+      const data = await res.json();
+      resCard.classList.remove('hidden');
+      progressBar.style.width = '100%';
+      progressPercent.textContent = '100%';
+
+      if (data.success) {
+        resCard.className = 'rounded-2xl p-4 border bg-emerald-50 border-emerald-300 text-emerald-900';
+        resCard.innerHTML = `✅ <b>सफलतापूर्वक प्रेषित:</b> ${data.message} (कुल कॉल: ${data.stats ? data.stats.dispatched : 0})`;
+        refreshVoiceQuota();
+        updateEstimate();
+      } else {
+        resCard.className = 'rounded-2xl p-4 border bg-rose-50 border-rose-300 text-rose-900';
+        resCard.innerHTML = `❌ <b>ब्रॉडकास्ट रुका:</b> ${data.error || data.message}`;
+      }
+    } catch (e) {
+      resCard.classList.remove('hidden');
+      resCard.className = 'rounded-2xl p-4 border bg-rose-50 border-rose-300 text-rose-900';
+      resCard.innerHTML = `❌ <b>नेटवर्क त्रुटि:</b> ${e.message}`;
+    } finally {
+      btn.disabled = false;
+      btnText.textContent = 'वॉइस कॉल ब्रॉडकास्ट शुरू करें';
+      setTimeout(() => {
+        progressContainer.classList.add('hidden');
+        progressBar.style.width = '0%';
+      }, 3500);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    refreshVoiceQuota();
+    loadApprovedSounds();
+  });
+</script>
+{% endblock %}

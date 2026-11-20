@@ -1,0 +1,67 @@
+<!-- MODAL: SENT HISTORY -->
+  <div id="historyModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col border border-slate-300 overflow-hidden">
+      
+      <div class="bg-slate-900 text-white px-5 py-3 flex items-center justify-between">
+        <h3 class="font-bold text-sm">Dispatched Voter Slips History</h3>
+        <button onclick="closeHistoryModal()" class="text-white/70 hover:text-white text-xl font-bold leading-none">&times;</button>
+      </div>
+
+      <div class="p-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-3">
+          <div class="font-semibold text-slate-700">
+            Total Dispatched: <strong id="modalHistoryCount" class="font-extrabold text-blue-900">0</strong> voters
+          </div>
+          <input 
+            type="text" 
+            id="historySearchInput" 
+            placeholder="Search mobile, voter, house, or part..." 
+            oninput="filterHistoryTable()" 
+            class="px-2.5 py-1 text-xs rounded border border-slate-300 w-56 focus:outline-none focus:border-blue-600 bg-white shadow-inner font-semibold"
+          >
+        </div>
+        <div class="flex gap-2">
+          <button 
+            id="btnHistoryClearTesting" 
+            type="button" 
+            onclick="promptClearTestHistory()" 
+            class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold px-3 py-1.5 rounded text-xs transition cursor-pointer hidden"
+            title="Purge test dispatches (Super Admin)"
+          >
+            🗑️ Clear Testing Records
+          </button>
+          <a href="/api/history/export" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded text-xs transition">
+            Export to Excel
+          </a>
+          <button onclick="loadHistoryData()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-1.5 rounded text-xs transition">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4 overflow-y-auto flex-1 text-xs">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 text-[11px] uppercase border-b border-slate-200 sticky top-0">
+              <th class="p-2 w-32">Date & Time</th>
+              <th class="p-2 w-28">Mobile No</th>
+              <th class="p-2">Voter Name</th>
+              <th class="p-2">Relative Name</th>
+              <th class="p-2 text-center w-14">Part</th>
+              <th class="p-2 text-center w-14">Sl. No.</th>
+              <th class="p-2 w-28">EPIC No</th>
+              <th class="p-2 w-20">Type</th>
+              <th class="p-2 w-28">Channel</th>
+              <th class="p-2 text-center w-24">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody" class="divide-y divide-slate-200 text-slate-800"></tbody>
+        </table>
+      </div>
+
+      <div class="bg-slate-50 px-4 py-2 border-t border-slate-200 text-right">
+        <button onclick="closeHistoryModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-1.5 rounded text-xs">Close</button>
+      </div>
+
+    </div>
+  </div>

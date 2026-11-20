@@ -1,0 +1,288 @@
+<!-- MODAL: DELETE CAMPAIGN CONFIRMATION (SAFE ARCHIVE vs PERMANENT PURGE) -->
+<div id="deleteCampaignModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-xs transition-opacity duration-200">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl text-slate-900 animate-in fade-in zoom-in-95 duration-150">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 text-sm font-bold">🗑️</span>
+                <div>
+                    <h3 class="text-sm sm:text-base font-extrabold text-slate-900">अभियान हटाएँ (Delete Campaign)</h3>
+                    <p class="text-[11px] text-slate-500 font-mono" id="delModalSlugDisplay">slug</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeDeleteCampaignModal()" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center font-bold text-sm cursor-pointer">✕</button>
+        </div>
+
+        <!-- Target Campaign Info Preview Box -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex items-center justify-between text-xs">
+            <div class="min-w-0 pr-2">
+                <div class="font-extrabold text-slate-800 truncate" id="delModalCandName">--</div>
+                <div class="text-[11px] text-slate-500" id="delModalVoterCount">-- मतदाता</div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider" id="delModalStatusBadge">ACTIVE</span>
+        </div>
+
+        <!-- Mode Select Options -->
+        <div class="space-y-2.5">
+            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">विलोपन प्रकार चुनें (Select Deletion Mode):</label>
+            
+            <!-- Option 1: Safe Archive (Default) -->
+            <label class="flex items-start gap-3 p-3 rounded-2xl border-2 border-indigo-500 bg-indigo-50/40 cursor-pointer transition" id="lblModeArchive">
+                <input type="radio" name="delCampaignMode" value="archive" checked onchange="onDelModeChange('archive')" class="mt-0.5 w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                <div class="text-xs">
+                    <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>📦 सुरक्षित संग्रह (Safe Archive / Deactivate)</span>
+                        <span class="bg-indigo-100 text-indigo-700 text-[9px] font-black px-1.5 py-0.2 rounded">अनुशंसित (Recommended)</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                        मतदाता रिकॉर्ड्स व इतिहास सुरक्षित रहेगा। अभियान निष्क्रिय (Archived) हो जाएगा और कभी भी पुनः सक्रिय किया जा सकेगा।
+                    </p>
+                </div>
+            </label>
+
+            <!-- Option 2: Permanent Purge -->
+            <label class="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 hover:border-rose-300 bg-slate-50/50 cursor-pointer transition" id="lblModePermanent">
+                <input type="radio" name="delCampaignMode" value="permanent" onchange="onDelModeChange('permanent')" class="mt-0.5 w-4 h-4 text-rose-600 border-slate-300 focus:ring-rose-500">
+                <div class="text-xs">
+                    <div class="font-bold text-rose-700 flex items-center gap-1">
+                        <span>💥 स्थायी रूप से हटाएँ (Permanent Purge)</span>
+                    </div>
+                    <p class="text-[11px] text-rose-600/80 mt-0.5 leading-relaxed">
+                        <strong>सावधानी:</strong> PostgreSQL पार्टीशन (<code class="font-mono text-[10px]">voters_t...</code>), सभी मतदाता डेटा, ऑपरेटर खाते व फाइल्स हमेशा के लिए हटा दी जाएंगी। इसे वापस नहीं लाया जा सकता।
+                    </p>
+                </div>
+            </label>
+        </div>
+
+        <!-- Permanent Confirmation Input (Hidden unless permanent mode selected) -->
+        <div id="delPermanentConfirmationBox" class="hidden space-y-1.5 p-3 rounded-2xl bg-rose-50 border border-rose-200">
+            <label class="block text-[11px] font-bold text-rose-800">
+                पुष्टि के लिए अभियान का स्लग (<span class="font-mono underline" id="delRequiredSlugText">slug</span>) नीचे टाइप करें:
+            </label>
+            <input 
+                type="text" 
+                id="delConfirmInput" 
+                oninput="onDelConfirmInputChange(this.value)" 
+                placeholder="स्लग यहाँ दर्ज करें"
+                autocomplete="off"
+                class="w-full bg-white border border-rose-300 rounded-xl px-3 py-2 text-xs font-mono font-bold text-rose-900 focus:outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600"
+            >
+            <p class="text-[10px] text-rose-600 font-medium">जब तक सही स्लग नहीं लिखेंगे, विलोपन बटन अक्षम (disabled) रहेगा।</p>
+        </div>
+
+        <!-- Hidden Slug Reference -->
+        <input type="hidden" id="delTargetSlug" value="">
+
+        <!-- Modal Footer Actions -->
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 text-xs">
+            <button 
+                type="button" 
+                onclick="closeDeleteCampaignModal()" 
+                class="px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-100 cursor-pointer transition"
+            >
+                रद्द करें (Cancel)
+            </button>
+            <button 
+                type="button" 
+                id="btnConfirmDeleteCampaign" 
+                onclick="executeDeleteCampaign()" 
+                class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold shadow-xs cursor-pointer transition flex items-center gap-1.5"
+            >
+                <span id="btnConfirmDeleteText">संग्रह करें (Archive)</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    function notify(msg, type = 'info') {
+        if (typeof window.showAdminToast === 'function') {
+            window.showAdminToast(msg, type);
+        } else if (typeof window.showToast === 'function') {
+            window.showToast(msg, type);
+        } else {
+            alert(msg);
+        }
+    }
+
+    window.openDeleteCampaignModal = function(slug, candName, voterCount, status, isReseller = false) {
+        const modal = document.getElementById('deleteCampaignModal');
+        if (!modal) return;
+
+        try {
+            if (candName && candName.includes('%')) {
+                candName = decodeURIComponent(candName);
+            }
+        } catch(e) {}
+
+        const permOption = document.getElementById('lblModePermanent');
+        if (permOption) {
+            if (isReseller) {
+                permOption.classList.add('hidden');
+            } else {
+                permOption.classList.remove('hidden');
+            }
+        }
+
+        const targetSlugEl = document.getElementById('delTargetSlug');
+        const slugDispEl = document.getElementById('delModalSlugDisplay');
+        const candEl = document.getElementById('delModalCandName');
+        const countEl = document.getElementById('delModalVoterCount');
+        const statusBadge = document.getElementById('delModalStatusBadge');
+        const reqSlugText = document.getElementById('delRequiredSlugText');
+        const confirmInput = document.getElementById('delConfirmInput');
+
+        if (targetSlugEl) targetSlugEl.value = slug || '';
+        if (slugDispEl) slugDispEl.innerText = slug || '';
+        if (candEl) candEl.innerText = candName || slug || '';
+        if (countEl) countEl.innerText = `${(Number(voterCount) || 0).toLocaleString('en-IN')} कुल मतदाता`;
+        if (reqSlugText) reqSlugText.innerText = slug || '';
+        if (confirmInput) confirmInput.value = '';
+
+        const st = (status || 'ACTIVE').toUpperCase();
+        if (statusBadge) {
+            statusBadge.innerText = st;
+            statusBadge.className = `px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                st === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                st === 'ARCHIVED' ? 'bg-slate-100 text-slate-600 border border-slate-200' :
+                'bg-amber-50 text-amber-700 border border-amber-200'
+            }`;
+        }
+
+        // Reset to Archive mode by default
+        const archiveRadio = document.querySelector('input[name="delCampaignMode"][value="archive"]');
+        if (archiveRadio) archiveRadio.checked = true;
+        window.onDelModeChange('archive');
+
+        modal.classList.remove('hidden');
+    };
+
+    window.closeDeleteCampaignModal = function() {
+        const modal = document.getElementById('deleteCampaignModal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    window.onDelModeChange = function(mode) {
+        const confirmBox = document.getElementById('delPermanentConfirmationBox');
+        const btn = document.getElementById('btnConfirmDeleteCampaign');
+        const btnText = document.getElementById('btnConfirmDeleteText');
+        const lblArchive = document.getElementById('lblModeArchive');
+        const lblPerm = document.getElementById('lblModePermanent');
+        const slug = document.getElementById('delTargetSlug')?.value || '';
+        const inputVal = document.getElementById('delConfirmInput')?.value || '';
+
+        if (mode === 'permanent') {
+            if (confirmBox) confirmBox.classList.remove('hidden');
+            if (lblArchive) {
+                lblArchive.classList.remove('border-2', 'border-indigo-500', 'bg-indigo-50/40');
+                lblArchive.classList.add('border', 'border-slate-200', 'bg-slate-50/50');
+            }
+            if (lblPerm) {
+                lblPerm.classList.remove('border-slate-200', 'bg-slate-50/50');
+                lblPerm.classList.add('border-2', 'border-rose-500', 'bg-rose-50/40');
+            }
+            if (btn) {
+                btn.className = "px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold shadow-xs cursor-pointer transition flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed";
+                btn.disabled = inputVal.trim() !== slug;
+            }
+            if (btnText) btnText.innerText = "हाँ, स्थायी रूप से हटाएं (Permanent Purge)";
+        } else {
+            if (confirmBox) confirmBox.classList.add('hidden');
+            if (lblPerm) {
+                lblPerm.classList.remove('border-2', 'border-rose-500', 'bg-rose-50/40');
+                lblPerm.classList.add('border', 'border-slate-200', 'bg-slate-50/50');
+            }
+            if (lblArchive) {
+                lblArchive.classList.remove('border', 'border-slate-200', 'bg-slate-50/50');
+                lblArchive.classList.add('border-2', 'border-indigo-500', 'bg-indigo-50/40');
+            }
+            if (btn) {
+                btn.className = "px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold shadow-xs cursor-pointer transition flex items-center gap-1.5";
+                btn.disabled = false;
+            }
+            if (btnText) btnText.innerText = "सुरक्षित संग्रह करें (Archive)";
+        }
+    };
+
+    window.onDelConfirmInputChange = function(val) {
+        const slug = document.getElementById('delTargetSlug')?.value || '';
+        const btn = document.getElementById('btnConfirmDeleteCampaign');
+        const mode = document.querySelector('input[name="delCampaignMode"]:checked')?.value || 'archive';
+        if (mode === 'permanent' && btn) {
+            btn.disabled = (val || '').trim() !== slug.trim();
+        }
+    };
+
+    window.executeDeleteCampaign = async function() {
+        const slug = document.getElementById('delTargetSlug')?.value || '';
+        const mode = document.querySelector('input[name="delCampaignMode"]:checked')?.value || 'archive';
+        const confirmSlug = document.getElementById('delConfirmInput')?.value || '';
+        const btn = document.getElementById('btnConfirmDeleteCampaign');
+        const btnText = document.getElementById('btnConfirmDeleteText');
+
+        if (!slug) return;
+        if (mode === 'permanent' && confirmSlug.trim() !== slug.trim()) {
+            notify("⚠️ पुष्टि के लिए कृपया अभियान का सही स्लग टाइप करें", "warning");
+            return;
+        }
+
+        if (btn) btn.disabled = true;
+        if (btnText) btnText.innerText = mode === 'permanent' ? "स्थायी रूप से हटाया जा रहा है..." : "संग्रह किया जा रहा है...";
+
+        try {
+            const res = await fetch(`/api/admin/campaigns/${encodeURIComponent(slug)}/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mode: mode,
+                    confirmation_slug: confirmSlug.trim()
+                })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success) {
+                notify(data.message || (mode === 'permanent' ? `अभियान '${slug}' स्थायी रूप से हटा दिया गया` : `अभियान '${slug}' पुरालेख में स्थानांतरित`), 'success');
+                window.closeDeleteCampaignModal();
+                if (typeof window.loadCampaigns === 'function') {
+                    sessionStorage.removeItem('admin_campaigns_cache');
+                    window.loadCampaigns(true);
+                } else {
+                    setTimeout(() => window.location.reload(), 600);
+                }
+            } else {
+                throw new Error(data.error || 'अभियान हटाने में विफलता');
+            }
+        } catch (err) {
+            notify(`❌ त्रुटि: ${err.message}`, 'error');
+        } finally {
+            if (btn) btn.disabled = false;
+            window.onDelModeChange(mode);
+        }
+    };
+
+    window.restoreCampaign = async function(slug) {
+        if (!slug) return;
+        try {
+            const res = await fetch(`/api/admin/campaigns/${encodeURIComponent(slug)}/restore`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success) {
+                notify(`✅ अभियान '${slug}' पुनः सक्रिय हो गया है`, 'success');
+                if (typeof window.loadCampaigns === 'function') {
+                    sessionStorage.removeItem('admin_campaigns_cache');
+                    window.loadCampaigns(true);
+                } else {
+                    setTimeout(() => window.location.reload(), 600);
+                }
+            } else {
+                throw new Error(data.error || 'अभियान पुनः सक्रिय करने में विफलता');
+            }
+        } catch (err) {
+            notify(`❌ त्रुटि: ${err.message}`, 'error');
+        }
+    };
+})();
+</script>

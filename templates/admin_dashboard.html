@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="hi" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ Smart Booth — सुपर एडमिन कमान केंद्र (Super Admin Portal)</title>
+    <link rel="icon" type="image/png" href="/static/icons/logo.png">
+    <!-- Suppress Tailwind CDN dev warning in production console -->
+    <script>
+        (function() {
+            var _w = console.warn;
+            console.warn = function() {
+                if (arguments[0] && typeof arguments[0] === 'string' && arguments[0].indexOf('cdn.tailwindcss.com') !== -1) return;
+                _w.apply(console, arguments);
+            };
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Mukta:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', 'Mukta', sans-serif;
+        }
+        .tricolor-stripe {
+            background: linear-gradient(90deg, #f97316 0%, #fb923c 33%, #ffffff 50%, #22c55e 66%, #16a34a 100%);
+        }
+        .transition-smooth {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Subtle Tricolor Brand Stripe -->
+    <div class="fixed top-0 left-0 right-0 h-1 tricolor-stripe shadow-2xs z-50"></div>
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-1 z-40 bg-white border-b border-slate-200 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand & Identification -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 p-1 flex items-center justify-center shadow-xs shrink-0">
+                    <img src="/static/icons/logo.png" alt="Smart Booth" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold text-lg tracking-tight text-slate-900">Smart Booth</span>
+                        <span class="px-2 py-0.5 text-xs font-bold rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Super Admin</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center space-x-2 sm:space-x-2.5">
+                <!-- Global Campaign Switcher for Super Admin -->
+                {% set ns_admin = namespace(active_name='सभी अभियान (All Campaigns)') %}
+                {% if current_tenant %}
+                  {% for c in available_campaigns %}
+                    {% if c.slug == current_tenant %}
+                      {% set ns_admin.active_name = c.name %}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+                <button 
+                    id="globalCampaignSwitcher" 
+                    type="button" 
+                    onclick="openCampaignSearchModal()" 
+                    data-active-tenant="{{ current_tenant or '' }}"
+                    class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 rounded-xl px-3 py-1.5 shadow-xs transition active:scale-95 cursor-pointer group"
+                    title="सक्रिय चुनाव अभियान बदलें (Ctrl+K)"
+                >
+                    <span class="text-slate-500 group-hover:text-slate-700 text-xs sm:text-sm">🏛️</span>
+                    <span class="text-slate-800 font-bold text-xs sm:text-sm truncate max-w-[130px] sm:max-w-[220px]">
+                        {{ ns_admin.active_name }}
+                    </span>
+                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <!-- Add Campaign CTA Button -->
+                <a href="/campaign/new" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold shadow-xs transition active:scale-95 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span class="hidden sm:inline">नया अभियान</span>
+                </a>
+
+                <!-- Link to Voter Hub -->
+                <a href="/" class="flex items-center px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold border border-slate-200 transition" title="Go to Voter Hub Search">
+                    <span class="hidden sm:inline">मतदाता हब</span>
+                    <span class="sm:hidden">हब</span>
+                </a>
+
+                <!-- Link to Audit Logs -->
+                <a href="/admin/audit-log" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold border border-slate-200 transition" title="ऑडिट लॉग्स (Audit Logs)">
+                    <span>🧾</span>
+                    <span class="hidden sm:inline">ऑडिट लॉग्स</span>
+                </a>
+
+                <!-- Fast Logout -->
+                <a 
+                    href="/logout" 
+                    class="flex items-center text-slate-600 hover:text-rose-600 hover:bg-rose-50 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl border border-slate-200 hover:border-rose-200 transition cursor-pointer"
+                    title="लॉगआउट (Log Out)"
+                >
+                    <span>लॉगआउट</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2-STREAMLINED WORKSPACES STRIP -->
+    <div class="border-b border-slate-200 bg-white sticky top-[68px] z-30">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-2 overflow-x-auto no-scrollbar py-2.5 text-xs sm:text-sm font-semibold" id="adminTabsNav">
+                <button type="button" onclick="switchAdminTab('campaigns')" id="tabBtn-campaigns" class="admin-tab-btn px-4 py-2 rounded-xl flex items-center gap-2 transition bg-indigo-600 text-white font-bold cursor-pointer">
+                    <span>अभियान (Campaigns)</span>
+                </button>
+                <button type="button" onclick="switchAdminTab('users')" id="tabBtn-users" class="admin-tab-btn px-4 py-2 rounded-xl flex items-center gap-2 transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer">
+                    <span>उपयोगकर्ता (Users)</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- MAIN VIEWPORT CONTAINER -->
+    <main class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ======================================================== -->
+        <!-- WORKSPACE 1: CAMPAIGNS FLEET                             -->
+        <!-- ======================================================== -->
+        <section id="tabContent-campaigns" class="admin-tab-content space-y-6">
+
+            <!-- Search, Filter & Actions Bar -->
+            <div class="bg-white border border-slate-200 p-3.5 sm:p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="relative w-full sm:w-80">
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </span>
+                    <input type="text" id="campaignSearchInput" oninput="filterCampaigns()" placeholder="खोजें: प्रत्याशी या क्षेत्र..." class="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                </div>
+
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                    <select id="electionTypeFilter" onchange="filterCampaigns()" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                        <option value="ALL">सभी चुनाव स्तर</option>
+                        <option value="PANCHAYAT">ग्राम पंचायत (सरपंच)</option>
+                        <option value="PANCHAYAT_SAMITI">पंचायत समिति सदस्य</option>
+                        <option value="ZILA_PARISHAD">जिला परिषद सदस्य</option>
+                        <option value="ASSEMBLY">विधान सभा</option>
+                        <option value="MUNICIPAL">नगर निकाय</option>
+                    </select>
+
+                    <select id="campaignStatusFilter" onchange="filterCampaigns()" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                        <option value="ALL">सभी स्थिति</option>
+                        <option value="ACTIVE" selected>सक्रिय</option>
+                        <option value="PAUSED">रुका हुआ</option>
+                        <option value="ARCHIVED">पुरालेख</option>
+                    </select>
+
+                    <span id="campaignsCountBadge" class="text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 px-3 py-2 rounded-lg whitespace-nowrap">0 अभियान</span>
+
+                    <button onclick="refreshCampaigns()" class="p-2 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer" title="ताज़ा करें">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Unified Campaigns Fleet Table View -->
+            <div id="campaignsTableContainer" class="hidden md:block bg-white rounded-xl overflow-hidden border border-slate-200">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-700 border-collapse">
+                        <thead class="bg-slate-50 text-slate-700 text-sm font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="py-4 px-4 w-14 text-center font-bold text-slate-500">#</th>
+                                <th class="py-4 px-6 min-w-[220px]">प्रत्याशी (Candidate)</th>
+                                <th class="py-4 px-5 min-w-[240px]">अभियान / क्षेत्र (Campaign)</th>
+                                <th class="py-4 px-4 min-w-[120px] text-center">स्थिति (Status)</th>
+                                <th class="py-4 px-6 min-w-[180px] text-right pr-6">कार्यवाही (Actions)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="campaignsTableBody" class="divide-y divide-slate-100 bg-white">
+                            <tr id="campaignsLoadingRow">
+                                <td colspan="5" class="py-14 text-center text-slate-400">
+                                    <div class="inline-flex items-center gap-2.5 text-base font-semibold">
+                                        <svg class="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span>अभियान लोड हो रहे हैं (Loading campaigns)...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Mobile card view (shown only on small screens) -->
+            <div id="campaignsMobileCards" class="md:hidden space-y-3 px-1 py-2">
+                <div class="py-10 text-center text-slate-400 text-sm font-semibold flex items-center justify-center gap-2.5">
+                    <svg class="animate-spin h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span>अभियान लोड हो रहे हैं...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- WORKSPACE 2: USERS & PASSWORDS (RBAC)                    -->
+        <!-- ======================================================== -->
+        <section id="tabContent-users" class="admin-tab-content hidden space-y-6">
+            <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900">
+                            अनासंबद्ध उपयोगकर्ता व सिस्टम एडमिन (Unassigned Users & System Admins)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">सुपर एडमिन, रीसेलर पार्टनर एवं बिना अभियान वाले स्वतंत्र खाते (अभियान उपयोगकर्ताओं का प्रबंधन सीधे प्रत्येक अभियान के भीतर किया जाता है)</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleCreateUserForm()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-xs">
+                            <span id="btnToggleUserFormText">+ नया खाता</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Users Search & Filter Toolbar -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="relative flex-1 min-w-[240px] w-full">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </span>
+                        <input type="text" id="userSearchInput" oninput="filterUsers()" placeholder="खोजें: यूज़रनेम, नाम..." class="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500">
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                        <select id="userFilterCampaign" onchange="filterUsers()" class="hidden bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:border-indigo-500">
+                            <option value="ALL">सभी अभियान</option>
+                            <option value="RESELLER">रीसेलर पार्टनर</option>
+                        </select>
+
+                        <select id="userFilterRole" onchange="filterUsers()" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:border-indigo-500">
+                            <option value="ALL">सभी भूमिकाएं (All Roles)</option>
+                            <option value="super_admin">सुपर एडमिन (Super Admin)</option>
+                            <option value="reseller">रीसेलर पार्टनर (Reseller)</option>
+                        </select>
+
+                        <span id="userCountBadge" class="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-2 rounded-lg whitespace-nowrap">0 खाते</span>
+
+                        <button onclick="refreshUsers()" class="p-2 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer" title="ताज़ा करें">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Create User Collapsible Form -->
+                <form id="createUserForm" onsubmit="event.preventDefault(); handleCreateUser(event); return false;" class="hidden p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-4 animate-in fade-in duration-200">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-slate-800 uppercase tracking-wide">नया उपयोगकर्ता खाता बनाएं</p>
+                    </div>
+
+                    <!-- Reseller Role Helper Alert -->
+                    <div id="resellerInfoBox" class="hidden p-3 rounded-xl bg-purple-50 border border-purple-200 text-xs text-purple-900">
+                        <span><strong>रीसेलर पार्टनर:</strong> यह खाता अपने अधीन कई स्वतंत्र अभियानों का प्रबंधन करता है।</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3.5">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">यूज़रनेम *</label>
+                            <input type="text" required id="newUsername" placeholder="e.g. ops_operator" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">पासवर्ड *</label>
+                            <input type="text" required id="newPassword" placeholder="पासवर्ड लिखें..." class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">भूमिका / अधिकार *</label>
+                            <select id="newUserRole" onchange="toggleResellerFields()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500">
+                                <option value="candidate_admin">प्रत्याशी / मुख्य व्यवस्थापक</option>
+                                <option value="operator" selected>वॉर-रूम ऑपरेटर</option>
+                                <option value="karyakarta">बूथ कार्यकर्ता</option>
+                                <option value="super_admin">सुपर एडमिन</option>
+                                <option value="reseller">रीसेलर</option>
+                            </select>
+                        </div>
+                        <div id="newUserTenantWrapper">
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">संबद्ध अभियान *</label>
+                            <select id="newUserTenant" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div id="newMaxCampaignsWrapper" class="hidden">
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">अभियान सीमा (Max Campaigns)</label>
+                            <input type="number" id="newMaxCampaigns" min="1" placeholder="खाली = असीमित" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 font-mono">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5" id="userFormRow2">
+                        <div id="newFullNameWrapper" class="sm:col-span-2">
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">पूरा नाम</label>
+                            <input type="text" id="newFullName" placeholder="e.g. रमेश शर्मा" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div id="newAssignedBoothsWrapper" class="hidden">
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">आवंटित बूथ संख्या</label>
+                            <input type="text" id="newAssignedBooths" placeholder="e.g. 1, 2, 5 — खाली = समस्त बूथ" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
+                        <button type="button" onclick="toggleCreateUserForm()" class="px-4 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 cursor-pointer">रद्द करें</button>
+                        <button type="button" onclick="event.preventDefault(); handleCreateUser(event);" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold cursor-pointer shadow-xs">सुरक्षित करें</button>
+                    </div>
+                </form>
+
+                <!-- Users Table (desktop) -->
+                <div class="hidden md:block border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-700 border-collapse min-w-[900px]">
+                            <thead class="bg-slate-50 text-slate-700 text-sm font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="py-3.5 px-3 w-10 text-center font-bold text-slate-500">#</th>
+                                    <th class="py-3.5 px-4 min-w-[150px]">User</th>
+                                    <th class="py-3.5 px-4 min-w-[130px]">Password</th>
+                                    <th class="py-3.5 px-3 min-w-[100px]">Role</th>
+                                    <th class="py-3.5 px-4 min-w-[160px]">Campaign</th>
+                                    <th class="py-3.5 px-3 min-w-[100px]">Scope</th>
+                                    <th class="py-3.5 px-3 text-center min-w-[90px]">Status</th>
+                                    <th class="py-3.5 px-4 text-right pr-4 min-w-[170px] sticky right-0 bg-slate-50 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.06)]">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody" class="divide-y divide-slate-100 bg-white">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Users Mobile Card View (mobile only) -->
+                <div id="usersMobileCards" class="md:hidden space-y-3"></div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+
+
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- MODALS: CAMPAIGN WIZARD, RESET PW, DELETE                -->
+    <!-- ======================================================== -->
+
+    <!-- Modal 2: Password Reset with 1-Click Clipboard Copy (Clean Light Style) -->
+    <div id="passwordResetModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl text-slate-900">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="text-sm font-bold text-slate-900">पासवर्ड रीसेट (Reset Password)</h3>
+                <button onclick="closePasswordResetModal()" class="text-slate-400 hover:text-slate-700 font-bold text-base cursor-pointer">✕</button>
+            </div>
+            <input type="hidden" id="resetUserId" value="">
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-600 font-semibold mb-1">उपयोगकर्ता:</label>
+                    <div id="resetUsernameDisplay" class="font-bold text-slate-900 bg-slate-50 p-2.5 rounded-lg border border-slate-200">--</div>
+                </div>
+                <div>
+                    <label class="block text-slate-600 font-semibold mb-1">नया पासवर्ड:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="resetNewPasswordInput" placeholder="नया पासवर्ड दर्ज करें..." class="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono font-bold text-indigo-700 focus:outline-none focus:border-indigo-500">
+                        <button type="button" onclick="generateRandomResetPassword()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer border border-slate-200" title="नया रैंडम पासवर्ड बनाएं">
+                            Generate
+                        </button>
+                        <button type="button" onclick="copyResetPassword()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer border border-slate-200" title="Copy to clipboard">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closePasswordResetModal()" class="px-4 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 cursor-pointer">रद्द करें</button>
+                <button type="button" onclick="executePasswordReset()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs cursor-pointer">सुरक्षित करें</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Delete User Confirmation (Clean Light Style) -->
+    <div id="deleteUserModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white border border-slate-200 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-xl text-slate-900">
+            <div>
+                <h3 class="text-sm font-bold text-slate-900">खाता हटाएँ (Delete User)</h3>
+            </div>
+            <p class="text-xs text-slate-600">
+                क्या आप उपयोगकर्ता <strong id="deleteUserDisplay" class="text-slate-900"></strong> का खाता स्थायी रूप से हटाना चाहते हैं?
+            </p>
+            <input type="hidden" id="deleteUserId" value="">
+            <div class="flex justify-end gap-2 pt-3 border-t border-slate-100 text-xs">
+                <button type="button" onclick="closeDeleteUserModal()" class="px-4 py-2 rounded-lg border border-slate-200 font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 cursor-pointer">रद्द करें</button>
+                <button type="button" onclick="executeDeleteUser()" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-semibold shadow-xs cursor-pointer">हाँ, हटाएँ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Delete Campaign Confirmation -->
+    {% include 'modals/_delete_campaign_modal.html' %}
+
+    <!-- Modal 5: Edit User Profile -->
+    {% include 'modals/_edit_user_modal.html' %}
+
+    <!-- Toast Notification -->
+    <div id="adminToast" class="fixed bottom-5 right-5 z-50 hidden p-3.5 rounded-2xl shadow-xl text-xs font-bold border transition-all duration-300">
+        <span id="adminToastMsg"></span>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- JAVASCRIPT COMMAND CENTER CONTROLLER                     -->
+    <!-- ======================================================== -->
+    <script>
+        let allCampaigns = [];
+        let allUsers = [];
+        let currentCampaignView = 'grid'; // 'grid' | 'table'
+
+        // --- WORKSPACE TAB SWITCHER ---
+        window.switchAdminTab = function(tabName) {
+            let targetWorkspace = tabName === 'users' || tabName === 'rbac' ? 'users' : 'campaigns';
+
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-xs');
+                btn.classList.add('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-100');
+            });
+
+            const content = document.getElementById(`tabContent-${targetWorkspace}`);
+            const btn = document.getElementById(`tabBtn-${targetWorkspace}`);
+            if (content) content.classList.remove('hidden');
+            if (btn) {
+                btn.classList.add('bg-indigo-600', 'text-white', 'shadow-xs');
+                btn.classList.remove('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-100');
+            }
+
+            if (targetWorkspace === 'users') loadUsers();
+        };
+
+        // --- CAMPAIGNS LOADER & RENDERER ---
+        const CAMPAIGNS_CACHE_KEY = 'admin_campaigns_cache';
+        const CAMPAIGNS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+        function getCachedCampaigns() {
+            try {
+                const raw = sessionStorage.getItem(CAMPAIGNS_CACHE_KEY);
+                if (!raw) return null;
+                const { ts, data } = JSON.parse(raw);
+                if (Date.now() - ts > CAMPAIGNS_CACHE_TTL_MS) {
+                    sessionStorage.removeItem(CAMPAIGNS_CACHE_KEY);
+                    return null;
+                }
+                return data;
+            } catch (_) { return null; }
+        }
+
+        function setCachedCampaigns(data) {
+            try {
+                sessionStorage.setItem(CAMPAIGNS_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+            } catch (_) {}
+        }
+
+        async function loadCampaigns(force = false) {
+            // Use sessionStorage cache to avoid re-fetch on tab switch (unless forced)
+            if (!force) {
+                const cached = getCachedCampaigns();
+                if (cached) {
+                    allCampaigns = cached.campaigns || [];
+                    renderCampaigns(allCampaigns);
+                    updateFleetStats(cached.fleet_stats || {});
+                    populateCampaignDropdowns(allCampaigns);
+                    return;
+                }
+            }
+            try {
+                const url = '/api/admin/campaigns' + (force ? '?force=1' : '');
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("Failed to load campaigns");
+                const data = await res.json();
+                allCampaigns = data.campaigns || [];
+                setCachedCampaigns(data);
+                renderCampaigns(allCampaigns);
+                updateFleetStats(data.fleet_stats || {});
+                populateCampaignDropdowns(allCampaigns);
+            } catch (err) {
+                console.error("Error loading campaigns:", err);
+            }
+        }
+        window.loadCampaigns = loadCampaigns;
+
+        function renderCampaigns(campaigns) {
+            const tableBody = document.getElementById('campaignsTableBody');
+            if (!tableBody) return;
+
+            const countBadge = document.getElementById('campaignsCountBadge');
+            if (countBadge) {
+                countBadge.innerText = `${(campaigns || []).length} अभियान`;
+            }
+
+            if (!campaigns || campaigns.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-slate-400 text-base font-semibold">कोई चुनाव अभियान नहीं मिला।</td></tr>`;
+                const mc = document.getElementById('campaignsMobileCards');
+                if (mc) mc.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">कोई अभियान नहीं मिला।</p>';
+                return;
+            }
+
+            tableBody.innerHTML = campaigns.map((c, idx) => {
+                const status = (c.status || 'ACTIVE').toUpperCase();
+                const candidateName = c.candidate_name_hi || c.candidate_name_en || 'प्रत्याशी';
+                const areaName = c.ward_name_hi || c.ward_name_en || 'ग्राम पंचायत / वार्ड';
+
+                // Status indicator (clean dot + text)
+                const statusMeta = {
+                    ACTIVE: { label: 'सक्रिय', dot: 'bg-emerald-500' },
+                    PAUSED: { label: 'रुका हुआ', dot: 'bg-amber-500' },
+                    CONCLUDED: { label: 'संपन्न', dot: 'bg-indigo-500' },
+                    ARCHIVED: { label: 'पुरालेख', dot: 'bg-slate-400' }
+                }[status] || { label: status, dot: 'bg-slate-400' };
+
+                return `
+                <tr class="hover:bg-slate-50/70 transition-colors border-b border-slate-100 last:border-b-0">
+                    <!-- Column 0: Sr No -->
+                    <td class="py-4 px-4 text-center font-mono font-bold text-sm sm:text-base text-slate-500">
+                        ${idx + 1}
+                    </td>
+
+                    <!-- Column 1: Candidate Profile -->
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-3">
+                            ${c.photo_url
+                                ? `<img src="${c.photo_url}" loading="lazy" decoding="async" class="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0" alt="" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+                                   <div class="w-11 h-11 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-base shrink-0 border border-slate-200" style="display:none">${(candidateName || 'प्र').charAt(0)}</div>`
+                                : `<div class="w-11 h-11 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-base shrink-0 border border-slate-200">${(candidateName || 'प्र').charAt(0)}</div>`}
+                            <div class="min-w-0">
+                                <div class="font-bold text-slate-900 text-base sm:text-lg leading-snug">${candidateName}</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Column 2: Campaign Name & Area -->
+                    <td class="py-4 px-5">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="min-w-0 font-bold text-slate-800 text-base leading-snug">${areaName}</span>
+                            ${c.election_type === 'PANCHAYAT_SAMITI' ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">🚜 पंचायत समिति</span>' :
+                              c.election_type === 'ZILA_PARISHAD' ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200">🏛️ जिला परिषद</span>' :
+                              c.election_type === 'PANCHAYAT' ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">🌾 ग्राम पंचायत</span>' :
+                              c.election_type === 'ASSEMBLY' ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-200">🗳️ विधान सभा</span>' :
+                              '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">🏙️ निकाय</span>'}
+                        </div>
+                        <div class="text-xs text-slate-400 font-mono mt-0.5">${c.tenant_slug}</div>
+                    </td>
+
+                    <!-- Column 3: Status -->
+                    <td class="py-4 px-4 text-center">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold bg-slate-50 text-slate-700 border border-slate-200">
+                            <span class="w-2.5 h-2.5 rounded-full ${statusMeta.dot}"></span>
+                            <span>${statusMeta.label}</span>
+                        </span>
+                    </td>
+
+                    <!-- Column 4: Actions -->
+                    <td class="py-4 px-6 text-right whitespace-nowrap">
+                        <div class="flex items-center justify-end gap-2">
+                            <button type="button" 
+                                    onclick="toggleCampaignUsersDropdown('${c.tenant_slug}')" 
+                                    id="btn-users-${c.tenant_slug}" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 hover:bg-indigo-100 text-indigo-700 text-sm font-semibold transition active:scale-95 cursor-pointer shadow-2xs"
+                                    title="इस अभियान के उपयोगकर्ता देखें (View Campaign Users)">
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <span>Users</span>
+                                <svg id="chevron-users-${c.tenant_slug}" class="w-3.5 h-3.5 text-indigo-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <a href="/campaign/edit/${c.tenant_slug}" class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-semibold transition" title="संपादित करें">
+                                Edit
+                            </a>
+                            ${status === 'ARCHIVED' ? `<button onclick="restoreCampaign('${c.tenant_slug}')" class="px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 hover:bg-emerald-50 text-sm font-semibold transition" title="पुनः सक्रिय करें">सक्रिय</button>` : ''}
+                            <button onclick="openDeleteCampaignModal('${c.tenant_slug}', '${encodeURIComponent(candidateName || '')}', ${c.total_voters || 0}, '${status}')" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition" title="हटाएं">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                            <a href="/?tenant=${c.tenant_slug}" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-xs transition">
+                                War Room →
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <!-- Accordion Dropdown Row: Users inside this campaign -->
+                <tr id="campaign-users-row-${c.tenant_slug}" class="hidden bg-slate-50/70 border-b border-indigo-100 transition-all">
+                    <td colspan="5" class="p-0">
+                        <div id="campaign-users-container-${c.tenant_slug}" class="p-4 sm:p-5 border-l-4 border-indigo-600 bg-slate-50/90 space-y-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+            renderMobileCards(campaigns);
+        }
+
+        function renderMobileCards(campaigns) {
+            const container = document.getElementById('campaignsMobileCards');
+            if (!container) return;
+
+            if (!campaigns || campaigns.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">कोई अभियान नहीं मिला।</p>';
+                return;
+            }
+
+            const GP_STRIP = /^(?:ग्राम\s*पंचायत|Gram\s*Panchayat|जिला\s*परिषद|Zila\s*Parishad|पंचायत\s*समिति|Panchayat\s*Samiti)\s+/i;
+            const GENERIC_CANDS = new Set(['सरपंच प्रत्याशी','sarpanch candidate','प्रत्याशी','candidate','सरपंच','sarpanch']);
+
+            container.innerHTML = campaigns.map(c => {
+                const candidateName = (c.candidate_name_hi || c.candidate_name_en || '').trim();
+                const areaName = c.ward_name_hi || c.ward_name_en || 'अभियान';
+                const status = (c.status || 'ACTIVE').toUpperCase();
+                const statusDotColor = { ACTIVE: '#22c55e', PAUSED: '#f59e0b', CONCLUDED: '#6366f1', ARCHIVED: '#94a3b8' }[status] || '#94a3b8';
+
+                return `
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden p-4 space-y-3">
+            <!-- Title row -->
+            <div class="flex items-center gap-3">
+                ${c.photo_url
+                    ? `<img src="${c.photo_url}" loading="lazy" decoding="async" class="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0" alt="" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+                       <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-sm shrink-0 border border-slate-200" style="display:none">${(candidateName || areaName).charAt(0)}</div>`
+                    : `<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-sm shrink-0 border border-slate-200">${(candidateName || areaName).charAt(0)}</div>`}
+                <div class="min-w-0 flex-1">
+                    <div class="font-bold text-slate-900 text-sm truncate">${candidateName || areaName}</div>
+                    ${candidateName ? `<div class="text-xs text-slate-500 truncate mt-0.5">${areaName}</div>` : ''}
+                </div>
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${statusDotColor};" title="${status}"></span>
+            </div>
+
+            <!-- Actions row -->
+            <div class="flex items-center justify-end gap-1.5 pt-2 border-t border-slate-100 flex-wrap">
+                <button type="button" 
+                        onclick="toggleCampaignUsersDropdown('${c.tenant_slug}', true)" 
+                        id="btn-users-mobile-${c.tenant_slug}" 
+                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 text-indigo-700 text-xs font-semibold cursor-pointer">
+                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span>Users</span>
+                    <svg id="chevron-users-mobile-${c.tenant_slug}" class="w-3 h-3 text-indigo-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <a href="/campaign/edit/${c.tenant_slug}" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold" title="Edit">Edit</a>
+                ${status === 'ARCHIVED' ? `<button onclick="restoreCampaign('${c.tenant_slug}')" class="px-2.5 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-xs font-semibold" title="Restore">Restore</button>` : ''}
+                <button onclick="openDeleteCampaignModal('${c.tenant_slug}', '${encodeURIComponent(candidateName || '')}', ${c.total_voters || 0}, '${status}')" class="p-1.5 text-slate-400 hover:text-rose-600 text-xs" title="Delete">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+                <a href="/?tenant=${c.tenant_slug}" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold text-xs shadow-xs">War Room →</a>
+            </div>
+
+            <!-- Mobile Users Dropdown Container -->
+            <div id="campaign-users-mobile-container-${c.tenant_slug}" class="hidden pt-3 border-t border-indigo-100 space-y-2">
+                <!-- Mobile users list loaded here -->
+            </div>
+        </div>
+        `;
+            }).join('');
+        }
+
+        function updateFleetStats(stats) {
+            const totC = stats.total_campaigns !== undefined ? stats.total_campaigns : allCampaigns.length;
+            const activeCount = allCampaigns.filter(c => (c.status || 'ACTIVE').toUpperCase() === 'ACTIVE').length;
+
+            const elC = document.getElementById('statTotalCampaigns');
+            const elActiveRatio = document.getElementById('statActiveRatio');
+
+            if (elC) elC.innerText = totC;
+            if (elActiveRatio) elActiveRatio.innerText = `${activeCount} सक्रिय / ${totC} कुल`;
+        }
+
+        const GP_STRIP_RE = /^(?:ग्राम\s*पंचायत|Gram\s*Panchayat|जिला\s*परिषद|Zila\s*Parishad|पंचायत\s*समिति|Panchayat\s*Samiti|नगर\s*(?:निगम|पालिका|परिषद)|Municipal\s*(?:Council|Corporation)?)\s+/i;
+        const GENERIC_CANDS = new Set(['सरपंच प्रत्याशी','sarpanch candidate','प्रत्याशी','candidate','सरपंच','sarpanch','वार्ड पार्षद','ward candidate']);
+
+        function formatCampaignLabel(c) {
+            const rawArea = c.ward_name_hi || c.ward_name_en || c.tenant_slug;
+            const cleanArea = rawArea.replace(GP_STRIP_RE, '').trim();
+            const cand = (c.candidate_name_hi || c.candidate_name_en || '').trim();
+            const isGeneric = !cand || GENERIC_CANDS.has(cand.toLowerCase());
+            return isGeneric ? cleanArea : `${cand} • ${cleanArea}`;
+        }
+
+        function populateCampaignDropdowns(campaigns) {
+            const opts = campaigns.map(c => `<option value="${c.tenant_slug}">${formatCampaignLabel(c)}</option>`).join('');
+            ['masterSyncCampaignSelect', 'newUserTenant'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = opts;
+            });
+
+            const filterSel = document.getElementById('userFilterCampaign');
+            if (filterSel) {
+                filterSel.innerHTML = '<option value="ALL">All Campaigns</option><option value="RESELLER">🏛️ Reseller Partners</option>' + opts;
+            }
+        }
+
+        function filterCampaigns() {
+            const query = (document.getElementById('campaignSearchInput').value || '').toLowerCase().trim();
+            const type = document.getElementById('electionTypeFilter').value;
+            const statusFilter = (document.getElementById('campaignStatusFilter')?.value || 'ALL').toUpperCase();
+
+            const filtered = allCampaigns.filter(c => {
+                const matchesQuery = !query || 
+                    (c.candidate_name_hi && c.candidate_name_hi.toLowerCase().includes(query)) ||
+                    (c.candidate_name_en && c.candidate_name_en.toLowerCase().includes(query)) ||
+                    (c.tenant_slug && c.tenant_slug.toLowerCase().includes(query)) ||
+                    (c.district && c.district.toLowerCase().includes(query)) ||
+                    (c.ward_name_hi && c.ward_name_hi.toLowerCase().includes(query));
+
+                const matchesType = type === 'ALL' || c.election_type === type;
+                const cStatus = (c.status || 'ACTIVE').toUpperCase();
+                const matchesStatus = statusFilter === 'ALL' || cStatus === statusFilter;
+                return matchesQuery && matchesType && matchesStatus;
+            });
+
+            renderCampaigns(filtered);
+        }
+
+        const campaignUsersCache = {};
+
+        window.invalidateCampaignUsersCache = function(slug) {
+            if (slug) {
+                delete campaignUsersCache[slug];
+            } else {
+                for (const k in campaignUsersCache) delete campaignUsersCache[k];
+            }
+            // Auto refresh any open campaign user dropdowns
+            document.querySelectorAll('[id^="campaign-users-row-"]:not(.hidden)').forEach(row => {
+                const rowSlug = row.id.replace('campaign-users-row-', '');
+                if (rowSlug && (!slug || slug === rowSlug)) {
+                    loadAndRenderCampaignUsers(rowSlug, false);
+                }
+            });
+            document.querySelectorAll('[id^="campaign-users-mobile-container-"]:not(.hidden)').forEach(card => {
+                const cardSlug = card.id.replace('campaign-users-mobile-container-', '');
+                if (cardSlug && (!slug || slug === cardSlug)) {
+                    loadAndRenderCampaignUsers(cardSlug, true);
+                }
+            });
+        };
+
+        async function loadAndRenderCampaignUsers(slug, isMobile = false) {
+            const containerId = isMobile ? `campaign-users-mobile-container-${slug}` : `campaign-users-container-${slug}`;
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (campaignUsersCache[slug]) {
+                renderCampaignUsersDropdown(slug, campaignUsersCache[slug], isMobile);
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="py-6 text-center text-slate-400">
+                    <div class="inline-flex items-center gap-2.5 text-xs font-semibold">
+                        <svg class="animate-spin h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>उपयोगकर्ता लोड हो रहे हैं (Loading campaign users)...</span>
+                    </div>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`/api/admin/users?tenant_slug=${encodeURIComponent(slug)}`);
+                if (!res.ok) throw new Error("Failed to load users");
+                const data = await res.json();
+                const rawUsers = data.users || [];
+                const targetSlug = String(slug || '').trim().toLowerCase();
+                const users = rawUsers.filter(u => {
+                    if (u.role === 'super_admin' || u.role === 'reseller') return false;
+                    const uSlug = String(u.tenant_slug || '').trim().toLowerCase();
+                    return uSlug && uSlug !== '*' && uSlug === targetSlug;
+                });
+                campaignUsersCache[slug] = users;
+
+                // Also populate into allUsersCache so modals can find any user
+                if (!Array.isArray(window.allUsersCache)) window.allUsersCache = [];
+                users.forEach(u => {
+                    const idx = window.allUsersCache.findIndex(x => String(x.id || x.user_id) === String(u.id || u.user_id));
+                    if (idx >= 0) window.allUsersCache[idx] = u;
+                    else window.allUsersCache.push(u);
+                });
+
+                renderCampaignUsersDropdown(slug, users, isMobile);
+            } catch (err) {
+                console.error("Error loading campaign users:", err);
+                container.innerHTML = `
+                    <div class="py-4 text-center text-rose-500 text-xs font-semibold">
+                        ⚠️ उपयोगकर्ता लोड करने में त्रुटि। कृपया पुनः प्रयास करें।
+                    </div>
+                `;
+            }
+        }
+
+        window.toggleCampaignUsersDropdown = async function(slug, isMobile = false) {
+            const rowId = isMobile ? `campaign-users-mobile-container-${slug}` : `campaign-users-row-${slug}`;
+            const chevronId = isMobile ? `chevron-users-mobile-${slug}` : `chevron-users-${slug}`;
+            const row = document.getElementById(rowId);
+            const chevron = document.getElementById(chevronId);
+            if (!row) return;
+
+            const isHidden = row.classList.contains('hidden');
+            if (!isHidden) {
+                row.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+                return;
+            }
+
+            // Expand
+            row.classList.remove('hidden');
+            if (chevron) chevron.classList.add('rotate-180');
+
+            loadAndRenderCampaignUsers(slug, isMobile);
+        };
+
+        function renderCampaignUsersDropdown(slug, rawUsers, isMobile) {
+            const containerId = isMobile ? `campaign-users-mobile-container-${slug}` : `campaign-users-container-${slug}`;
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const targetSlug = String(slug || '').trim().toLowerCase();
+            const users = (rawUsers || []).filter(u => {
+                if (u.role === 'super_admin' || u.role === 'reseller') return false;
+                const uSlug = String(u.tenant_slug || '').trim().toLowerCase();
+                return uSlug && uSlug !== '*' && uSlug === targetSlug;
+            });
+
+            const c = allCampaigns.find(item => item.tenant_slug === slug) || {};
+            const candName = c.candidate_name_hi || c.candidate_name_en || slug;
+
+            if (!users || users.length === 0) {
+                container.innerHTML = `
+                    <div class="p-4 sm:p-5 rounded-xl bg-white border border-dashed border-slate-300 text-center space-y-2.5">
+                        <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto text-base">👤</div>
+                        <div class="text-xs sm:text-sm font-bold text-slate-700">इस अभियान में कोई उपयोगकर्ता खाता नहीं है (No Users in Campaign)</div>
+                        <p class="text-[11px] text-slate-500 max-w-sm mx-auto">अभियान का प्रबंधन करने हेतु व्यवस्थापक (Admin) या ऑपरेटर खाता बनाएं।</p>
+                        <button onclick="openCreateUserForCampaign('${slug}')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs cursor-pointer">
+                            <span>+ नया खाता बनाएं</span>
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const roleDisplayMap = {
+                'super_admin': { label: 'Super Admin', badge: 'bg-rose-50 text-rose-700 border-rose-200' },
+                'candidate_admin': { label: 'Admin', badge: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+                'admin': { label: 'Admin', badge: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+                'operator': { label: 'Operator', badge: 'bg-blue-50 text-blue-700 border-blue-200' },
+                'booth_agent': { label: 'Booth Agent', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                'karyakarta': { label: 'Karyakarta', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                'reseller': { label: 'Reseller', badge: 'bg-purple-50 text-purple-700 border-purple-200' },
+                'viewer': { label: 'Viewer', badge: 'bg-slate-100 text-slate-700 border-slate-200' }
+            };
+
+            const headerHtml = `
+                <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-indigo-100">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                            <span>अभियान के उपयोगकर्ता (Campaign Users)</span>
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800">${users.length} खाते</span>
+                    </div>
+                    <button onclick="openCreateUserForCampaign('${slug}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition active:scale-95 cursor-pointer shadow-2xs">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>+ नया उपयोगकर्ता</span>
+                    </button>
+                </div>
+            `;
+
+            if (isMobile) {
+                const cardsHtml = users.map(u => {
+                    const uid = u.id || u.user_id;
+                    const status = (u.status || (u.is_active ? 'ACTIVE' : 'INACTIVE')).toUpperCase();
+                    const isActive = status === 'ACTIVE';
+                    const roleInfo = roleDisplayMap[u.role] || { label: u.role || 'Operator', badge: 'bg-slate-100 text-slate-700 border-slate-200' };
+                    const magicUrl = u.access_token ? `${window.location.origin}/k/${u.access_token}` : '';
+
+                    return `
+                        <div class="bg-white rounded-xl p-3 border border-slate-200 shadow-2xs space-y-2 text-xs">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <div class="font-mono font-bold text-slate-900 text-sm">${u.username}</div>
+                                    ${u.full_name ? `<div class="text-[11px] text-slate-500 mt-0.5">${u.full_name}</div>` : ''}
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${roleInfo.badge}">${roleInfo.label}</span>
+                                    <button onclick="toggleUserStatus(${uid}, '${status}')" class="px-2 py-0.5 rounded-full text-[10px] font-bold border cursor-pointer ${isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}">${status}</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between py-1 border-y border-slate-100">
+                                <span class="text-slate-500 font-medium">Password:</span>
+                                <div class="inline-flex items-center gap-1.5 font-mono text-xs bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                                    <span class="font-bold text-slate-900 select-all">${u.plain_password || '—'}</span>
+                                    ${u.plain_password ? `
+                                        <button type="button" onclick="copyPasswordToClipboard('${u.plain_password}', this)" class="text-slate-400 hover:text-indigo-600 p-0.5 cursor-pointer" title="Copy password">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <!-- Actions: Magic Link, Edit, Reset, Delete -->
+                            <div class="flex items-center gap-1.5 pt-1">
+                                ${magicUrl ? `
+                                    <button type="button" onclick="copyMagicLink('${magicUrl}', this)" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-[11px] font-bold active:scale-95 transition cursor-pointer" title="मैजिक लॉगिन लिंक कॉपी करें">
+                                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                        <span>Link</span>
+                                    </button>
+                                    <a href="${magicUrl}" target="_blank" class="p-1 rounded-lg border border-slate-200 text-slate-400 hover:text-indigo-600" title="Open Magic Link">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
+                                ` : ''}
+                                <button onclick="openEditUserModal(${uid})" class="flex-1 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[11px] font-semibold cursor-pointer text-center">Edit</button>
+                                <button onclick="openPasswordResetModal(${uid}, '${u.username}')" class="flex-1 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[11px] font-semibold cursor-pointer text-center">Reset</button>
+                                <button onclick="openDeleteUserModal(${uid}, '${u.username}')" class="p-1 text-slate-400 hover:text-rose-600 text-[11px] font-semibold cursor-pointer" title="Delete">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                container.innerHTML = headerHtml + `<div class="space-y-2">${cardsHtml}</div>`;
+                return;
+            }
+
+            // Desktop Table View
+            const rowsHtml = users.map((u, idx) => {
+                const uid = u.id || u.user_id;
+                const status = (u.status || (u.is_active ? 'ACTIVE' : 'INACTIVE')).toUpperCase();
+                const isActive = status === 'ACTIVE';
+                const roleInfo = roleDisplayMap[u.role] || { label: u.role || 'Operator', badge: 'bg-slate-100 text-slate-700 border-slate-200' };
+                const magicUrl = u.access_token ? `${window.location.origin}/k/${u.access_token}` : '';
+
+                return `
+                    <tr class="hover:bg-indigo-50/40 transition-colors border-b border-slate-100 last:border-b-0 bg-white">
+                        <!-- Sr No -->
+                        <td class="py-3 px-3 text-center font-mono font-bold text-xs text-slate-400">
+                            ${idx + 1}
+                        </td>
+
+                        <!-- User -->
+                        <td class="py-3 px-4">
+                            <div class="font-mono font-bold text-slate-900 text-sm">${u.username}</div>
+                            ${u.full_name ? `<div class="text-xs text-slate-500 mt-0.5 font-sans">${u.full_name}</div>` : ''}
+                        </td>
+
+                        <!-- Password -->
+                        <td class="py-3 px-4">
+                            <div class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg font-mono text-xs font-bold text-slate-900 select-all">
+                                <span>${u.plain_password || '—'}</span>
+                                ${u.plain_password ? `
+                                    <button type="button" onclick="copyPasswordToClipboard('${u.plain_password}', this)" class="text-slate-400 hover:text-indigo-600 transition cursor-pointer p-0.5" title="पासवर्ड कॉपी करें">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+
+                        <!-- Role -->
+                        <td class="py-3 px-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${roleInfo.badge}">
+                                ${roleInfo.label}
+                            </span>
+                        </td>
+
+                        <!-- Status -->
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="toggleUserStatus(${uid}, '${status}')" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border transition cursor-pointer hover:opacity-80 ${isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}">
+                                <span class="w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-slate-400'}"></span>
+                                <span>${status}</span>
+                            </button>
+                        </td>
+
+                        <!-- Actions: Magic Link, Edit, Reset, Delete -->
+                        <td class="py-3 px-4 text-right pr-4 whitespace-nowrap">
+                            <div class="inline-flex items-center justify-end gap-1.5">
+                                ${magicUrl ? `
+                                    <button type="button" onclick="copyMagicLink('${magicUrl}', this)" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 active:scale-95 text-xs font-semibold cursor-pointer transition shadow-2xs" title="मैजिक लॉगिन लिंक कॉपी करें">
+                                        <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                        </svg>
+                                        <span>Magic Link</span>
+                                    </button>
+                                    <a href="${magicUrl}" target="_blank" class="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition" title="सीधे नए टैब में लॉगिन करें">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                    </a>
+                                ` : `<span class="text-slate-400 text-xs italic px-2">—</span>`}
+                                <button onclick="openEditUserModal(${uid})" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold cursor-pointer transition" title="Edit">Edit</button>
+                                <button onclick="openPasswordResetModal(${uid}, '${u.username}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold cursor-pointer transition" title="Reset">Reset</button>
+                                <button onclick="openDeleteUserModal(${uid}, '${u.username}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 text-xs font-semibold cursor-pointer transition" title="Delete">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                ${headerHtml}
+                <div class="rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
+                    <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                        <thead class="bg-slate-100/80 text-slate-700 text-xs font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="py-2.5 px-3 w-10 text-center font-bold text-slate-500">#</th>
+                                <th class="py-2.5 px-4 min-w-[150px]">User</th>
+                                <th class="py-2.5 px-4 min-w-[140px]">Password</th>
+                                <th class="py-2.5 px-4 min-w-[120px]">Role</th>
+                                <th class="py-2.5 px-4 min-w-[90px] text-center">Status</th>
+                                <th class="py-2.5 px-4 text-right pr-4 min-w-[280px]">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        window.openCreateUserForCampaign = function(slug) {
+            switchAdminTab('users');
+            const form = document.getElementById('createUserForm');
+            if (form && form.classList.contains('hidden')) {
+                toggleCreateUserForm();
+            }
+            const tenantSel = document.getElementById('newUserTenant');
+            if (tenantSel && slug) {
+                tenantSel.value = slug;
+            }
+            const uInput = document.getElementById('newUsername');
+            if (uInput) {
+                uInput.focus();
+                uInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        };
+
+        function refreshCampaigns() {
+            sessionStorage.removeItem(CAMPAIGNS_CACHE_KEY);
+            invalidateCampaignUsersCache();
+            loadCampaigns(true);
+            showAdminToast("🔄 अभियान सूची ताज़ा हो गई है", "info");
+        }
+
+
+        // --- WORKSPACE 2: USERS & RBAC ---
+        window.toggleCreateUserForm = function() {
+            const form = document.getElementById('createUserForm');
+            const text = document.getElementById('btnToggleUserFormText');
+            if (form) {
+                const isHidden = form.classList.toggle('hidden');
+                if (text) text.textContent = isHidden ? "नया खाता जोड़ें" : "फॉर्म छुपाएँ";
+                if (!isHidden && window.toggleResellerFields) {
+                    window.toggleResellerFields();
+                }
+            }
+        };
+
+        async function loadUsers() {
+            try {
+                const res = await fetch('/api/admin/users');
+                const data = await res.json();
+                allUsers = data.users || [];
+                window.allUsersCache = allUsers;
+                filterUsers();
+            } catch (err) {
+                console.error("Error loading users:", err);
+            }
+        }
+
+        function isUserUnassigned(u) {
+            if (!u) return false;
+            // Super admins and resellers manage global or portfolio-level access
+            if (u.role === 'super_admin' || u.role === 'reseller') return true;
+            // Any user with no campaign slug or wildcard '*'
+            const slug = String(u.tenant_slug || '').trim().toLowerCase();
+            if (!slug || slug === '*' || slug === 'null' || slug === 'none') return true;
+            // Any user assigned to a campaign that no longer exists in allCampaigns (orphan user)
+            if (Array.isArray(allCampaigns) && allCampaigns.length > 0) {
+                const campaignExists = allCampaigns.some(c => String(c.tenant_slug || '').trim().toLowerCase() === slug);
+                if (!campaignExists) return true;
+            }
+            // Otherwise, user is assigned to an existing campaign -> hidden from Users page
+            return false;
+        }
+
+        function filterUsers() {
+            const query = (document.getElementById('userSearchInput')?.value || '').toLowerCase().trim();
+            const roleSel = document.getElementById('userFilterRole');
+            const roleVal = roleSel ? roleSel.value : 'ALL';
+
+            // Show ONLY users who are NOT assigned to any campaign
+            const unassignedUsers = allUsers.filter(isUserUnassigned);
+
+            const filtered = unassignedUsers.filter(u => {
+                // Role filter
+                let matchesRole = true;
+                if (roleVal !== 'ALL') {
+                    matchesRole = String(u.role || '').toLowerCase() === roleVal.toLowerCase();
+                }
+
+                // Search query match across username, full_name, role, and tenant
+                let matchesQuery = true;
+                if (query) {
+                    const username = String(u.username || '').toLowerCase();
+                    const fullName = String(u.full_name || '').toLowerCase();
+                    const role = String(u.role || '').toLowerCase();
+                    const tenant = String(u.tenant_slug || '').toLowerCase();
+
+                    matchesQuery = username.includes(query) ||
+                                   fullName.includes(query) ||
+                                   role.includes(query) ||
+                                   tenant.includes(query);
+                }
+
+                return matchesRole && matchesQuery;
+            });
+
+            renderUsersTable(filtered);
+        }
+
+        window.filterUsers = filterUsers;
+        window.filterUsersByCampaign = filterUsers;
+
+        function refreshUsers() {
+            loadUsers();
+            showAdminToast("🔄 उपयोगकर्ता सूची ताज़ा हो गई है", "info");
+        }
+        window.refreshUsers = refreshUsers;
+
+        function formatRoleTitle(roleStr, roleTier) {
+            const r = String(roleStr || '').toLowerCase();
+            if (r === 'super_admin' || roleTier === 1) return { title: 'सुपर एडमिन (Super Admin)', badge: 'bg-rose-50 text-rose-700 border-rose-200' };
+            if (r === 'reseller') return { title: 'रीसेलर पार्टनर (Reseller)', badge: 'bg-purple-50 text-purple-700 border-purple-200' };
+            if (r === 'candidate_admin' || r === 'admin') return { title: 'प्रत्याशी / मुख्य व्यवस्थापक (Campaign Admin)', badge: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
+            if (r === 'operator') return { title: 'वॉर-रूम ऑपरेटर (War Room Operator)', badge: 'bg-blue-50 text-blue-700 border-blue-200' };
+            if (r === 'karyakarta' || r === 'booth_agent' || roleTier === 3 || roleTier === 4) return { title: 'बूथ कार्यकर्ता (Booth Agent)', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+            return { title: 'दर्शक (Viewer)', badge: 'bg-slate-100 text-slate-700 border-slate-200' };
+        }
+
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+
+            if (!Array.isArray(window.allUsersCache) || window.allUsersCache.length === 0) {
+                window.allUsersCache = allUsers || [];
+            }
+
+            const badge = document.getElementById('userCountBadge');
+            if (badge) badge.textContent = `${users ? users.length : 0} खाते`;
+
+            const mobileContainer = document.getElementById('usersMobileCards');
+
+            if (!users || users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400 text-xs">
+                    <div class="space-y-2 max-w-sm mx-auto">
+                        <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto text-base">👤</div>
+                        <div class="font-bold text-slate-700 text-sm">कोई अनासंबद्ध खाता नहीं है (No Unassigned Users)</div>
+                        <p class="text-slate-500 text-[11px]">सभी उपयोगकर्ता सीधे विशिष्ट अभियानों से जुड़े हैं। अभियान उपयोगकर्ताओं को देखने, मैजिक लिंक, पासवर्ड रीसेट व संपादन के लिए "अभियान (Campaigns)" टैब में संबंधित अभियान के "Users" बटन पर क्लिक करें।</p>
+                    </div>
+                </td></tr>`;
+                if (mobileContainer) {
+                    mobileContainer.innerHTML = `
+                        <div class="p-6 rounded-xl bg-white border border-slate-200 text-center space-y-2 text-xs">
+                            <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto text-base">👤</div>
+                            <div class="font-bold text-slate-700">कोई अनासंबद्ध खाता नहीं है</div>
+                            <p class="text-slate-500 text-[11px]">अभियान उपयोगकर्ताओं का प्रबंधन "अभियान" पृष्ठ पर प्रत्येक अभियान के भीतर किया जाता है।</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            const roleDisplayMap = {
+                'super_admin': 'Super Admin',
+                'candidate_admin': 'Admin',
+                'admin': 'Admin',
+                'operator': 'Operator',
+                'reseller': 'Reseller',
+                'booth_agent': 'Booth Agent',
+                'karyakarta': 'Karyakarta',
+                'viewer': 'Viewer'
+            };
+
+            const rows = users.map((u, idx) => {
+                const uid = u.id || u.user_id;
+                const status = (u.status || (u.is_active ? 'ACTIVE' : 'INACTIVE')).toUpperCase();
+                const isPaused = status === 'PAUSED' || status === 'ARCHIVED';
+                const isActive = status === 'ACTIVE';
+                const statusBtnClass = isPaused 
+                    ? 'bg-amber-50 text-amber-700 border-amber-300' 
+                    : (isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-400 border-slate-200');
+                const statusLabel = isPaused ? `⏸️ ${status}` : status;
+                const englishRole = roleDisplayMap[u.role] || (u.role ? u.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Operator');
+
+                let campaignBadge = '';
+                let scopeText = '';
+                if (u.role === 'reseller') {
+                    const ownedCount = u.owned_campaigns_count !== undefined ? u.owned_campaigns_count : (u.owned_count || 0);
+                    const quotaLimit = u.max_campaigns ? u.max_campaigns : '∞';
+                    const waCredits = Number(u.whatsapp_credits || 0).toLocaleString('en-IN');
+                    campaignBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">Portfolio (${ownedCount}/${quotaLimit}) • 📱 ${waCredits} WA</span>`;
+                    scopeText = '<span class="text-purple-600 font-semibold">Portfolio Level</span>';
+                } else if (u.tenant_slug === '*' || (!u.tenant_slug && u.role === 'super_admin')) {
+                    campaignBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">All Campaigns / System Admin</span>`;
+                    scopeText = '<span class="text-rose-600 font-semibold">Full System Access</span>';
+                } else {
+                    campaignBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">अनासंबद्ध (Unassigned)</span>`;
+                    scopeText = '<span class="text-slate-400">No Campaign Assigned</span>';
+                }
+
+                return { u, idx, uid, status, isActive, isPaused, statusBtnClass, statusLabel, englishRole, campaignBadge, scopeText };
+            });
+
+            // Desktop table rows
+            tbody.innerHTML = rows.map(({ u, idx, uid, status, isActive, isPaused, statusBtnClass, statusLabel, englishRole, campaignBadge, scopeText }) => `
+                <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100 last:border-b-0 group">
+                    <td class="py-3 px-3 text-center font-mono font-bold text-xs text-slate-500">
+                        ${idx + 1}
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="font-bold text-slate-900 text-sm">${u.username}</div>
+                        <div class="text-xs text-slate-500 mt-0.5">${u.full_name || '—'}</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md font-mono text-xs font-bold text-slate-900 select-all">
+                            <span>${u.plain_password || '—'}</span>
+                            ${u.plain_password ? `
+                            <button type="button" onclick="copyPasswordToClipboard('${u.plain_password}')" class="text-slate-400 hover:text-indigo-600 transition cursor-pointer" title="Copy password">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </button>` : ''}
+                        </div>
+                    </td>
+                    <td class="py-3 px-3 text-xs font-semibold text-slate-800">
+                        ${englishRole}
+                    </td>
+                    <td class="py-3 px-4">${campaignBadge}</td>
+                    <td class="py-3 px-3 text-slate-700 text-xs">${scopeText}</td>
+                    <td class="py-3 px-3 text-center">
+                        <button onclick="toggleUserStatus(${uid}, '${status}')" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase cursor-pointer border transition hover:opacity-80 ${statusBtnClass}">
+                            ${statusLabel}
+                        </button>
+                    </td>
+                    <td class="py-3 px-4 text-right pr-4 whitespace-nowrap sticky right-0 bg-white group-hover:bg-slate-50/95 transition-colors shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.06)]">
+                        <div class="flex items-center justify-end gap-1.5">
+                            ${u.access_token ? `
+                                <button type="button" onclick="copyMagicLink('${window.location.origin}/k/${u.access_token}', this)" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold cursor-pointer transition active:scale-95 shadow-2xs" title="मैजिक लॉगिन लिंक कॉपी करें">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                    <span>Magic Link</span>
+                                </button>
+                            ` : ''}
+                            <button onclick="openEditUserModal(${uid})" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold cursor-pointer transition" title="Edit">Edit</button>
+                            <button onclick="openPasswordResetModal(${uid}, '${u.username}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold cursor-pointer transition" title="Reset">Reset</button>
+                            <button onclick="openDeleteUserModal(${uid}, '${u.username}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 text-xs font-semibold cursor-pointer transition" title="Delete">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Mobile cards
+            if (mobileContainer) {
+                mobileContainer.innerHTML = rows.map(({ u, uid, status, isActive, isPaused, statusBtnClass, statusLabel, englishRole, campaignBadge, scopeText }) => `
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden p-4 space-y-3">
+                    <!-- Header: username + status -->
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm sm:text-base">${u.username}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">${u.full_name || '—'}</div>
+                        </div>
+                        <button onclick="toggleUserStatus(${uid}, '${status}')" class="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase cursor-pointer border shrink-0 ${statusBtnClass}">
+                            ${statusLabel}
+                        </button>
+                    </div>
+                    <!-- Role (plain English) + Password -->
+                    <div class="flex items-center justify-between text-sm py-1 border-y border-slate-100">
+                        <span class="text-slate-600 font-medium">Role: <strong class="text-slate-800 font-semibold">${englishRole}</strong></span>
+                        <div class="inline-flex items-center gap-1 font-mono text-xs bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                            <span class="text-slate-500 font-sans">Pass:</span>
+                            <span class="font-bold text-slate-900">${u.plain_password || '—'}</span>
+                        </div>
+                    </div>
+                    <!-- Campaign + Scope -->
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                        <div>${campaignBadge}</div>
+                        <div class="text-slate-500">${scopeText}</div>
+                    </div>
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+                        ${u.access_token ? `
+                            <button type="button" onclick="copyMagicLink('${window.location.origin}/k/${u.access_token}', this)" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold cursor-pointer transition">
+                                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                <span>Magic Link</span>
+                            </button>
+                        ` : ''}
+                        <button onclick="openEditUserModal(${uid})" class="flex-1 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold cursor-pointer text-center">Edit</button>
+                        <button onclick="openPasswordResetModal(${uid}, '${u.username}')" class="flex-1 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold cursor-pointer text-center">Reset</button>
+                        <button onclick="openDeleteUserModal(${uid}, '${u.username}')" class="p-1.5 text-slate-400 hover:text-rose-600 text-xs font-semibold cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                </div>
+                `).join('');
+            }
+        }
+
+        window.copyPasswordToClipboard = function(pwd, btn) {
+            if (!pwd) return;
+            const onCopied = () => {
+                if (btn) {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                    `;
+                    setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+                }
+                if (window.showAdminToast) {
+                    showAdminToast("🔑 पासवर्ड क्लिपबोर्ड पर कॉपी हो गया!", "success");
+                } else if (window.showToast) {
+                    showToast('Password copied to clipboard');
+                }
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(pwd).then(onCopied).catch(() => {
+                    prompt('Copy password:', pwd);
+                });
+            } else {
+                prompt('Copy password:', pwd);
+            }
+        };
+
+        window.copyMagicLink = function(magicUrl, btn) {
+            if (!magicUrl) {
+                if (window.showAdminToast) showAdminToast("⚠️ मैजिक लिंक उपलब्ध नहीं है", "error");
+                return;
+            }
+            const fullUrl = magicUrl.startsWith('http') ? magicUrl : `${window.location.origin}${magicUrl}`;
+            const onCopied = () => {
+                if (btn) {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `
+                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="text-emerald-700 font-bold">Copied!</span>
+                    `;
+                    btn.classList.add('bg-emerald-50', 'border-emerald-300');
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.classList.remove('bg-emerald-50', 'border-emerald-300');
+                    }, 2000);
+                }
+                if (window.showAdminToast) {
+                    showAdminToast("📋 मैजिक लॉगिन लिंक कॉपी हो गया (Magic link copied)", "success");
+                } else if (window.showToast) {
+                    showToast("Magic login link copied to clipboard");
+                }
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(fullUrl).then(onCopied).catch(() => {
+                    prompt("Copy Magic Link:", fullUrl);
+                });
+            } else {
+                prompt("Copy Magic Link:", fullUrl);
+            }
+        };
+
+
+        window.toggleResellerFields = function() {
+            const role = document.getElementById('newUserRole').value;
+            const tenantWrapper = document.getElementById('newUserTenantWrapper');
+            const maxCampaignsWrapper = document.getElementById('newMaxCampaignsWrapper');
+            const assignedBoothsWrapper = document.getElementById('newAssignedBoothsWrapper');
+            const fullNameWrapper = document.getElementById('newFullNameWrapper');
+            const resellerInfoBox = document.getElementById('resellerInfoBox');
+
+            const isReseller = role === 'reseller';
+            const isSuperAdmin = role === 'super_admin';
+            const isKaryakarta = role === 'karyakarta';
+
+            if (tenantWrapper) tenantWrapper.classList.toggle('hidden', isReseller || isSuperAdmin);
+            if (maxCampaignsWrapper) maxCampaignsWrapper.classList.toggle('hidden', !isReseller);
+            if (resellerInfoBox) resellerInfoBox.classList.toggle('hidden', !isReseller);
+
+            // Booth restriction is only applicable to field booth agents / karyakartas.
+            // Resellers, Super Admins, and Campaign Admins/Operators manage all booths in their scope.
+            if (assignedBoothsWrapper) {
+                assignedBoothsWrapper.classList.toggle('hidden', !isKaryakarta);
+            }
+            if (fullNameWrapper) {
+                fullNameWrapper.className = isKaryakarta ? 'sm:col-span-1' : 'sm:col-span-2';
+            }
+        };
+
+        async function handleCreateUser(e) {
+            e.preventDefault();
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            const role = document.getElementById('newUserRole').value;
+            const isReseller = role === 'reseller';
+            const isSuperAdmin = role === 'super_admin';
+            const isKaryakarta = role === 'karyakarta';
+
+            // Resellers and super_admin have no single tenant_id — ownership is per-campaign or global.
+            const tenant_slug = (isReseller || isSuperAdmin) ? null : document.getElementById('newUserTenant').value;
+            const full_name = document.getElementById('newFullName').value.trim();
+
+            let assigned_booths = [];
+            if (isKaryakarta) {
+                assigned_booths = (document.getElementById('newAssignedBooths').value || '')
+                    .split(',')
+                    .map(s => parseInt(s.trim(), 10))
+                    .filter(n => !isNaN(n));
+            }
+
+            const payload = { username, password, role, tenant_slug, full_name, assigned_booths };
+            if (isReseller) {
+                const maxCampaignsRaw = (document.getElementById('newMaxCampaigns').value || '').trim();
+                if (maxCampaignsRaw !== '') {
+                    payload.max_campaigns = parseInt(maxCampaignsRaw, 10);
+                }
+            }
+
+            try {
+                const res = await fetch('/api/admin/users/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success !== false) {
+                    showAdminToast(`✅ खाता '${username}' सफलतापूर्वक निर्मित हुआ!`, 'success');
+                    invalidateCampaignUsersCache(tenant_slug);
+                    loadUsers();
+                    toggleCreateUserForm();
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('newFullName').value = '';
+                    if (document.getElementById('newMaxCampaigns')) document.getElementById('newMaxCampaigns').value = '';
+                    if (document.getElementById('newAssignedBooths')) document.getElementById('newAssignedBooths').value = '';
+                } else {
+                    showAdminToast(`❌ त्रुटि: ${data.error || 'खाता नहीं बन सका'}`, 'error');
+                }
+            } catch (err) {
+                showAdminToast(`❌ त्रुटि: ${err.message}`, 'error');
+            }
+        }
+
+        window.generateRandomResetPassword = function() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let gen = '';
+            for (let i = 0; i < 8; i++) gen += chars.charAt(Math.floor(Math.random() * chars.length));
+            document.getElementById('resetNewPasswordInput').value = gen;
+            document.getElementById('resetNewPasswordInput').focus();
+        };
+
+        window.openPasswordResetModal = function(userId, username) {
+            document.getElementById('resetUserId').value = userId;
+            document.getElementById('resetUsernameDisplay').textContent = username;
+            document.getElementById('resetNewPasswordInput').value = '';
+            document.getElementById('passwordResetModal').classList.remove('hidden');
+            setTimeout(() => {
+                const el = document.getElementById('resetNewPasswordInput');
+                if (el) el.focus();
+            }, 50);
+        };
+
+        window.closePasswordResetModal = function() {
+            document.getElementById('passwordResetModal').classList.add('hidden');
+        };
+
+        window.copyResetPassword = function() {
+            const input = document.getElementById('resetNewPasswordInput');
+            if (input && input.value) {
+                input.select();
+                navigator.clipboard.writeText(input.value);
+                showAdminToast("📋 पासवर्ड क्लिपबोर्ड पर कॉपी हो गया!", "success");
+            } else {
+                showAdminToast("⚠️ कॉपी करने के लिए पासवर्ड खाली है", "error");
+            }
+        };
+
+        window.executePasswordReset = async function() {
+            const userId = document.getElementById('resetUserId').value;
+            const newPassword = document.getElementById('resetNewPasswordInput').value.trim();
+            if (!newPassword) {
+                showAdminToast("⚠️ कृपया नया पासवर्ड दर्ज करें", "error");
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/users/reset_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, password: newPassword })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAdminToast("✅ पासवर्ड सफलतापूर्वक रीसेट हो गया!", "success");
+                    invalidateCampaignUsersCache();
+                    closePasswordResetModal();
+                    loadUsers();
+                } else {
+                    showAdminToast(`❌ त्रुटि: ${data.error || 'पासवर्ड रीसेट विफल रहा'}`, "error");
+                }
+            } catch (err) {
+                showAdminToast("❌ पासवर्ड अपडेट विफल रहा", "error");
+            }
+        };
+
+        window.toggleUserStatus = async function(userId, currentStatus) {
+            const isCurrentlyActive = currentStatus === 'ACTIVE';
+            const nextActive = !isCurrentlyActive;
+            try {
+                await fetch(`/api/admin/users/${userId}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_active: nextActive })
+                });
+                showAdminToast(`उपयोगकर्ता स्थिति ${nextActive ? 'ACTIVE' : 'INACTIVE'} सेट की गई`, 'success');
+                invalidateCampaignUsersCache();
+                loadUsers();
+            } catch (err) {
+                showAdminToast(`उपयोगकर्ता स्थिति अद्यतन हुई`, 'success');
+                invalidateCampaignUsersCache();
+                loadUsers();
+            }
+        };
+
+        window.openDeleteUserModal = function(userId, username) {
+            document.getElementById('deleteUserId').value = userId;
+            document.getElementById('deleteUserDisplay').textContent = username;
+            document.getElementById('deleteUserModal').classList.remove('hidden');
+        };
+
+        window.closeDeleteUserModal = function() {
+            document.getElementById('deleteUserModal').classList.add('hidden');
+        };
+
+        window.executeDeleteUser = async function() {
+            const userId = document.getElementById('deleteUserId').value;
+            try {
+                await fetch(`/api/admin/users/${userId}/delete`, { method: 'POST' });
+                showAdminToast("✅ उपयोगकर्ता सफलतापूर्वक हटाया गया", "success");
+                invalidateCampaignUsersCache();
+                closeDeleteUserModal();
+                loadUsers();
+            } catch (err) {
+                showAdminToast("✅ उपयोगकर्ता हटाया गया", "success");
+                invalidateCampaignUsersCache();
+                closeDeleteUserModal();
+                loadUsers();
+            }
+        };
+
+        // --- GLOBAL ADMIN TOAST ---
+        function showAdminToast(msg, type = 'info') {
+            const toast = document.getElementById('adminToast');
+            const toastMsg = document.getElementById('adminToastMsg');
+            if (!toast || !toastMsg) return;
+
+            toastMsg.textContent = msg;
+            toast.className = `fixed bottom-5 right-5 z-50 p-3.5 rounded-2xl shadow-xl text-xs font-bold border transition-all duration-300 ${
+                type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
+                type === 'error' ? 'bg-rose-50 text-rose-800 border-rose-300' :
+                type === 'warning' ? 'bg-amber-50 text-amber-800 border-amber-300' :
+                'bg-white text-slate-800 border-slate-200'
+            }`;
+            toast.classList.remove('hidden');
+            setTimeout(() => { toast.classList.add('hidden'); }, 3500);
+        }
+
+        window.switchGlobalCampaign = function(newSlug) {
+            if (!newSlug || newSlug === 'ALL' || newSlug === '*') {
+                document.cookie = "voter_tenant=; path=/; max-age=0; SameSite=Lax";
+                window.location.href = '/admin';
+                return;
+            }
+            document.cookie = "voter_tenant=" + encodeURIComponent(newSlug) + "; path=/; max-age=2592000; SameSite=Lax";
+            window.location.href = '/?tenant=' + encodeURIComponent(newSlug);
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCampaigns();
+            // Users load lazily via switchWorkspace('users'); the Edit User modal
+            // falls back to /api/admin/users/<id> when allUsersCache is empty.
+        });
+    </script>
+
+    <!-- Dedicated External Campaign Wizard & Live Dual-Preview Controller -->
+    <script src="/static/js/admin_campaign_wizard.js?v={{ APP_VERSION }}"></script>
+
+    {% include "_campaign_search_modal.html" %}
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!-- MODAL: EDIT USER ACCOUNT CONTROLLER -->
+<div id="editUserModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-xs transition-opacity duration-200">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl text-slate-900 animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 text-sm font-bold">✏️</span>
+                <div>
+                    <h3 class="text-sm sm:text-base font-extrabold text-slate-900">उपयोगकर्ता खाता संपादित करें (Edit User)</h3>
+                    <p class="text-[11px] text-slate-500 font-mono" id="editModalUserSubtitle">User #--</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeEditUserModal()" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center font-bold text-sm cursor-pointer">✕</button>
+        </div>
+
+        <!-- Form Body -->
+        <form id="editUserForm" onsubmit="event.preventDefault(); handleEditUserSubmit(event); return false;" class="space-y-3.5 text-xs">
+            <input type="hidden" id="editUserId" value="">
+            <input type="hidden" id="editOriginalUsername" value="">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Username -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">यूज़रनेम (Username) *</label>
+                    <input type="text" id="editUsername" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <!-- Full Name -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">पूरा नाम (Full Name) *</label>
+                    <input type="text" id="editFullName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Phone -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">फ़ोन नंबर (Phone)</label>
+                    <input type="tel" inputmode="numeric" maxlength="10" id="editPhone" placeholder="10 अंक मोबाइल" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <!-- Role Selection -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">भूमिका / अधिकार (Role) *</label>
+                    <select id="editUserRole" onchange="toggleEditUserRoleFields()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                        <option value="candidate_admin">प्रत्याशी / मुख्य व्यवस्थापक (Campaign Admin)</option>
+                        <option value="operator">वॉर-रूम ऑपरेटर (War Room Operator)</option>
+                        <option value="karyakarta">बूथ कार्यकर्ता (Booth Agent)</option>
+                        <option value="super_admin">सुपर एडमिन (Super Admin)</option>
+                        <option value="reseller">रीसेलर पार्टनर (Reseller)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Campaign Selector (Hidden for super_admin & reseller) -->
+            <div id="editUserTenantWrapper">
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">संबद्ध अभियान (Assigned Campaign) *</label>
+                <select id="editUserTenant" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <!-- Max Campaigns (For Reseller) -->
+            <div id="editMaxCampaignsWrapper" class="hidden">
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">अभियान सीमा कोटा (Max Campaigns Limit)</label>
+                <input type="number" id="editMaxCampaigns" min="1" placeholder="खाली = असीमित (Unlimited)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <!-- WhatsApp Credits Quota (For Reseller) -->
+            <div id="editWhatsAppCreditsWrapper" class="hidden">
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">WhatsApp संदेश कोटा (WhatsApp Credits Balance)</label>
+                <input type="number" id="editWhatsAppCredits" min="0" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <!-- Assigned Booths / Wards (For Karyakarta) -->
+            <div id="editAssignedBoothsWrapper" class="hidden space-y-2.5">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">आवंटित वार्ड संख्या (Assigned Wards)</label>
+                    <input type="text" id="editAssignedWards" placeholder="e.g. 1, 2, 5 — खाली छोड़ने पर समस्त वार्ड" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500">
+                    <p class="text-[10px] text-slate-500 mt-1">कोमा (,) से अलग करके वार्ड संख्या दर्ज करें (जैसे: 1, 2, 5)।</p>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">आवंटित बूथ संख्या (Assigned Booths)</label>
+                    <input type="text" id="editAssignedBooths" placeholder="e.g. 1, 2, 5 — खाली छोड़ने पर समस्त बूथ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500">
+                    <p class="text-[10px] text-slate-500 mt-1">कोमा (,) से अलग करके बूथ संख्या दर्ज करें (जैसे: 1, 2, 5)।</p>
+                </div>
+            </div>
+
+            <!-- Password Management Action -->
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <div>
+                    <div class="font-bold text-slate-800 text-xs">पासवर्ड सुरक्षा (Password Security)</div>
+                    <div class="text-[10px] text-slate-500">1-क्लिक सुरक्षित पासवर्ड रीसेट व कॉपी</div>
+                </div>
+                <button type="button" onclick="openPasswordResetFromEdit()" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-700 border border-indigo-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <span>🔑</span>
+                    <span>पासवर्ड रीसेट करें (Reset Password)</span>
+                </button>
+            </div>
+
+            <!-- Status Radio -->
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <div>
+                    <div class="font-bold text-slate-800 text-xs">खाता स्थिति (Account Status)</div>
+                    <div class="text-[10px] text-slate-500">निष्क्रिय खाते लॉगिन नहीं कर सकेंगे</div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="flex items-center gap-1.5 cursor-pointer font-bold text-xs text-emerald-700">
+                        <input type="radio" name="editUserStatus" id="editStatusActive" value="1" class="text-emerald-600 focus:ring-emerald-500">
+                        <span>सक्रिय (Active)</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer font-bold text-xs text-rose-700 ml-2">
+                        <input type="radio" name="editUserStatus" id="editStatusInactive" value="0" class="text-rose-600 focus:ring-rose-500">
+                        <span>निष्क्रिय (Disabled)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="editUserErrorAlert" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 font-bold"></div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeEditUserModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-100 cursor-pointer transition">
+                    रद्द करें (Cancel)
+                </button>
+                <button type="submit" id="btnSaveEditUser" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold shadow-xs cursor-pointer transition flex items-center gap-1.5">
+                    <span id="btnSaveEditUserText">सुरक्षित करें (Save Changes)</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function() {
+    window.toggleEditUserRoleFields = function() {
+        const role = document.getElementById('editUserRole')?.value || '';
+        const tenantWrapper = document.getElementById('editUserTenantWrapper');
+        const maxCampWrapper = document.getElementById('editMaxCampaignsWrapper');
+        const boothsWrapper = document.getElementById('editAssignedBoothsWrapper');
+
+        const isReseller = role === 'reseller';
+        const isSuperAdmin = role === 'super_admin';
+        const isKaryakarta = role === 'karyakarta';
+
+        if (tenantWrapper) tenantWrapper.classList.toggle('hidden', isReseller || isSuperAdmin);
+        if (maxCampWrapper) maxCampWrapper.classList.toggle('hidden', !isReseller);
+        const waCreditsWrapper = document.getElementById('editWhatsAppCreditsWrapper');
+        if (waCreditsWrapper) waCreditsWrapper.classList.toggle('hidden', !isReseller);
+        if (boothsWrapper) boothsWrapper.classList.toggle('hidden', !isKaryakarta);
+    };
+
+    window.openPasswordResetFromEdit = function() {
+        const userId = document.getElementById('editUserId')?.value;
+        const username = document.getElementById('editUsername')?.value;
+        if (!userId || !username) return;
+        window.closeEditUserModal();
+        if (typeof window.openPasswordResetModal === 'function') {
+            window.openPasswordResetModal(userId, username);
+        }
+    };
+
+    window.populateEditCampaignDropdown = function(selectedSlug) {
+        const select = document.getElementById('editUserTenant');
+        if (!select) return;
+        select.innerHTML = '';
+
+        // If allCampaigns is available from admin_dashboard
+        const campaigns = window.allCampaigns || [];
+        if (campaigns.length > 0) {
+            campaigns.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.tenant_slug;
+                const name = c.candidate_name_hi || c.candidate_name_en || c.ward_name_hi || c.tenant_slug;
+                opt.textContent = `${c.tenant_slug.toUpperCase()} — ${name}`;
+                if (c.tenant_slug.toLowerCase() === (selectedSlug || '').toLowerCase()) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+        } else {
+            const opt = document.createElement('option');
+            opt.value = selectedSlug || '';
+            opt.textContent = (selectedSlug || 'Default').toUpperCase();
+            opt.selected = true;
+            select.appendChild(opt);
+        }
+    };
+
+    window.openEditUserModal = async function(userId) {
+        const modal = document.getElementById('editUserModal');
+        if (!modal) return;
+
+        const errAlert = document.getElementById('editUserErrorAlert');
+        if (errAlert) errAlert.classList.add('hidden');
+
+        // Find user from memory or fetch from API
+        let user = null;
+        if (Array.isArray(window.allUsersCache)) {
+            user = window.allUsersCache.find(u => (u.id || u.user_id) == userId);
+        }
+
+        if (!user) {
+            try {
+                const res = await fetch(`/api/admin/users/${userId}`);
+                const data = await res.json().catch(() => ({}));
+                if (data.success && data.user) {
+                    user = data.user;
+                }
+            } catch (e) {
+                console.error("Error fetching user profile:", e);
+            }
+        }
+
+        if (!user) {
+            if (typeof window.showAdminToast === 'function') {
+                window.showAdminToast("❌ उपयोगकर्ता डेटा लोड करने में असमर्थ", "error");
+            } else {
+                alert("User details not found");
+            }
+            return;
+        }
+
+        document.getElementById('editUserId').value = userId;
+        document.getElementById('editOriginalUsername').value = user.username || '';
+        document.getElementById('editModalUserSubtitle').textContent = `@${user.username || '-'} (ID #${userId})`;
+        document.getElementById('editUsername').value = user.username || '';
+        document.getElementById('editFullName').value = user.full_name || '';
+        document.getElementById('editPhone').value = user.phone || '';
+
+        const roleSelect = document.getElementById('editUserRole');
+        if (roleSelect) {
+            roleSelect.value = user.role || 'operator';
+        }
+
+        window.populateEditCampaignDropdown(user.tenant_slug);
+
+        const maxCampInput = document.getElementById('editMaxCampaigns');
+        if (maxCampInput) {
+            maxCampInput.value = user.max_campaigns || '';
+        }
+
+        const waCreditsInput = document.getElementById('editWhatsAppCredits');
+        if (waCreditsInput) {
+            waCreditsInput.value = user.whatsapp_credits !== undefined ? user.whatsapp_credits : 0;
+        }
+
+        const boothsInput = document.getElementById('editAssignedBooths');
+        if (boothsInput) {
+            boothsInput.value = (user.assigned_booths && user.assigned_booths.length) ? user.assigned_booths.join(', ') : '';
+        }
+
+        const wardsInput = document.getElementById('editAssignedWards');
+        if (wardsInput) {
+            wardsInput.value = (user.assigned_wards && user.assigned_wards.length) ? user.assigned_wards.join(', ') : '';
+        }
+
+        const isActive = user.is_active !== undefined ? Boolean(user.is_active) : (user.status || 'ACTIVE').toUpperCase() === 'ACTIVE';
+        if (document.getElementById('editStatusActive')) {
+            document.getElementById('editStatusActive').checked = isActive;
+        }
+        if (document.getElementById('editStatusInactive')) {
+            document.getElementById('editStatusInactive').checked = !isActive;
+        }
+
+        window.toggleEditUserRoleFields();
+        modal.classList.remove('hidden');
+    };
+
+    window.closeEditUserModal = function() {
+        const modal = document.getElementById('editUserModal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    window.handleEditUserSubmit = async function(event) {
+        if (event) event.preventDefault();
+        const userId = document.getElementById('editUserId')?.value;
+        const errAlert = document.getElementById('editUserErrorAlert');
+        const btn = document.getElementById('btnSaveEditUser');
+        const btnText = document.getElementById('btnSaveEditUserText');
+
+        if (!userId) return;
+
+        const username = document.getElementById('editUsername')?.value.trim();
+        const fullName = document.getElementById('editFullName')?.value.trim();
+        const phone = document.getElementById('editPhone')?.value.trim();
+        const role = document.getElementById('editUserRole')?.value;
+
+        const isReseller = role === 'reseller';
+        const isSuperAdmin = role === 'super_admin';
+        const isKaryakarta = role === 'karyakarta';
+
+        const tenant_slug = (isReseller || isSuperAdmin) ? null : document.getElementById('editUserTenant')?.value;
+        
+        let assigned_booths = null;
+        let assigned_wards = null;
+        if (isKaryakarta) {
+            const rawBooths = document.getElementById('editAssignedBooths')?.value || '';
+            assigned_booths = rawBooths.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+            const rawWards = document.getElementById('editAssignedWards')?.value || '';
+            assigned_wards = rawWards.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+        }
+
+        let max_campaigns = null;
+        let whatsapp_credits = null;
+        if (isReseller) {
+            const rawMax = document.getElementById('editMaxCampaigns')?.value.trim();
+            if (rawMax !== '') max_campaigns = parseInt(rawMax, 10);
+            const rawWa = document.getElementById('editWhatsAppCredits')?.value.trim();
+            if (rawWa !== '') whatsapp_credits = parseInt(rawWa, 10);
+        }
+
+        const is_active = document.getElementById('editStatusActive')?.checked ? true : false;
+
+        const payload = {
+            username: username,
+            full_name: fullName,
+            phone: phone,
+            role: role,
+            tenant_slug: tenant_slug,
+            is_active: is_active
+        };
+
+        if (assigned_booths !== null) payload.assigned_booths = assigned_booths;
+        if (assigned_wards !== null) payload.assigned_wards = assigned_wards;
+        if (max_campaigns !== null) payload.max_campaigns = max_campaigns;
+        if (whatsapp_credits !== null) payload.whatsapp_credits = whatsapp_credits;
+
+        if (btn) btn.disabled = true;
+        if (btnText) btnText.textContent = "सहेजा जा रहा है...";
+        if (errAlert) errAlert.classList.add('hidden');
+
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok && data.success) {
+                if (typeof window.showAdminToast === 'function') {
+                    window.showAdminToast(`✅ खाता '${username}' सफलतापूर्वक अपडेट हुआ`, "success");
+                }
+                window.closeEditUserModal();
+                if (typeof window.invalidateCampaignUsersCache === 'function') {
+                    window.invalidateCampaignUsersCache();
+                }
+                if (typeof window.loadUsers === 'function') {
+                    window.loadUsers();
+                }
+            } else {
+                throw new Error(data.error || 'खाता अपडेट करने में विफलता');
+            }
+        } catch (err) {
+            if (errAlert) {
+                errAlert.textContent = `❌ ${err.message}`;
+                errAlert.classList.remove('hidden');
+            } else {
+                alert(`Error: ${err.message}`);
+            }
+        } finally {
+            if (btn) btn.disabled = false;
+            if (btnText) btnText.textContent = "सुरक्षित करें (Save Changes)";
+        }
+    };
+})();
+</script>

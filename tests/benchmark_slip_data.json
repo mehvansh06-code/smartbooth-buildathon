@@ -1,0 +1,61 @@
+{
+  "platform": "Windows-10-10.0.26200-SP0",
+  "asset_mode": "data",
+  "daemons_up": [
+    9222,
+    9223,
+    9224
+  ],
+  "layouts": {
+    "single": {
+      "html_bytes": 2102647,
+      "cold_ms": 664.2,
+      "out_bytes_p50": 202476,
+      "stages": [
+        {
+          "stage": "html_build",
+          "n": 15,
+          "min": 4.2,
+          "p50": 5.0,
+          "p95": 6.7,
+          "max": 7.9,
+          "mean": 5.4
+        },
+        {
+          "stage": "render_total",
+          "n": 15,
+          "min": 549.5,
+          "p50": 600.0,
+          "p95": 643.7,
+          "max": 668.0,
+          "mean": 606.7
+        }
+      ]
+    },
+    "family": {
+      "html_bytes": 2106724,
+      "cold_ms": 622.4,
+      "out_bytes_p50": 260812,
+      "stages": [
+        {
+          "stage": "html_build",
+          "n": 15,
+          "min": 6.7,
+          "p50": 7.8,
+          "p95": 12.4,
+          "max": 14.1,
+          "mean": 8.6
+        },
+        {
+          "stage": "render_total",
+          "n": 15,
+          "min": 632.1,
+          "p50": 679.4,
+          "p95": 719.4,
+          "max": 761.2,
+          "mean": 678.7
+        }
+      ]
+    }
+  }
+}

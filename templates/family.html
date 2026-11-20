@@ -1,0 +1,1852 @@
+{% extends 'base.html' %}
+{% from 'modals/_ward_sheet_modal.html' import ward_sheet_trigger, ward_sheet_modal, ward_select_options with context %}
+{% block title %}{{ CAMPAIGN.election.ward_name_en }} — परिवार व मुखिया प्रबंधन{% endblock %}
+{% block content %}
+<div id="familyViewContainer" class="max-w-7xl mx-auto px-2.5 sm:px-4 py-2 sm:py-3 space-y-2 sm:space-y-3 safe-bottom-padding">
+
+  <!-- Summary Statistics Bar (Ultra-Compact Single Row) -->
+  <div class="grid grid-cols-4 divide-x divide-slate-100 bg-white rounded-xl border border-slate-200 py-1.5 px-0.5 shadow-2xs text-center">
+    <div class="px-0.5 sm:px-1">
+      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-tight">कुल परिवार</div>
+      <div id="statTotalFamilies" class="text-xs sm:text-base font-black text-slate-900 mt-0.5">--</div>
+    </div>
+    <div class="px-0.5 sm:px-1">
+      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-tight">सदस्य (वोटर)</div>
+      <div id="statTotalMembers" class="text-xs sm:text-base font-black text-blue-700 mt-0.5">--</div>
+    </div>
+    <div class="px-0.5 sm:px-1">
+      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-tight">औसत/परिवार</div>
+      <div id="statAvgMembers" class="text-xs sm:text-base font-black text-indigo-700 mt-0.5">--</div>
+    </div>
+    <div class="px-0.5 sm:px-1">
+      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-tight">फोन उपलब्ध</div>
+      <div id="statWithPhone" class="text-xs sm:text-base font-black text-emerald-700 mt-0.5">--</div>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls (Compact Integrated Bar) -->
+  <div class="bg-white rounded-xl border border-slate-200 p-2 sm:p-3 shadow-xs space-y-2">
+    <!-- Search Input -->
+    <div class="relative flex items-center">
+      <div class="absolute left-3 text-slate-400 pointer-events-none text-sm sm:text-base">
+        🔍
+      </div>
+      <input 
+        type="text" 
+        id="familySearchInput" 
+        placeholder="मुखिया का नाम या मोबाइल नंबर लिखें..."
+        class="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-blue-600 rounded-xl pl-9 pr-16 sm:pr-20 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none shadow-2xs transition-all"
+        autocomplete="off"
+        oninput="debounceSearch()"
+      >
+      <div class="absolute right-1.5 flex items-center gap-0.5 z-10">
+        <button 
+          type="button" 
+          id="voiceFamilySearchBtn" 
+          onclick="toggleVoiceSearch('family', event)" 
+          class="p-1.5 text-slate-400 hover:text-blue-600 active:scale-95 rounded-lg transition cursor-pointer text-sm"
+          title="बोलकर खोजें (Voice Search)"
+        >
+          🎤
+        </button>
+        <button 
+          type="button" 
+          onpointerdown="event.preventDefault()"
+          onmousedown="event.preventDefault()"
+          onclick="clearFamilySearch()" 
+          class="p-1.5 text-slate-400 hover:text-slate-600 font-bold text-xs rounded-lg hover:bg-slate-100 transition cursor-pointer"
+          title="साफ़ करें"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Ward Filter & Quick Filters Row (Minimal UI) -->
+    <div class="flex items-center gap-1.5 flex-wrap">
+      <!-- Ward / Booth Filter -->
+      <div class="flex-1 min-w-[130px]">
+        {{ ward_sheet_trigger('familyWardFilterModal', 'familyWardFilter', 'familySelectedWardLabel', 'वार्ड' if (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat or WARDS) else 'भाग') }}
+        <select 
+          id="familyWardFilter" 
+          data-filter-key="{{ 'ward_no' if (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat) else 'part_no' }}"
+          onchange="loadFamilies()" 
+          class="sr-only"
+        >
+          {{ ward_select_options() }}
+        </select>
+      </div>
+
+      <!-- Phone Filter (Minimal UI) -->
+      <select 
+        id="familyPhoneFilter" 
+        onchange="loadFamilies()"
+        class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl px-2 py-1.5 cursor-pointer focus:outline-none focus:border-blue-500 transition shadow-2xs"
+      >
+        <option value="">फोन: सभी</option>
+        <option value="no_phone">बिना फोन (No Phone)</option>
+        <option value="has_phone">फोन उपलब्ध</option>
+      </select>
+
+      <!-- Caste Filter (Minimal UI) -->
+      <select 
+        id="familyCasteFilter" 
+        onchange="loadFamilies()"
+        class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl px-2 py-1.5 cursor-pointer focus:outline-none focus:border-blue-500 transition shadow-2xs"
+      >
+        <option value="">जाति: सभी</option>
+        <option value="untagged">अनिर्धारित (Untagged)</option>
+      </select>
+
+      <!-- Sentiment Filter (Minimal UI) -->
+      <select 
+        id="familySentimentFilter" 
+        onchange="loadFamilies()"
+        class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl px-2 py-1.5 cursor-pointer focus:outline-none focus:border-blue-500 transition shadow-2xs"
+      >
+        <option value="">भावना: सभी</option>
+        <option value="pending">सर्वे बाकी (Pending)</option>
+        <option value="favored">समर्थक (Favored)</option>
+        <option value="swing">संशय (Swing)</option>
+        <option value="opposed">विरोधी (Opposed)</option>
+      </select>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-1 shrink-0 ml-auto">
+        <button 
+          type="button" 
+          id="selectAllFamiliesBtn" 
+          onclick="toggleSelectAllFamilies()" 
+          class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold px-2 py-1.5 rounded-xl text-xs transition border border-slate-300 flex items-center gap-1 cursor-pointer shrink-0"
+          title="वर्तमान में दिखाई दे रहे सभी परिवार चुनें"
+        >
+          <span>☑️</span>
+          <span id="selectAllFamiliesBtnText">सभी चुनें</span>
+        </button>
+
+        <button 
+          type="button" 
+          id="toolbarSendAllBtn" 
+          onclick="openBatchFamilyParchiModal(null)" 
+          class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black px-2.5 py-1.5 rounded-xl text-xs transition shadow-xs flex items-center gap-1 cursor-pointer shrink-0"
+          title="सभी परिवारों को WhatsApp पर्ची भेजें"
+        >
+          <span>🚀</span>
+          <span>पर्ची</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Transliteration Feedback Badge -->
+    <div id="translitHint" class="hidden text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-2 py-1 flex items-center justify-between">
+      <span id="translitHintText"></span>
+      <span class="text-[10px] text-blue-500 font-bold">द्विभाषी खोज ✓</span>
+    </div>
+  </div>
+
+  <!-- Families Card Grid Container -->
+  <div id="familiesGridContainer" class="min-h-[300px]">
+    <div class="text-center py-12 px-4 bg-white rounded-2xl border border-slate-200 shadow-xs">
+      <div class="text-3xl mb-2 text-slate-400">⏳</div>
+      <h3 class="text-sm font-bold text-slate-700">परिवार सूची लोड हो रही है...</h3>
+    </div>
+  </div>
+
+  <!-- Member Drawer Modal -->
+  <div id="familyMembersModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-4 py-3 bg-slate-900 text-white flex items-center justify-between">
+        <div>
+          <h3 id="modalFamilyTitle" class="text-sm sm:text-base font-black flex items-center gap-1.5">
+            <span>🏠</span>
+            <span id="modalFamilyName">परिवार सदस्य</span>
+          </h3>
+          <p id="modalFamilySubtitle" class="text-[11px] text-slate-400 mt-0.5">लोड हो रहा है...</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button 
+            type="button" 
+            onclick="toggleAddMemberPane()" 
+            class="px-2.5 py-1 text-xs font-bold bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white rounded-lg transition flex items-center gap-1 cursor-pointer"
+            title="इस परिवार में नया सदस्य जोड़ें"
+          >
+            <span>➕</span>
+            <span>सदस्य जोड़ें</span>
+          </button>
+          <button onclick="closeFamilyMembersModal()" class="text-slate-400 hover:text-white p-1 rounded-lg text-lg font-bold cursor-pointer">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Member Search Pane -->
+      <div id="addMemberSearchPane" class="hidden bg-blue-50/90 border-b border-blue-200 p-3 space-y-2 shrink-0">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-black text-blue-950 flex items-center gap-1">
+            <span>🔍</span>
+            <span>मतदाता खोजें व परिवार में जोड़ें</span>
+          </span>
+          <button type="button" onclick="toggleAddMemberPane(false)" class="text-blue-600 hover:text-blue-900 text-xs font-bold cursor-pointer">✕ बंद करें</button>
+        </div>
+        <div class="relative">
+          <input 
+            type="text" 
+            id="candidateSearchInput" 
+            placeholder="नाम (हिंदी/अंग्रेजी), EPIC, या मोबाइल नंबर लिखें..."
+            class="w-full bg-white border border-blue-300 focus:border-blue-600 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none shadow-2xs"
+            oninput="debounceCandidateSearch()"
+            autocomplete="off"
+          >
+        </div>
+        <div id="candidateSearchResults" class="max-h-48 overflow-y-auto space-y-1.5 bg-white rounded-xl border border-blue-200 p-2 hidden">
+          <!-- Dynamically populated candidate results -->
+        </div>
+      </div>
+
+      <!-- Modal Body (Member List) -->
+      <div id="modalMembersList" class="p-4 overflow-y-auto flex-1 space-y-2 divide-y divide-slate-100">
+        <div class="text-center py-8 text-slate-400 text-xs">लोड हो रहा है...</div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2">
+        <button onclick="closeFamilyMembersModal()" class="px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 cursor-pointer">
+          बंद करें
+        </button>
+        <button id="modalSendSlipBtn" class="px-4 py-1.5 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-xs flex items-center gap-1 cursor-pointer">
+          <span>💬</span>
+          <span>पर्ची भेजें</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Member Phone Modal -->
+  <div id="editMemberPhoneModal" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-4 py-3 bg-slate-900 text-white flex items-center justify-between">
+        <h3 class="text-sm font-black flex items-center gap-1.5">
+          <span>📞</span>
+          <span id="editPhoneModalVoterName">मोबाइल नंबर</span>
+        </h3>
+        <button onclick="closeEditMemberPhoneModal()" class="text-slate-400 hover:text-white p-1 rounded-lg text-lg font-bold cursor-pointer">
+          ✕
+        </button>
+      </div>
+      <div class="p-4 space-y-2">
+        <label class="text-[11px] font-bold text-slate-600">मोबाइल नंबर दर्ज करें</label>
+        <input id="editPhoneInput" type="tel" inputmode="numeric" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर"
+          class="w-full px-3 py-2 text-sm font-mono font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+      </div>
+      <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
+        <button onclick="closeEditMemberPhoneModal()" class="px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 cursor-pointer">
+          रद्द करें
+        </button>
+        <button onclick="saveEditMemberPhone()" class="px-4 py-1.5 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-xs cursor-pointer">
+          सेव करें
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch Family WhatsApp Parchi Dispatch Modal (#batchFamilyParchiModal) -->
+  <div id="batchFamilyParchiModal" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white bottom-sheet-content rounded-t-3xl sm:rounded-2xl max-w-2xl w-full max-h-[88vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in duration-200">
+      
+      <!-- Mobile Pull Drag Handle -->
+      <div class="sm:hidden w-12 h-1 bg-slate-300 rounded-full mx-auto mt-2.5 mb-1 shrink-0"></div>
+
+      <!-- Modal Header -->
+      <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🚀</span>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-white leading-tight">
+              सामूहिक परिवार व्हाट्सएप पर्ची प्रेषक (Batch Family Parchi Dispatch)
+            </h3>
+            <p class="text-[10px] sm:text-[11px] text-slate-400">Meta WhatsApp Cloud API Direct Dispatch</p>
+          </div>
+        </div>
+        <button onclick="closeBatchFamilyParchiModal()" class="text-slate-400 hover:text-white p-1 rounded-lg text-lg font-bold cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs flex-1">
+        
+        <!-- Pre-Flight Summary Metrics -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-2.5 text-center">
+            <span class="text-[10px] font-bold text-blue-700 uppercase block">कुल परिवार</span>
+            <span id="batchMetricFamilies" class="text-lg font-black text-blue-950 mt-0.5 block">0</span>
+          </div>
+          <div class="bg-indigo-50/80 border border-indigo-200 rounded-xl p-2.5 text-center">
+            <span class="text-[10px] font-bold text-indigo-700 uppercase block">कुल मतदाता</span>
+            <span id="batchMetricVoters" class="text-lg font-black text-indigo-950 mt-0.5 block">0</span>
+          </div>
+          <div class="bg-emerald-50/80 border border-emerald-200 rounded-xl p-2.5 text-center">
+            <span class="text-[10px] font-bold text-emerald-700 uppercase block">✓ तैयार (Ready)</span>
+            <span id="batchMetricReady" class="text-lg font-black text-emerald-950 mt-0.5 block">0</span>
+          </div>
+          <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-2.5 text-center">
+            <span class="text-[10px] font-bold text-amber-700 uppercase block">⚠️ बिना फोन (Skip)</span>
+            <span id="batchMetricSkipped" class="text-lg font-black text-amber-950 mt-0.5 block">0</span>
+          </div>
+        </div>
+
+        <!-- WhatsApp Quota Balance Pill -->
+        <div id="batchQuotaNotice" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-1.5 font-bold text-slate-700">
+            <span>💳 WhatsApp क्रेडिट शेष:</span>
+            <span id="batchQuotaAvailable" class="font-black text-emerald-700 font-mono">जांच जारी...</span>
+          </div>
+          <span id="batchQuotaBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-200 text-slate-700">Official Cloud API</span>
+        </div>
+
+        <!-- Enriched Targeting & Filter Controls -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <span class="font-bold text-slate-800 flex items-center gap-1.5">
+              <span>🎯</span>
+              <span>फ़िल्टर व लक्षित चयन (Targeting Filters)</span>
+            </span>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="setBatchSentimentPreset('all')" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700 hover:bg-slate-300 cursor-pointer">सभी</button>
+              <button type="button" onclick="setBatchSentimentPreset('favored')" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200 cursor-pointer">केवल समर्थक</button>
+              <button type="button" onclick="setBatchSentimentPreset('swing')" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 hover:bg-amber-200 cursor-pointer">स्विंग टारगेट</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Caste Filter -->
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">🏷️ जाति / समुदाय (Caste)</label>
+              <select id="batchFilterCaste" onchange="applyBatchFilters()" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <option value="">सभी जातियाँ (All Castes)</option>
+              </select>
+            </div>
+
+            <!-- Recipient Mode -->
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">📱 प्रेषण मोड (Recipient Mode)</label>
+              <div class="flex items-center gap-3 mt-1.5">
+                <label class="flex items-center gap-1.5 text-[11px] font-bold text-slate-800 cursor-pointer">
+                  <input type="radio" name="batchRecipientMode" value="mukhiya" checked onchange="applyBatchFilters()" class="text-blue-600">
+                  <span>केवल मुखिया</span>
+                </label>
+                <label class="flex items-center gap-1.5 text-[11px] font-bold text-slate-800 cursor-pointer">
+                  <input type="radio" name="batchRecipientMode" value="all" onchange="applyBatchFilters()" class="text-blue-600">
+                  <span>सभी उपलब्ध मोबाइल</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sentiment Checkboxes & Phone Toggle -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-[10px] font-bold text-slate-500 uppercase">झुकाव:</span>
+              <label class="flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 cursor-pointer">
+                <input type="checkbox" id="batchSentFavored" checked onchange="applyBatchFilters()" class="text-emerald-600 rounded">
+                <span>🟢 पक्ष</span>
+              </label>
+              <label class="flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 cursor-pointer">
+                <input type="checkbox" id="batchSentSwing" checked onchange="applyBatchFilters()" class="text-amber-600 rounded">
+                <span>🟡 स्विंग</span>
+              </label>
+              <label class="flex items-center gap-1 text-[11px] font-bold text-rose-800 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 cursor-pointer">
+                <input type="checkbox" id="batchSentOpposed" checked onchange="applyBatchFilters()" class="text-rose-600 rounded">
+                <span>🔴 विपक्ष</span>
+              </label>
+              <label class="flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200 cursor-pointer">
+                <input type="checkbox" id="batchSentNeutral" checked onchange="applyBatchFilters()" class="text-slate-600 rounded">
+                <span>⚪ न्यूट्रल</span>
+              </label>
+            </div>
+
+            <!-- Only with Phone toggle -->
+            <label class="flex items-center gap-1.5 text-[11px] font-bold text-blue-900 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200 cursor-pointer shrink-0">
+              <input type="checkbox" id="batchOnlyWithPhone" checked onchange="applyBatchFilters()" class="text-blue-600 rounded">
+              <span>📞 केवल फोन उपलब्ध</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Execution Progress Section (Visible during/after dispatch) -->
+        <div id="batchProgressSection" class="hidden space-y-2 bg-slate-900 text-white rounded-xl p-3.5 border border-slate-800 shadow-sm">
+          <div class="flex items-center justify-between text-xs">
+            <span id="batchProgressStatus" class="font-black text-emerald-400">प्रेषण प्रगति (0%)...</span>
+            <span id="batchProgressPercent" class="font-mono font-bold text-slate-300">0%</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+            <div id="batchProgressBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2.5 rounded-full transition-all duration-300 w-0"></div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800 text-slate-300">
+            <span class="flex items-center gap-1 text-emerald-400 font-bold">✓ सफल: <span id="batchStatSuccess" class="font-mono font-black">0</span></span>
+            <span class="flex items-center gap-1 text-rose-400 font-bold">✕ विफल: <span id="batchStatFailed" class="font-mono font-black">0</span></span>
+            <span class="flex items-center gap-1 text-amber-400 font-bold">⚠️ छोड़े गए: <span id="batchStatSkippedCount" class="font-mono font-black">0</span></span>
+          </div>
+        </div>
+
+        <!-- Target Families Preview Table -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+            <span>📋 लक्षित परिवार सूची (Target Families Preview):</span>
+            <span id="batchPreviewCountLabel" class="text-[11px] text-slate-500 font-normal"></span>
+          </div>
+          <div class="border border-slate-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto bg-slate-50 divide-y divide-slate-200">
+            <div id="batchPreviewList" class="p-2 space-y-1">
+              <!-- Dynamically rendered preview rows -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2 shrink-0">
+        <button 
+          type="button" 
+          id="batchBtnCancel" 
+          onclick="cancelBatchDispatch()" 
+          class="px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 cursor-pointer min-h-[40px]"
+        >
+          रद्द करें (Cancel)
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button 
+            type="button" 
+            id="batchBtnPauseResume" 
+            onclick="toggleBatchPause()" 
+            class="hidden px-3.5 py-2 text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-xl border border-amber-300 cursor-pointer min-h-[40px]"
+          >
+            ⏸️ रोकें (Pause)
+          </button>
+
+          <button 
+            type="button" 
+            id="batchBtnStart" 
+            onclick="startBatchDispatch()" 
+            class="px-4 py-2 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer min-h-[40px] transition"
+          >
+            <span>🗳️</span>
+            <span>WhatsApp पर तुरंत भेजें (Auto Batch)</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Floating Action Island (#familyFloatingActionIsland) -->
+  <div 
+    id="familyFloatingActionIsland" 
+    class="fixed z-40 bg-slate-900/98 backdrop-blur-md text-white border border-slate-700/90 rounded-2xl shadow-2xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center justify-between gap-2.5 transition-all duration-300 max-w-2xl w-[95%] sm:w-auto translate-y-28 opacity-0 pointer-events-none"
+  >
+    <div class="flex items-center gap-2 shrink-0">
+      <span class="bg-blue-600 text-white font-black px-2.5 py-1 rounded-xl text-xs flex items-center gap-1 shadow-xs">
+        <span id="familyIslandBadge">✓ 0 परिवार चुने गए (0 मतदाता)</span>
+      </span>
+      <button 
+        type="button" 
+        onclick="clearFamilySelection()" 
+        class="text-xs text-slate-400 hover:text-white font-bold p-1 cursor-pointer transition hover:scale-110" 
+        title="चयन हटाएं (Clear Selection)"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="flex items-center gap-1.5 justify-end">
+      <button 
+        type="button" 
+        id="familyIslandEditBtn" 
+        onclick="handleIslandBulkEditClick()" 
+        class="bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-black text-xs px-3.5 py-2 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer transition active:scale-95 min-h-[38px]"
+        title="चुने गए परिवारों का सामूहिक संपादन (Bulk Edit Selected Families)"
+      >
+        <span>✏️</span>
+        <span>संपादन</span>
+      </button>
+      <button 
+        type="button" 
+        id="familyIslandSendSlipBtn" 
+        onclick="handleIslandSendSlipClick()" 
+        class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-xs px-3.5 py-2 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer transition active:scale-95 min-h-[38px]"
+        title="व्हाट्सएप पर्ची भेजें (Send WhatsApp Slip)"
+      >
+        <span>💬</span>
+        <span>पर्ची भेजें</span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal Partials & Slip Engine Script -->
+{% include '_modals.html' %}
+<script src="/static/js/app_state.js?v={{ APP_VERSION }}"></script>
+<script src="/static/js/slip_engine.js?v={{ APP_VERSION }}"></script>
+<script src="/static/js/omnisearch.js?v={{ APP_VERSION }}"></script>
+<script>
+  // Ensure APP_STATE is available for slip_engine
+  window.APP_STATE = window.APP_STATE || {
+    selectedVoters: new Map(),
+    currentResults: [],
+    tenant: "{{ current_tenant }}"
+  };
+
+  let allFamiliesData = [];
+  let searchTimer = null;
+  const currentTenant = "{{ current_tenant }}";
+  const isWardElection = {{ 'true' if (WARDS and WARDS|length > 1) else 'false' }};
+  let currentModalMembers = [];
+  let currentModalFamilyId = null;
+  let currentModalFamilyMukhiya = null;
+  let currentModalFamilyWard = null;
+  let currentModalFamilyPart = null;
+  let activeEditPhoneVoterId = null;
+
+  // Batch Filter Raw and Active Targets
+  let activeBatchTargetsRaw = [];
+  let filteredBatchTargets = [];
+
+  // Multi-Family Selection State (Map: family_id -> family object)
+  const selectedFamilies = new Map();
+
+  // Batch Dispatch Runtime State
+  let batchExecutionState = {
+    isRunning: false,
+    isPaused: false,
+    shouldCancel: false,
+    queue: [],
+    currentIndex: 0,
+    successCount: 0,
+    failedCount: 0,
+    skippedCount: 0,
+    totalTarget: 0
+  };
+
+  // Sensory Parity Audio & Haptics Helpers
+  function playAudioToneSafe(freq, duration, type = 'sine') {
+    if (typeof window.playAudioTone === 'function') {
+      window.playAudioTone(freq, duration, type);
+    } else {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!window._sbSharedAudioCtx) window._sbSharedAudioCtx = new AudioCtx();
+        const ctx = window._sbSharedAudioCtx;
+        if (ctx.state === 'suspended') ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    }
+  }
+
+  function triggerHapticSafe(type = 'light') {
+    if (typeof window.triggerHaptic === 'function') {
+      window.triggerHaptic(type);
+    } else if (navigator.vibrate) {
+      if (type === 'selection') navigator.vibrate(10);
+      else if (type === 'light') navigator.vibrate(15);
+      else if (type === 'medium') navigator.vibrate(30);
+      else if (type === 'success') navigator.vibrate([20, 40, 20]);
+      else if (type === 'warning') navigator.vibrate([30, 50, 30]);
+    }
+  }
+
+  function debounceSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadFamilies, 300);
+  }
+
+  function clearFamilySearch() {
+    const el = document.getElementById('familySearchInput');
+    if (el) {
+      el.value = '';
+      el.blur();
+    }
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+      document.activeElement.blur();
+    }
+    const hintEl = document.getElementById('translitHint');
+    if (hintEl) hintEl.classList.add('hidden');
+    loadFamilies();
+  }
+
+  async function loadFamilies() {
+    const q = document.getElementById('familySearchInput').value.trim();
+    const filterEl = document.getElementById('familyWardFilter');
+    const rawFilterVal = filterEl ? filterEl.value : '';
+    let filterKey = filterEl ? (filterEl.getAttribute('data-filter-key') || 'ward_no') : 'ward_no';
+    let filterVal = rawFilterVal;
+    if (rawFilterVal) {
+      if (rawFilterVal.startsWith('ward:')) {
+        filterKey = 'ward_no';
+        filterVal = rawFilterVal.substring(5);
+      } else if (rawFilterVal.startsWith('wards:')) {
+        filterKey = 'ward_no';
+        filterVal = rawFilterVal;
+      } else if (rawFilterVal.startsWith('part:') || rawFilterVal.startsWith('booth:') || rawFilterVal.startsWith('parts:')) {
+        filterKey = 'part_no';
+        filterVal = rawFilterVal;
+      }
+    }
+    const phoneFilter = document.getElementById('familyPhoneFilter')?.value || '';
+    const casteFilter = document.getElementById('familyCasteFilter')?.value || '';
+    const sentimentFilter = document.getElementById('familySentimentFilter')?.value || '';
+
+    const container = document.getElementById('familiesGridContainer');
+    const hintEl = document.getElementById('translitHint');
+    const hintText = document.getElementById('translitHintText');
+
+    let url = `/api/families/summary?tenant=${encodeURIComponent(currentTenant)}`;
+    if (q) url += `&q=${encodeURIComponent(q)}`;
+    if (filterVal) url += `&${filterKey}=${encodeURIComponent(filterVal)}`;
+    if (phoneFilter) url += `&phone_status=${encodeURIComponent(phoneFilter)}`;
+    if (casteFilter === 'untagged') {
+      url += `&caste_status=untagged`;
+    } else if (casteFilter) {
+      url += `&caste=${encodeURIComponent(casteFilter)}`;
+    }
+    if (sentimentFilter) url += `&sentiment_status=${encodeURIComponent(sentimentFilter)}`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to load');
+
+      allFamiliesData = data.families || [];
+      const stats = data.stats || {};
+
+      // Update stat counters
+      document.getElementById('statTotalFamilies').textContent = (stats.total_families || 0).toLocaleString('en-IN');
+      document.getElementById('statTotalMembers').textContent = (stats.total_members || 0).toLocaleString('en-IN');
+      document.getElementById('statAvgMembers').textContent = (stats.avg_members || 0);
+      document.getElementById('statWithPhone').textContent = (stats.with_phone_count || 0).toLocaleString('en-IN');
+
+      // Update bilingual transliteration feedback badge
+      if (hintEl && hintText) {
+        if (data.transliterated_query && q && data.transliterated_query !== q) {
+          hintText.textContent = `🔤 खोज: "${q}" ➔ "${data.transliterated_query}"`;
+          hintEl.classList.remove('hidden');
+        } else {
+          hintEl.classList.add('hidden');
+        }
+      }
+
+      renderFamiliesGrid(allFamiliesData);
+      updateSelectAllButtonState();
+      updateFamilyFloatingActionIsland();
+    } catch (err) {
+      console.error(err);
+      if (hintEl) hintEl.classList.add('hidden');
+      container.innerHTML = `
+        <div class="text-center py-12 px-4 bg-white rounded-2xl border border-rose-200 shadow-xs">
+          <div class="text-3xl mb-2 text-rose-500">⚠️</div>
+          <h3 class="text-sm font-bold text-rose-800">डेटा लोड करने में त्रुटि</h3>
+          <p class="text-xs text-slate-500 mt-1">${err.message}</p>
+        </div>
+      `;
+    }
+  }
+
+  function getFamilyCardClasses(isSelected) {
+    const base = 'rounded-2xl border p-3.5 sm:p-4 transition-all flex flex-col justify-between space-y-3 cursor-pointer select-none';
+    const variant = isSelected
+      ? 'ring-2 ring-blue-500 bg-blue-50/20 border-blue-400 shadow-md'
+      : 'bg-white border-slate-200 hover:border-blue-400 shadow-2xs hover:shadow-md';
+    return `${base} ${variant}`;
+  }
+
+  function renderFamiliesGrid(families) {
+    const container = document.getElementById('familiesGridContainer');
+    if (!families || families.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-12 px-4 bg-white rounded-2xl border border-slate-200 shadow-xs">
+          <div class="text-3xl mb-2 text-slate-400">🏠</div>
+          <h3 class="text-sm font-bold text-slate-700">कोई परिवार नहीं मिला</h3>
+          <p class="text-xs text-slate-400 mt-1">खोज शब्द बदलें या दूसरा वार्ड/बूथ चुनें।</p>
+        </div>
+      `;
+      return;
+    }
+
+    const cardsHtml = families.map((f, idx) => {
+      const fid = f.family_id || `fam_${idx}`;
+      const isSelected = selectedFamilies.has(fid);
+      const mukhiya = f.mukhiya_name || 'अज्ञात मुखिया';
+      const mukhiyaEn = f.mukhiya_name_en || '';
+      let wardBadge = '';
+      if (f.all_wards && f.all_wards.length > 1) {
+        wardBadge = isWardElection ? `वार्ड ${f.all_wards.join(', ')}` : `भाग ${f.all_wards.join(', ')}`;
+      } else if (f.all_wards && f.all_wards.length === 1) {
+        wardBadge = isWardElection ? `वार्ड ${f.all_wards[0]}` : `भाग ${f.all_wards[0]}`;
+      } else if (f.ward_no) {
+        wardBadge = isWardElection ? `वार्ड ${f.ward_no}` : (f.part_no ? `भाग ${f.part_no}` : `वार्ड ${f.ward_no}`);
+      } else if (f.part_no) {
+        wardBadge = `भाग ${f.part_no}`;
+      }
+      const caste = f.caste_tag ? `🏷️ ${f.caste_tag}` : '';
+      const phone = f.primary_phone ? `📞 ${f.primary_phone}` : '';
+      const total = f.total_members || 0;
+      const favored = f.favored_count || 0;
+      const opposed = f.opposed_count || 0;
+      const swing = f.swing_count || 0;
+      const karyakarta = f.karyakarta_name || '';
+
+      const cardClasses = getFamilyCardClasses(isSelected);
+
+      return `
+        <div 
+          id="familyCard_${fid}"
+          data-family-id="${fid}"
+          class="${cardClasses}"
+          onclick="handleFamilyCardClick(event, '${fid}')"
+        >
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-start gap-2.5 min-w-0">
+                <input 
+                  type="checkbox" 
+                  id="familyCb_${fid}"
+                  ${isSelected ? 'checked' : ''}
+                  onclick="event.stopPropagation(); toggleFamilySelection('${fid}', this.checked)"
+                  class="mt-1 w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer shrink-0"
+                >
+                <div class="min-w-0">
+                  <h4 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-1.5 leading-snug truncate">
+                    <span>🏠</span>
+                    <span class="truncate">${mukhiya}</span>
+                  </h4>
+                  ${mukhiyaEn && mukhiyaEn.toLowerCase() !== mukhiya.toLowerCase() ? `<div class="text-[11px] font-bold text-slate-500 pl-6 mt-0.5 truncate">${mukhiyaEn}</div>` : ''}
+                </div>
+              </div>
+              <span class="bg-blue-100 text-blue-900 text-xs font-black px-2.5 py-0.5 rounded-full shrink-0">
+                👥 ${total} सदस्य
+              </span>
+            </div>
+
+            <!-- Badges -->
+            <div class="flex items-center gap-1.5 flex-wrap mt-2">
+              ${wardBadge ? `<span class="text-[10px] bg-slate-100 text-slate-800 font-bold px-2 py-0.5 rounded-md border border-slate-200">${wardBadge}</span>` : ''}
+              ${caste ? `<span class="text-[10px] bg-purple-50 text-purple-800 font-bold px-2 py-0.5 rounded-md border border-purple-200">${caste}</span>` : ''}
+              ${phone ? `<span class="text-[10px] bg-emerald-50 text-emerald-800 font-bold font-mono px-2 py-0.5 rounded-md border border-emerald-200">${phone}</span>` : ''}
+              ${karyakarta ? `<span class="text-[10px] bg-indigo-50 text-indigo-800 font-bold px-2 py-0.5 rounded-md border border-indigo-200">👤 ${karyakarta}</span>` : ''}
+            </div>
+
+            <!-- Sentiment Pills -->
+            <div class="flex items-center gap-2 mt-2.5 text-[11px] font-bold">
+              ${favored > 0 ? `<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">🟢 ${favored} पक्ष</span>` : ''}
+              ${swing > 0 ? `<span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">🟡 ${swing} स्विंग</span>` : ''}
+              ${opposed > 0 ? `<span class="text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">🔴 ${opposed} विपक्ष</span>` : ''}
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-1.5" onclick="event.stopPropagation()">
+            <button 
+              type="button" 
+              onclick="viewFamilyMembers('${encodeURIComponent(f.family_id || '')}', '${mukhiya.replace(/'/g, "\\'")}', ${f.ward_no || 0}, ${f.part_no || 0})" 
+              class="flex-1 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-700 font-bold text-xs py-2 px-2 rounded-xl border border-blue-200 transition text-center flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <span>👁️</span>
+              <span>सदस्य (${total})</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="openEditForFamily('${fid}')"
+              class="bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-700 font-bold text-xs py-2 px-2.5 rounded-xl border border-indigo-200 transition text-center flex items-center justify-center gap-1 cursor-pointer"
+              title="परिवार का संपादन करें (Edit Family Details)"
+            >
+              <span>✏️</span>
+              <span>एडिट</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="openFamilySlipByFid('${fid}')"
+              class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-xs py-2 px-2.5 rounded-xl shadow-xs transition text-center flex items-center justify-center gap-1 cursor-pointer"
+              title="व्हाट्सएप परिवार पर्ची भेजें"
+            >
+              <span>💬</span>
+              <span>पर्ची</span>
+            </button>
+            <a 
+              href="/voters?tenant=${encodeURIComponent(currentTenant)}&q=${encodeURIComponent(mukhiya)}&ward_no=${encodeURIComponent(f.ward_no || f.part_no || '')}"
+              class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-bold text-xs py-2 px-2 rounded-xl border border-slate-200 transition text-center flex items-center justify-center gap-1 cursor-pointer"
+              title="मतदाता खोज में खोलें"
+            >
+              <span>🔍</span>
+            </a>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+        ${cardsHtml}
+      </div>
+    `;
+  }
+
+  // Handle Card Click for Toggle Selection
+  function handleFamilyCardClick(e, familyId) {
+    // If clicked on an interactive element inside card, ignore
+    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input[type="checkbox"]')) {
+      return;
+    }
+    const isCurrentlySelected = selectedFamilies.has(familyId);
+    toggleFamilySelection(familyId, !isCurrentlySelected);
+  }
+
+  // Toggle Single Family Selection with Sound & Haptics Parity
+  function toggleFamilySelection(familyId, isSelected) {
+    const family = allFamiliesData.find(f => (f.family_id || '') === familyId);
+    if (isSelected) {
+      if (family) selectedFamilies.set(familyId, family);
+      else selectedFamilies.set(familyId, { family_id: familyId });
+      playAudioToneSafe(950, 0.08);
+      triggerHapticSafe('selection');
+    } else {
+      selectedFamilies.delete(familyId);
+      playAudioToneSafe(440, 0.08);
+      triggerHapticSafe('light');
+    }
+
+    // Update DOM Card styling
+    const cardEl = document.getElementById(`familyCard_${familyId}`);
+    const cbEl = document.getElementById(`familyCb_${familyId}`);
+    if (cbEl) cbEl.checked = isSelected;
+
+    if (cardEl) {
+      cardEl.className = getFamilyCardClasses(isSelected);
+    }
+
+    updateSelectAllButtonState();
+    updateFamilyFloatingActionIsland();
+  }
+
+  // Toggle Select All Visible Families
+  function toggleSelectAllFamilies() {
+    if (!allFamiliesData || allFamiliesData.length === 0) return;
+
+    const areAllSelected = allFamiliesData.length > 0 && allFamiliesData.every(f => selectedFamilies.has(f.family_id || ''));
+
+    if (areAllSelected) {
+      // Deselect all
+      allFamiliesData.forEach(f => {
+        selectedFamilies.delete(f.family_id || '');
+      });
+      playAudioToneSafe(440, 0.08);
+      triggerHapticSafe('light');
+    } else {
+      // Select all
+      allFamiliesData.forEach(f => {
+        selectedFamilies.set(f.family_id || '', f);
+      });
+      playAudioToneSafe(950, 0.08);
+      triggerHapticSafe('selection');
+    }
+
+    // Re-render or update card styles
+    renderFamiliesGrid(allFamiliesData);
+    updateSelectAllButtonState();
+    updateFamilyFloatingActionIsland();
+  }
+
+  function updateSelectAllButtonState() {
+    const btnText = document.getElementById('selectAllFamiliesBtnText');
+    if (!btnText) return;
+    const areAllSelected = allFamiliesData.length > 0 && allFamiliesData.every(f => selectedFamilies.has(f.family_id || ''));
+    if (areAllSelected && allFamiliesData.length > 0) {
+      btnText.textContent = 'चयन हटाएं';
+    } else {
+      btnText.textContent = 'सभी चुनें';
+    }
+  }
+
+  function clearFamilySelection() {
+    selectedFamilies.clear();
+    playAudioToneSafe(440, 0.08);
+    triggerHapticSafe('light');
+    renderFamiliesGrid(allFamiliesData);
+    updateSelectAllButtonState();
+    updateFamilyFloatingActionIsland();
+  }
+
+  // Floating Action Island Positioning & Transitions
+  function updateFamilyFloatingActionIsland() {
+    const island = document.getElementById('familyFloatingActionIsland');
+    if (!island) return;
+
+    const count = selectedFamilies.size;
+    if (count === 0) {
+      island.classList.remove('translate-y-0', 'opacity-100');
+      island.classList.add('translate-y-28', 'opacity-0', 'pointer-events-none');
+      return;
+    }
+
+    let totalVoters = 0;
+    selectedFamilies.forEach(f => {
+      totalVoters += (f.total_members || (f.member_ids ? f.member_ids.length : 0) || 0);
+    });
+
+    const badgeEl = document.getElementById('familyIslandBadge');
+    if (badgeEl) {
+      badgeEl.textContent = `✓ ${count} परिवार चुने गए (${totalVoters} मतदाता)`;
+    }
+
+    // Responsive positioning parity with voter_cards.js
+    if (window.innerWidth < 768) {
+      island.style.bottom = 'calc(env(safe-area-inset-bottom, 0px) + 72px)';
+      island.style.left = '50%';
+    } else {
+      island.style.bottom = '20px';
+      const sidebar = document.getElementById('appSidebar');
+      const sidebarWidth = sidebar && sidebar.offsetParent !== null ? sidebar.offsetWidth : 0;
+      island.style.left = `calc(50% + ${Math.round(sidebarWidth / 2)}px)`;
+    }
+    island.style.transform = 'translateX(-50%)';
+
+    island.classList.remove('translate-y-28', 'opacity-0', 'pointer-events-none');
+    island.classList.add('translate-y-0', 'opacity-100');
+  }
+
+  window.addEventListener('resize', () => {
+    if (selectedFamilies.size > 0) updateFamilyFloatingActionIsland();
+  });
+
+  window.loadFamilies = loadFamilies;
+  window.onVoterProfileSaved = function() {
+    if (selectedFamilies.size > 0) {
+      clearFamilySelection();
+    }
+    loadFamilies();
+  };
+
+  // Helper to fetch full voter objects for a family
+  async function fetchMembersForFamily(familyId, wardNo, partNo) {
+    try {
+      let url = `/api/family/members_by_head?tenant=${encodeURIComponent(currentTenant)}`;
+      if (familyId) url += `&family_id=${encodeURIComponent(familyId)}`;
+      if (wardNo) url += `&ward_no=${encodeURIComponent(wardNo)}`;
+      if (partNo) url += `&part_no=${encodeURIComponent(partNo)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return (data.success && Array.isArray(data.members)) ? data.members : [];
+    } catch (e) {
+      console.warn('Failed to fetch members for family', familyId, e);
+      return [];
+    }
+  }
+
+  // Open Edit Profile / Bulk Edit for a single family card
+  async function openEditForFamily(fid) {
+    triggerHapticSafe('light');
+    const family = allFamiliesData.find(f => (f.family_id || '') === fid) || selectedFamilies.get(fid);
+    if (!family) return;
+
+    const memberIds = family.member_ids || [];
+    if (memberIds.length === 0) {
+      window.showToast?.('इस परिवार में कोई सदस्य नहीं मिला', 'warning');
+      return;
+    }
+
+    // Fetch full member objects so the modal has complete names, ages, relatives
+    const members = await fetchMembersForFamily(family.family_id, family.ward_no, family.part_no);
+    const voters = (members && members.length > 0) ? members : memberIds.map(id => ({ id: id, voter_id: id }));
+
+    // Pre-populate APP_STATE.selectedVoters so tagger can find them
+    if (window.APP_STATE && window.APP_STATE.selectedVoters) {
+      voters.forEach(v => {
+        window.APP_STATE.selectedVoters.set(v.voter_id || v.id, v);
+      });
+    }
+
+    if (voters.length === 1 && typeof window.openVoterProfileModal === 'function') {
+      window.openVoterProfileModal(voters[0].voter_id || voters[0].id);
+    } else if (typeof window.openBulkProfileModal === 'function') {
+      window.openBulkProfileModal(voters.map(v => v.voter_id || v.id), voters);
+    }
+  }
+
+  // Bulk Edit for multiple selected families from Floating Island
+  async function handleIslandBulkEditClick() {
+    triggerHapticSafe('medium');
+    const selectedList = Array.from(selectedFamilies.values());
+    if (selectedList.length === 0) {
+      window.showToast?.('कृपया पहले परिवार चुनें (Select a family first)', 'warning');
+      return;
+    }
+
+    if (selectedList.length === 1) {
+      return openEditForFamily(selectedList[0].family_id);
+    }
+
+    // Fetch members for all selected families in parallel
+    const memberPromises = selectedList.map(f => fetchMembersForFamily(f.family_id, f.ward_no, f.part_no));
+    const memberLists = await Promise.all(memberPromises);
+    const allMembers = memberLists.flat();
+
+    if (allMembers.length === 0) {
+      const allIds = [];
+      selectedList.forEach(f => {
+        if (f.member_ids) allIds.push(...f.member_ids);
+      });
+      if (allIds.length === 0) {
+        window.showToast?.('चुने गए परिवारों में कोई मतदाता नहीं मिला', 'warning');
+        return;
+      }
+      if (allIds.length === 1 && typeof window.openVoterProfileModal === 'function') {
+        window.openVoterProfileModal(allIds[0]);
+      } else if (typeof window.openBulkProfileModal === 'function') {
+        window.openBulkProfileModal(allIds);
+      }
+      return;
+    }
+
+    // Pre-populate APP_STATE.selectedVoters
+    if (window.APP_STATE && window.APP_STATE.selectedVoters) {
+      allMembers.forEach(v => {
+        window.APP_STATE.selectedVoters.set(v.voter_id || v.id, v);
+      });
+    }
+
+    const allVoterIds = allMembers.map(v => v.voter_id || v.id);
+    if (allVoterIds.length === 1 && typeof window.openVoterProfileModal === 'function') {
+      window.openVoterProfileModal(allVoterIds[0]);
+    } else if (typeof window.openBulkProfileModal === 'function') {
+      window.openBulkProfileModal(allVoterIds, allMembers);
+    }
+  }
+
+  function handleIslandSendSlipClick() {
+    triggerHapticSafe('medium');
+    const selectedList = Array.from(selectedFamilies.values());
+    if (selectedList.length === 1) {
+      openFamilySlip(selectedList[0]);
+    } else if (selectedList.length > 1) {
+      openBatchFamilyParchiModal(selectedList);
+    }
+  }
+
+  // Single Family Slip Dispatch Helper
+  function openFamilySlipByFid(fid) {
+    const family = allFamiliesData.find(f => (f.family_id || '') === fid) || selectedFamilies.get(fid);
+    if (family) openFamilySlip(family);
+  }
+
+  function openFamilySlip(family) {
+    if (!family) return;
+    const memberIds = family.member_ids || [];
+    if (typeof window.openSlipModal === 'function') {
+      window.openSlipModal(memberIds);
+    } else {
+      window.showToast?.('पर्ची मॉड्यूल लोड हो रहा है, कृपया प्रतीक्षा करें...', 'info');
+    }
+  }
+
+  // View Member Drawer Modal
+  async function viewFamilyMembers(familyId, mukhiyaName, wardNo, partNo) {
+    const modal = document.getElementById('familyMembersModal');
+    const titleEl = document.getElementById('modalFamilyName');
+    const subEl = document.getElementById('modalFamilySubtitle');
+    const listEl = document.getElementById('modalMembersList');
+    const sendSlipBtn = document.getElementById('modalSendSlipBtn');
+
+    currentModalFamilyId = familyId;
+    currentModalFamilyMukhiya = mukhiyaName;
+    currentModalFamilyWard = wardNo;
+    currentModalFamilyPart = partNo;
+    toggleAddMemberPane(false);
+
+    titleEl.textContent = mukhiyaName;
+    subEl.textContent = 'लोड हो रहा है...';
+    listEl.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">सदस्य सूची लोड हो रही है...</div>';
+    modal.classList.remove('hidden');
+
+    try {
+      let url = `/api/family/members_by_head?tenant=${encodeURIComponent(currentTenant)}`;
+      if (familyId) url += `&family_id=${familyId}`;
+      if (mukhiyaName) url += `&mukhiya_name=${encodeURIComponent(mukhiyaName)}`;
+      if (wardNo) url += `&ward_no=${encodeURIComponent(wardNo)}`;
+      if (partNo) url += `&part_no=${encodeURIComponent(partNo)}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed');
+
+      const members = data.members || [];
+      currentModalMembers = members;
+      const mukhiyaEn = data.mukhiya_name_en || '';
+      const displayMukhiya = data.mukhiya_name || mukhiyaName;
+      if (mukhiyaEn && mukhiyaEn.toLowerCase() !== displayMukhiya.toLowerCase()) {
+        titleEl.innerHTML = `${displayMukhiya} <span class="text-xs font-normal text-slate-300">(${mukhiyaEn})</span>`;
+      } else {
+        titleEl.textContent = displayMukhiya;
+      }
+      const memberWards = [...new Set(members.map(m => m.ward_no || m.part_no).filter(Boolean))].sort((a, b) => a - b);
+      let locLabel = '';
+      if (memberWards.length > 1) {
+        locLabel = isWardElection ? `वार्ड ${memberWards.join(', ')}` : `भाग ${memberWards.join(', ')}`;
+      } else if (memberWards.length === 1) {
+        locLabel = isWardElection ? `वार्ड ${memberWards[0]}` : `भाग ${memberWards[0]}`;
+      } else if (wardNo) {
+        locLabel = isWardElection ? `वार्ड ${wardNo}` : `भाग ${wardNo}`;
+      }
+      subEl.textContent = `कुल ${members.length} सदस्य${locLabel ? ' · ' + locLabel : ''}`;
+
+      if (members.length === 0) {
+        listEl.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">कोई सदस्य नहीं मिला।</div>';
+        return;
+      }
+
+      renderModalMembersList();
+
+      // Rewired: Open Family Slip directly instead of redirecting to /voters
+      const memberIds = members.map(m => m.voter_id);
+      const targetFamily = {
+        family_id: familyId,
+        mukhiya_name: displayMukhiya,
+        member_ids: memberIds,
+        primary_phone: members.find(m => m.contact_phone)?.contact_phone || null
+      };
+
+      sendSlipBtn.onclick = function() {
+        closeFamilyMembersModal();
+        openFamilySlip(targetFamily);
+      };
+
+    } catch (err) {
+      listEl.innerHTML = `<div class="text-center py-6 text-rose-500 text-xs">त्रुटि: ${err.message}</div>`;
+    }
+  }
+
+  function closeFamilyMembersModal() {
+    document.getElementById('familyMembersModal').classList.add('hidden');
+    toggleAddMemberPane(false);
+  }
+
+  function renderModalMembersList() {
+    const listEl = document.getElementById('modalMembersList');
+    listEl.innerHTML = currentModalMembers.map(m => {
+      const catBadge = m.voter_category === 100
+        ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 font-black px-1.5 py-0.5 rounded">🟢 पक्ष</span>'
+        : (m.voter_category === -1
+          ? '<span class="text-[10px] bg-rose-100 text-rose-800 font-black px-1.5 py-0.5 rounded">🔴 विपक्ष</span>'
+          : (m.voter_category === 50
+            ? '<span class="text-[10px] bg-amber-100 text-amber-800 font-black px-1.5 py-0.5 rounded">🟡 स्विंग</span>'
+            : '<span class="text-[10px] bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded">न्यूट्रल</span>'));
+
+      const phoneDisplay = m.contact_phone ? `<span class="text-xs font-mono font-bold text-emerald-700">📞 ${m.contact_phone}</span>` : '<span class="text-[11px] text-slate-400">नंबर नहीं</span>';
+      const editPhoneBtn = `<button onclick="openEditMemberPhoneModal(${m.voter_id})" class="text-[11px] text-blue-600 hover:text-blue-800 font-bold cursor-pointer" title="मोबाइल नंबर सम्पादित करें">✏️</button>`;
+      const removeMemberBtn = `<button onclick="confirmRemoveFamilyMember(${m.voter_id}, '${(m.name_hi || m.name_en || '').replace(/'/g, "\\'")}')" class="text-[11px] text-rose-500 hover:text-rose-700 font-bold cursor-pointer px-1 py-0.5 rounded hover:bg-rose-50 transition" title="परिवार से अलग करें">✕ हटाएं</button>`;
+      const nameHi = m.name_hi || '';
+      const nameEn = m.name_en || '';
+      const nameEnBadge = (nameEn && nameHi && nameEn.toLowerCase() !== nameHi.toLowerCase()) ? `<span class="text-xs font-semibold text-slate-500 font-mono">(${nameEn})</span>` : '';
+      const relHi = m.rel_name_hi || m.rel_name_en || '-';
+      const relEn = m.rel_name_en || '';
+      const relEnBadge = (relEn && m.rel_name_hi && relEn.toLowerCase() !== m.rel_name_hi.toLowerCase()) ? `<span class="text-xs text-slate-400 font-mono">(${relEn})</span>` : '';
+
+      return `
+        <div class="py-2.5 flex items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-xs sm:text-sm font-black text-slate-900">${nameHi || nameEn}</span>
+              ${nameEnBadge}
+              ${m.is_family_head ? '<span class="text-[9px] bg-blue-100 text-blue-900 font-extrabold px-1.5 py-0.2 rounded">मुखिया</span>' : ''}
+              ${catBadge}
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">
+              ${m.rel_type || 'संबंध'}: <span class="font-bold text-slate-700">${relHi}</span> ${relEnBadge} · उम्र: ${m.age || '-'} · ${m.gender || ''}
+            </p>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="flex items-center justify-end gap-1">
+              ${(m.ward_no || m.part_no) ? `<span class="text-[10px] bg-blue-50 text-blue-800 font-bold px-1.5 py-0.5 rounded border border-blue-200">${isWardElection ? 'वार्ड ' + (m.ward_no || m.part_no) : 'भाग ' + (m.part_no || m.ward_no)}</span>` : ''}
+              <span class="text-[10px] bg-slate-100 text-slate-700 font-mono px-1.5 py-0.5 rounded border border-slate-200">
+                क्र. ${m.sl_no}
+              </span>
+            </div>
+            <div class="mt-0.5 flex items-center justify-end gap-1.5">
+              ${phoneDisplay}
+              ${editPhoneBtn}
+              ${removeMemberBtn}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Remove Member from Current Family
+  async function confirmRemoveFamilyMember(voterId, voterName) {
+    triggerHapticSafe('warning');
+    if (!confirm(`क्या आप ${voterName || 'इस मतदाता'} को इस परिवार से अलग करना चाहते हैं?`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/family/remove_member?tenant=${encodeURIComponent(currentTenant)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voter_id: voterId, family_id: currentModalFamilyId })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'हटाया नहीं जा सका');
+
+      currentModalMembers = currentModalMembers.filter(m => m.voter_id !== voterId);
+      renderModalMembersList();
+
+      const subEl = document.getElementById('modalFamilySubtitle');
+      if (subEl) subEl.textContent = `कुल ${currentModalMembers.length} सदस्य`;
+
+      window.showToast?.('मतदाता को परिवार से अलग कर दिया गया है', 'success');
+      playAudioToneSafe(880, 0.08);
+      triggerHapticSafe('light');
+
+      loadFamilies();
+    } catch (e) {
+      window.showToast?.(e.message || 'त्रुटि हुई', 'error');
+    }
+  }
+
+  // Add Member Search & Add Logic
+  let candidateSearchTimer = null;
+  function toggleAddMemberPane(forceOpen) {
+    const pane = document.getElementById('addMemberSearchPane');
+    if (!pane) return;
+    const shouldOpen = forceOpen !== undefined ? forceOpen : pane.classList.contains('hidden');
+    if (shouldOpen) {
+      pane.classList.remove('hidden');
+      const input = document.getElementById('candidateSearchInput');
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 50);
+      }
+      const resultsContainer = document.getElementById('candidateSearchResults');
+      if (resultsContainer) {
+        resultsContainer.innerHTML = '';
+        resultsContainer.classList.add('hidden');
+      }
+    } else {
+      pane.classList.add('hidden');
+    }
+  }
+
+  function debounceCandidateSearch() {
+    clearTimeout(candidateSearchTimer);
+    candidateSearchTimer = setTimeout(searchCandidateMembers, 300);
+  }
+
+  async function searchCandidateMembers() {
+    const input = document.getElementById('candidateSearchInput');
+    const q = input ? input.value.trim() : '';
+    const resultsContainer = document.getElementById('candidateSearchResults');
+    if (!resultsContainer) return;
+
+    if (!q || q.length < 2) {
+      resultsContainer.innerHTML = '';
+      resultsContainer.classList.add('hidden');
+      return;
+    }
+
+    const currentMemberIds = currentModalMembers.map(m => m.voter_id).join(',');
+    let url = `/api/family/search_candidates?tenant=${encodeURIComponent(currentTenant)}&q=${encodeURIComponent(q)}&exclude_ids=${encodeURIComponent(currentMemberIds)}`;
+    if (currentModalFamilyWard) url += `&ward_no=${currentModalFamilyWard}`;
+    if (currentModalFamilyPart) url += `&part_no=${currentModalFamilyPart}`;
+
+    resultsContainer.innerHTML = '<div class="py-2 text-center text-slate-400 text-xs font-bold">खोज जारी है...</div>';
+    resultsContainer.classList.remove('hidden');
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'खोज विफल');
+
+      const candidates = data.candidates || [];
+      if (candidates.length === 0) {
+        resultsContainer.innerHTML = '<div class="py-2 text-center text-slate-500 text-xs font-bold">कोई मतदाता नहीं मिला</div>';
+        return;
+      }
+
+      resultsContainer.innerHTML = candidates.map(c => `
+        <div class="py-2 flex items-center justify-between gap-2 border-b border-slate-100 last:border-b-0">
+          <div class="min-w-0">
+            <div class="text-xs font-black text-slate-900 truncate">
+              ${c.name_hi || c.name_en}
+              <span class="text-[10px] text-slate-500 font-normal">(${c.gender || ''}, ${c.age || '-'} वर्ष)</span>
+            </div>
+            <div class="text-[10px] text-slate-500 truncate mt-0.5">
+              ${c.rel_type || 'संबंध'}: <span class="font-bold text-slate-700">${c.rel_name_hi || c.rel_name_en || '-'}</span> · मकान: ${c.house_no || '-'} · क्र. ${c.sl_no}
+            </div>
+          </div>
+          <button 
+            type="button" 
+            onclick="addCandidateToCurrentFamily(${c.voter_id})"
+            class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-lg text-[11px] font-bold shrink-0 cursor-pointer shadow-xs transition"
+          >
+            + जोड़ें
+          </button>
+        </div>
+      `).join('');
+    } catch (e) {
+      resultsContainer.innerHTML = `<div class="py-2 text-center text-rose-500 text-xs font-bold">त्रुटि: ${e.message}</div>`;
+    }
+  }
+
+  async function addCandidateToCurrentFamily(voterId) {
+    if (!voterId || !currentModalFamilyId) return;
+    try {
+      const res = await fetch(`/api/family/add_member?tenant=${encodeURIComponent(currentTenant)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          voter_id: voterId,
+          target_family_id: currentModalFamilyId
+        })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'जोड़ा नहीं जा सका');
+
+      window.showToast?.('मतदाता परिवार में जोड़ दिया गया', 'success');
+      playAudioToneSafe(1200, 0.1);
+      triggerHapticSafe('success');
+
+      if (data.family_id) {
+        currentModalFamilyId = data.family_id;
+      }
+
+      const updatedMembers = await fetchMembersForFamily(currentModalFamilyId, currentModalFamilyWard, currentModalFamilyPart);
+      if (updatedMembers && updatedMembers.length > 0) {
+        currentModalMembers = updatedMembers;
+      }
+      renderModalMembersList();
+
+      const subEl = document.getElementById('modalFamilySubtitle');
+      if (subEl) subEl.textContent = `कुल ${currentModalMembers.length} सदस्य`;
+
+      toggleAddMemberPane(false);
+      loadFamilies();
+    } catch (e) {
+      window.showToast?.(e.message || 'त्रुटि हुई', 'error');
+    }
+  }
+
+  function openEditMemberPhoneModal(voterId) {
+    const member = currentModalMembers.find(m => m.voter_id === voterId);
+    if (!member) return;
+    activeEditPhoneVoterId = voterId;
+    const nameHi = member.name_hi || member.name_en || '';
+    document.getElementById('editPhoneModalVoterName').textContent = nameHi ? `मोबाइल नंबर · ${nameHi}` : 'मोबाइल नंबर';
+    document.getElementById('editPhoneInput').value = member.contact_phone || '';
+    document.getElementById('editMemberPhoneModal').classList.remove('hidden');
+  }
+
+  function closeEditMemberPhoneModal() {
+    document.getElementById('editMemberPhoneModal').classList.add('hidden');
+    activeEditPhoneVoterId = null;
+  }
+
+  async function saveEditMemberPhone() {
+    if (!activeEditPhoneVoterId) return;
+    const phone = document.getElementById('editPhoneInput').value.trim();
+    try {
+      const res = await fetch(`/api/voter/update_phone?tenant=${encodeURIComponent(currentTenant)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voter_id: activeEditPhoneVoterId, phone: phone, apply_to_family: false })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'अपडेट नहीं हो सका');
+
+      const member = currentModalMembers.find(m => m.voter_id === activeEditPhoneVoterId);
+      if (member) member.contact_phone = data.phone;
+      renderModalMembersList();
+      window.showToast?.('मोबाइल नंबर अपडेट किया गया', 'success');
+      closeEditMemberPhoneModal();
+    } catch (err) {
+      window.showToast?.(err.message || 'अपडेट नहीं हो सका', 'error');
+    }
+  }
+
+  // =========================================================================
+  // BATCH FAMILY PARCHI DISPATCH MODAL & ENRICHED FILTER ENGINE
+  // =========================================================================
+
+  function populateBatchCasteOptions() {
+    const casteSelect = document.getElementById('batchFilterCaste');
+    if (!casteSelect) return;
+    const currentVal = casteSelect.value;
+    const castesSet = new Set();
+    const sourceList = (activeBatchTargetsRaw && activeBatchTargetsRaw.length > 0) ? activeBatchTargetsRaw : allFamiliesData;
+    sourceList.forEach(f => {
+      if (f.caste_tag && f.caste_tag.trim()) {
+        castesSet.add(f.caste_tag.trim());
+      }
+    });
+    const sortedCastes = Array.from(castesSet).sort((a, b) => a.localeCompare(b, 'hi'));
+    let html = '<option value="">सभी जातियाँ (All Castes)</option>';
+    sortedCastes.forEach(c => {
+      html += `<option value="${c.replace(/"/g, '&quot;')}">${c.replace(/</g, '&lt;')}</option>`;
+    });
+    casteSelect.innerHTML = html;
+    if (castesSet.has(currentVal)) {
+      casteSelect.value = currentVal;
+    }
+  }
+
+  function setBatchSentimentPreset(preset) {
+    const favEl = document.getElementById('batchSentFavored');
+    const swEl = document.getElementById('batchSentSwing');
+    const oppEl = document.getElementById('batchSentOpposed');
+    const neuEl = document.getElementById('batchSentNeutral');
+
+    if (preset === 'all') {
+      if (favEl) favEl.checked = true;
+      if (swEl) swEl.checked = true;
+      if (oppEl) oppEl.checked = true;
+      if (neuEl) neuEl.checked = true;
+    } else if (preset === 'favored') {
+      if (favEl) favEl.checked = true;
+      if (swEl) swEl.checked = false;
+      if (oppEl) oppEl.checked = false;
+      if (neuEl) neuEl.checked = false;
+    } else if (preset === 'swing') {
+      if (favEl) favEl.checked = false;
+      if (swEl) swEl.checked = true;
+      if (oppEl) oppEl.checked = false;
+      if (neuEl) neuEl.checked = false;
+    }
+    applyBatchFilters();
+  }
+
+  function applyBatchFilters() {
+    if (!activeBatchTargetsRaw || activeBatchTargetsRaw.length === 0) return;
+
+    const casteFilter = (document.getElementById('batchFilterCaste')?.value || '').trim();
+    const sentFav = document.getElementById('batchSentFavored')?.checked ?? true;
+    const sentSw = document.getElementById('batchSentSwing')?.checked ?? true;
+    const sentOpp = document.getElementById('batchSentOpposed')?.checked ?? true;
+    const sentNeu = document.getElementById('batchSentNeutral')?.checked ?? true;
+    const onlyWithPhone = document.getElementById('batchOnlyWithPhone')?.checked ?? true;
+
+    const allSentimentsChecked = sentFav && sentSw && sentOpp && sentNeu;
+
+    filteredBatchTargets = activeBatchTargetsRaw.filter(f => {
+      // 1. Caste Filter
+      if (casteFilter && (f.caste_tag || '').trim() !== casteFilter) {
+        return false;
+      }
+
+      // 2. Phone availability filter
+      const phone = (f.primary_phone || (f.all_phones && f.all_phones[0]) || '').replace(/\D/g, '');
+      const hasPhone = phone.length >= 10;
+      if (onlyWithPhone && !hasPhone) {
+        return false;
+      }
+
+      // 3. Sentiment filter
+      if (!allSentimentsChecked) {
+        const favored = f.favored_count || 0;
+        const swing = f.swing_count || 0;
+        const opposed = f.opposed_count || 0;
+        const total = f.total_members || (f.member_ids ? f.member_ids.length : 1);
+        const neutral = Math.max(0, total - (favored + swing + opposed));
+
+        const matchesSentiment = (sentFav && favored > 0) ||
+                                 (sentSw && swing > 0) ||
+                                 (sentOpp && opposed > 0) ||
+                                 (sentNeu && neutral > 0);
+        if (!matchesSentiment) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    // Update metrics
+    let totalFamilies = filteredBatchTargets.length;
+    let totalVoters = 0;
+    let readyCount = 0;
+    let skippedCount = 0;
+
+    filteredBatchTargets.forEach(f => {
+      const vCount = f.total_members || (f.member_ids ? f.member_ids.length : 0) || 0;
+      totalVoters += vCount;
+      const phone = (f.primary_phone || (f.all_phones && f.all_phones[0]) || '').replace(/\D/g, '');
+      if (phone.length >= 10) {
+        readyCount++;
+      } else {
+        skippedCount++;
+      }
+    });
+
+    document.getElementById('batchMetricFamilies').textContent = totalFamilies.toLocaleString('en-IN');
+    document.getElementById('batchMetricVoters').textContent = totalVoters.toLocaleString('en-IN');
+    document.getElementById('batchMetricReady').textContent = readyCount.toLocaleString('en-IN');
+    document.getElementById('batchMetricSkipped').textContent = skippedCount.toLocaleString('en-IN');
+
+    // Update Preview list
+    const previewListEl = document.getElementById('batchPreviewList');
+    const previewLabelEl = document.getElementById('batchPreviewCountLabel');
+    const maxPreview = 50;
+    const previewSubset = filteredBatchTargets.slice(0, maxPreview);
+
+    if (previewLabelEl) {
+      previewLabelEl.textContent = totalFamilies > maxPreview 
+        ? `प्रथम ${maxPreview} दिखाए जा रहे हैं (फ़िल्टर अनुसार कुल ${totalFamilies})` 
+        : `फ़िल्टर अनुसार कुल ${totalFamilies} परिवार`;
+    }
+
+    if (previewListEl) {
+      if (previewSubset.length === 0) {
+        previewListEl.innerHTML = '<div class="p-3 text-center text-slate-500 font-bold text-xs">चयनित फ़िल्टर के अनुसार कोई परिवार नहीं मिला</div>';
+      } else {
+        previewListEl.innerHTML = previewSubset.map((f, idx) => {
+          const phone = (f.primary_phone || (f.all_phones && f.all_phones[0]) || '').replace(/\D/g, '');
+          const hasPhone = phone.length >= 10;
+          const mukhiya = f.mukhiya_name || 'अज्ञात मुखिया';
+          const count = f.total_members || (f.member_ids ? f.member_ids.length : 0) || 0;
+          const caste = f.caste_tag ? `🏷️ ${f.caste_tag}` : '';
+
+          return `
+            <div id="batchRow_${idx}" class="p-2 rounded-lg bg-white border border-slate-200 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2 truncate mr-2">
+                <span class="font-bold text-slate-400 font-mono w-5 shrink-0">${idx + 1}.</span>
+                <span class="font-black text-slate-900 truncate">${mukhiya}</span>
+                <span class="text-[10px] text-slate-500 shrink-0">(${count} सदस्य)</span>
+                ${caste ? `<span class="text-[9px] bg-purple-50 text-purple-700 font-bold px-1.5 py-0.2 rounded border border-purple-200 shrink-0">${caste}</span>` : ''}
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                ${hasPhone ? `<span class="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[11px]">📞 ${phone.slice(-10)}</span>` : '<span class="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-[10px]">⚠️ फोन नहीं</span>'}
+                <span id="batchStatusBadge_${idx}" class="text-[10px] font-bold text-slate-400">प्रतीक्षारत</span>
+              </div>
+            </div>
+          `;
+        }).join('') + (totalFamilies > maxPreview ? `
+          <div class="p-2 text-center text-xs font-bold text-slate-500 bg-slate-100 rounded-lg">
+            + ${totalFamilies - maxPreview} और परिवार बैच में शामिल हैं
+          </div>
+        ` : '');
+      }
+    }
+  }
+
+  async function openBatchFamilyParchiModal(targetList = null) {
+    if (batchExecutionState.isRunning) {
+      window.showToast?.('बैच प्रेषण वर्तमान में चल रहा है, कृपया इसके समाप्त होने की प्रतीक्षा करें।', 'warning');
+      document.getElementById('batchFamilyParchiModal').classList.remove('hidden');
+      return;
+    }
+
+    // 1. Snapshot targets
+    if (targetList && targetList.length > 0) {
+      activeBatchTargetsRaw = JSON.parse(JSON.stringify(targetList));
+    } else if (selectedFamilies.size > 0) {
+      activeBatchTargetsRaw = JSON.parse(JSON.stringify(Array.from(selectedFamilies.values())));
+    } else {
+      activeBatchTargetsRaw = JSON.parse(JSON.stringify(allFamiliesData));
+    }
+
+    if (!activeBatchTargetsRaw || activeBatchTargetsRaw.length === 0) {
+      window.showToast?.('भेजने के लिए कोई परिवार उपलब्ध नहीं है', 'warning');
+      return;
+    }
+
+    // 2. Populate filters & compute initial filtered list
+    populateBatchCasteOptions();
+    applyBatchFilters();
+
+    // 3. Reset Progress UI
+    const progressSection = document.getElementById('batchProgressSection');
+    progressSection.classList.add('hidden');
+    document.getElementById('batchProgressBar').style.width = '0%';
+    document.getElementById('batchProgressPercent').textContent = '0%';
+    document.getElementById('batchProgressStatus').textContent = 'प्रेषण प्रगति (0%)...';
+    document.getElementById('batchStatSuccess').textContent = '0';
+    document.getElementById('batchStatFailed').textContent = '0';
+    document.getElementById('batchStatSkippedCount').textContent = '0';
+
+    const startBtn = document.getElementById('batchBtnStart');
+    const pauseBtn = document.getElementById('batchBtnPauseResume');
+    const cancelBtn = document.getElementById('batchBtnCancel');
+    startBtn.disabled = false;
+    startBtn.classList.remove('hidden');
+    pauseBtn.classList.add('hidden');
+    cancelBtn.textContent = 'रद्द करें (Cancel)';
+
+    // 4. Check WhatsApp Quota Balance
+    const quotaBalanceEl = document.getElementById('batchQuotaAvailable');
+    try {
+      quotaBalanceEl.textContent = 'जांच जारी...';
+      const quotaRes = await fetch(`/api/campaign/whatsapp_quota?_t=${Date.now()}`);
+      const quotaData = await quotaRes.json();
+      if (quotaData.success && quotaData.available !== undefined) {
+        quotaBalanceEl.textContent = `${quotaData.available} संदेश उपलब्ध`;
+        const readyCount = filteredBatchTargets.filter(f => ((f.primary_phone || (f.all_phones && f.all_phones[0]) || '').replace(/\D/g, '')).length >= 10).length;
+        if (quotaData.available < readyCount) {
+          quotaBalanceEl.classList.remove('text-emerald-700');
+          quotaBalanceEl.classList.add('text-amber-700');
+        } else {
+          quotaBalanceEl.classList.remove('text-amber-700');
+          quotaBalanceEl.classList.add('text-emerald-700');
+        }
+      } else {
+        quotaBalanceEl.textContent = 'उपलब्ध';
+      }
+    } catch (e) {
+      quotaBalanceEl.textContent = 'उपलब्ध';
+    }
+
+    // 5. Show Modal
+    document.getElementById('batchFamilyParchiModal').classList.remove('hidden');
+  }
+
+  function closeBatchFamilyParchiModal() {
+    if (batchExecutionState.isRunning && !batchExecutionState.shouldCancel) {
+      if (!confirm('बैच प्रेषण वर्तमान में चल रहा है। क्या आप सचमुच इसे रोकना चाहते हैं?')) {
+        return;
+      }
+      batchExecutionState.shouldCancel = true;
+    }
+    document.getElementById('batchFamilyParchiModal').classList.add('hidden');
+  }
+
+  function cancelBatchDispatch() {
+    if (batchExecutionState.isRunning) {
+      batchExecutionState.shouldCancel = true;
+      const cancelBtn = document.getElementById('batchBtnCancel');
+      if (cancelBtn) cancelBtn.textContent = 'रोका जा रहा है...';
+    } else {
+      closeBatchFamilyParchiModal();
+    }
+  }
+
+  function toggleBatchPause() {
+    batchExecutionState.isPaused = !batchExecutionState.isPaused;
+    const pauseBtn = document.getElementById('batchBtnPauseResume');
+    const statusText = document.getElementById('batchProgressStatus');
+    if (batchExecutionState.isPaused) {
+      if (pauseBtn) pauseBtn.textContent = '▶️ पुनः शुरू करें (Resume)';
+      if (statusText) statusText.textContent = '⏸️ प्रेषण रोका गया है (Paused)';
+    } else {
+      if (pauseBtn) pauseBtn.textContent = '⏸️ रोकें (Pause)';
+      if (statusText) statusText.textContent = 'प्रेषण जारी...';
+    }
+  }
+
+  // Sequential Execution Loop
+  async function startBatchDispatch() {
+    if (!filteredBatchTargets || filteredBatchTargets.length === 0) {
+      window.showToast?.('चयनित फ़िल्टर के अनुसार कोई परिवार नहीं है', 'warning');
+      return;
+    }
+    if (batchExecutionState.isRunning) {
+      window.showToast?.('बैच प्रेषण पहले से सक्रिय है', 'info');
+      return;
+    }
+
+    const recipientMode = document.querySelector('input[name="batchRecipientMode"]:checked')?.value || 'mukhiya';
+
+    batchExecutionState = {
+      isRunning: true,
+      isPaused: false,
+      shouldCancel: false,
+      queue: filteredBatchTargets,
+      currentIndex: 0,
+      successCount: 0,
+      failedCount: 0,
+      skippedCount: 0,
+      totalTarget: filteredBatchTargets.length
+    };
+
+    // UI Updates
+    document.getElementById('batchProgressSection').classList.remove('hidden');
+    const startBtn = document.getElementById('batchBtnStart');
+    const pauseBtn = document.getElementById('batchBtnPauseResume');
+    const cancelBtn = document.getElementById('batchBtnCancel');
+    startBtn.classList.add('hidden');
+    pauseBtn.classList.remove('hidden');
+    pauseBtn.textContent = '⏸️ रोकें (Pause)';
+    cancelBtn.textContent = 'रोकें (Stop)';
+
+    const total = batchExecutionState.totalTarget;
+
+    for (let i = 0; i < total; i++) {
+      if (batchExecutionState.shouldCancel) {
+        break;
+      }
+
+      // Handle pause loop
+      while (batchExecutionState.isPaused && !batchExecutionState.shouldCancel) {
+        await new Promise(r => setTimeout(r, 400));
+      }
+      if (batchExecutionState.shouldCancel) break;
+
+      batchExecutionState.currentIndex = i;
+      const family = batchExecutionState.queue[i];
+
+      // Update progress percent
+      const progressPct = Math.round(((i + 1) / total) * 100);
+      document.getElementById('batchProgressBar').style.width = `${progressPct}%`;
+      document.getElementById('batchProgressPercent').textContent = `${progressPct}%`;
+      document.getElementById('batchProgressStatus').textContent = `प्रेषित किया जा रहा है: ${family.mukhiya_name || 'परिवार'} (${i + 1}/${total})...`;
+
+      const badgeEl = document.getElementById(`batchStatusBadge_${i}`);
+      if (badgeEl) {
+        badgeEl.textContent = '⏳ भेजा जा रहा है...';
+        badgeEl.className = 'text-[10px] font-black text-blue-600 animate-pulse';
+      }
+
+      // Check phone numbers
+      const primaryPhone = (family.primary_phone || (family.all_phones && family.all_phones[0]) || '').replace(/\D/g, '').slice(-10);
+      const allPhones = (family.all_phones && family.all_phones.length > 0)
+        ? family.all_phones.map(p => String(p).replace(/\D/g, '').slice(-10)).filter(p => p.length === 10)
+        : (primaryPhone.length === 10 ? [primaryPhone] : []);
+
+      let dispatchPhones = [primaryPhone];
+      if (recipientMode === 'all' && allPhones.length > 0) {
+        dispatchPhones = allPhones;
+      }
+
+      if (primaryPhone.length !== 10) {
+        batchExecutionState.skippedCount++;
+        document.getElementById('batchStatSkippedCount').textContent = batchExecutionState.skippedCount;
+        if (badgeEl) {
+          badgeEl.textContent = '⚠️ फोन नहीं';
+          badgeEl.className = 'text-[10px] font-bold text-amber-600';
+        }
+        continue;
+      }
+
+      // Sequential POST to /api/send_openclaw
+      try {
+        const payload = {
+          phone: primaryPhone,
+          phones: dispatchPhones,
+          voter_ids: family.member_ids || [],
+          slip_type: 'Family'
+        };
+
+        const res = await fetch('/api/send_openclaw', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          batchExecutionState.successCount++;
+          document.getElementById('batchStatSuccess').textContent = batchExecutionState.successCount;
+          triggerHapticSafe('success');
+          playAudioToneSafe(1200, 0.15);
+          if (badgeEl) {
+            badgeEl.textContent = '✓ सफल';
+            badgeEl.className = 'text-[10px] font-black text-emerald-600';
+          }
+        } else {
+          batchExecutionState.failedCount++;
+          document.getElementById('batchStatFailed').textContent = batchExecutionState.failedCount;
+          triggerHapticSafe('warning');
+          if (badgeEl) {
+            badgeEl.textContent = '✕ विफल';
+            badgeEl.className = 'text-[10px] font-black text-rose-600';
+          }
+        }
+      } catch (err) {
+        console.error('Batch send item error:', err);
+        batchExecutionState.failedCount++;
+        document.getElementById('batchStatFailed').textContent = batchExecutionState.failedCount;
+        if (badgeEl) {
+          badgeEl.textContent = '✕ त्रुटि';
+          badgeEl.className = 'text-[10px] font-black text-rose-600';
+        }
+      }
+
+      // 1.2s to 1.5s delay between sends to comply with WhatsApp API rate limits
+      await new Promise(r => setTimeout(r, 1300));
+    }
+
+    // Completion Handling
+    batchExecutionState.isRunning = false;
+    pauseBtn.classList.add('hidden');
+    cancelBtn.textContent = 'बंद करें (Close)';
+    document.getElementById('batchProgressStatus').textContent = batchExecutionState.shouldCancel 
+      ? '⚠️ बैच रोक दिया गया (Stopped)' 
+      : '✅ बैच प्रेषण पूर्ण हुआ (Completed)';
+
+    const summaryMsg = `बैच पूर्ण: ${batchExecutionState.successCount} सफल, ${batchExecutionState.failedCount} विफल, ${batchExecutionState.skippedCount} छोड़े गए।`;
+    window.showToast?.(summaryMsg, batchExecutionState.failedCount === 0 ? 'success' : 'info', 4500);
+
+    // Clear selection & reset island on complete
+    selectedFamilies.clear();
+    renderFamiliesGrid(allFamiliesData);
+    updateSelectAllButtonState();
+    updateFamilyFloatingActionIsland();
+  }
+
+  // Load on start
+  // Dynamically load campaign castes into #familyCasteFilter
+  async function loadFamilyCasteFilter() {
+    const select = document.getElementById('familyCasteFilter');
+    if (!select) return;
+    try {
+      const res = await fetch(`/api/caste/presets?tenant=${encodeURIComponent(currentTenant)}`);
+      const data = await res.json();
+      if (!data || !data.success) return;
+
+      const currentVal = select.value;
+      select.innerHTML = '';
+
+      const optAll = document.createElement('option');
+      optAll.value = '';
+      optAll.textContent = 'जाति: सभी';
+      select.appendChild(optAll);
+
+      const optUntagged = document.createElement('option');
+      optUntagged.value = 'untagged';
+      optUntagged.textContent = 'अनिर्धारित (Untagged)';
+      select.appendChild(optUntagged);
+
+      const tagged = data.tagged_castes || [];
+      tagged.forEach(c => {
+        const tag = (c.tag || '').trim();
+        if (tag) {
+          const opt = document.createElement('option');
+          opt.value = tag;
+          opt.textContent = `${tag}${c.count ? ` (${c.count})` : ''}`;
+          select.appendChild(opt);
+        }
+      });
+
+      if (currentVal) {
+        select.value = currentVal;
+      }
+    } catch (err) {
+      console.warn('Could not load caste presets for family module:', err);
+    }
+  }
+
+  // Load on start
+  document.addEventListener('DOMContentLoaded', () => {
+    loadFamilyCasteFilter();
+    loadFamilies();
+  });
+</script>
+
+{{ ward_sheet_modal('familyWardFilterModal', 'familyWardFilter', 'familySelectedWardLabel') }}
+{% endblock %}

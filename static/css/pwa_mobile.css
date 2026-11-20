@@ -1,0 +1,124 @@
+/**
+ * pwa_mobile.css - Core PWA & Mobile Native Bridge Stylesheet
+ * Eliminates mobile zoom, boundary clipping, tap delay, and keyboard displacement.
+ * Part of SmartBooth PWA
+ */
+
+/* 1. Enforce 100dvh Dynamic Viewport Height */
+:root {
+  --app-height: 100dvh;
+}
+
+@supports not (height: 100dvh) {
+  :root {
+    --app-height: 100vh;
+  }
+}
+
+html, body {
+  height: var(--app-height);
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Make UI chrome (headers, navs, action buttons) behave like native controls */
+header, nav, aside, button, .no-select {
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Retain normal selectable text for voter records, data tables, and inputs */
+input, textarea, select, [contenteditable="true"], table, .voter-card, .voter-details, p, span, td {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Native tactile button press feedback */
+button:active:not(:disabled), .active-press:active {
+  transform: scale(0.97);
+  transition: transform 0.08s ease-out;
+}
+
+/* Suppress ghost image dragging */
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+/* 2. Crucial Anti-Zoom Rule for iOS & Android: Inputs >= 16px prevent auto-zoom */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* 3. Eliminate 300ms tap delay while ensuring natural vertical gesture scrolling */
+button, a, input, select, textarea, .voter-card, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* 4. Safe Area Inset Utility Classes for Notched Devices (iPhone X+, Modern Android) */
+.safe-top-bar {
+  padding-top: max(8px, env(safe-area-inset-top, 0px)) !important;
+  height: calc(48px + env(safe-area-inset-top, 0px)) !important;
+}
+
+.safe-bottom-bar {
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.safe-main-viewport {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px) !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+/* Horizontal scrollable carousels & chip bars: explicitly allow horizontal touch swipe */
+.overflow-x-auto, [class*="overflow-x-auto"] {
+  touch-action: pan-x pan-y !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Position floating multi-select bar cleanly above bottom navigation bar */
+#mobileMultiSelectBar {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 64px) !important;
+  transition: bottom 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hide bottom bar when mobile keyboard is open on Android/iOS to prevent it jumping into the middle of the screen */
+body.keyboard-open nav.safe-bottom-bar {
+  display: none !important;
+}
+
+body.keyboard-open #mobileMultiSelectBar {
+  bottom: 12px !important;
+}
+
+/* 5. Elegant Floating PWA Update Notification Toast */
+#pwaUpdateToast {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top, 12px));
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  z-index: 99999;
+  max-width: min(92vw, 420px);
+  width: max-content;
+  pointer-events: none;
+  opacity: 0;
+}
+
+#pwaUpdateToast.visible {
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+  opacity: 1;
+}

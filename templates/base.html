@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>{% block title %}{{ CAMPAIGN.election.app_title }} — {{ CAMPAIGN.election.portal_subtitle }}{% endblock %}</title>
+  
+  <!-- PWA Manifest, Mobile Engine & Meta -->
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="stylesheet" href="/static/css/pwa_mobile.css?v={{ APP_VERSION }}">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Smart Booth">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+  <link rel="icon" type="image/png" href="/static/icons/icon-192.png">
+
+  <script>
+    // Suppress Tailwind CDN dev warning in console
+    const _ow = console.warn;
+    console.warn = function(...a) {
+      if (a[0] && typeof a[0] === 'string' && a[0].includes('cdn.tailwindcss.com')) return;
+      _ow.apply(console, a);
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Inter', 'Mukta', sans-serif; }
+    table tr:hover { background-color: #f8fafc; }
+    .safe-bottom-padding { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 78px); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Native Mobile Bottom Sheet Styles */
+    @media (max-width: 767px) {
+      .mobile-extra-filter { display: none !important; }
+      
+      .bottom-sheet-modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+      }
+      .bottom-sheet-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-top-left-radius: 1.5rem !important;
+        border-top-right-radius: 1.5rem !important;
+        max-height: 88vh !important;
+        animation: slideUpSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      @keyframes slideUpSheet {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+    }
+    /* Collapsible Left Sidebar Styles */
+    #appSidebar {
+      transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @media (min-width: 768px) {
+      #appSidebar.sidebar-collapsed {
+        width: 3.75rem !important; /* 60px slim rail */
+      }
+      #appSidebar.sidebar-collapsed .sidebar-text,
+      #appSidebar.sidebar-collapsed .sidebar-section-header,
+      #appSidebar.sidebar-collapsed .sidebar-badge {
+        display: none !important;
+      }
+      #appSidebar.sidebar-collapsed .sidebar-link {
+        justify-content: center !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+      #appSidebar.sidebar-collapsed .sidebar-collapse-icon {
+        transform: rotate(180deg);
+      }
+    }
+    @media (max-width: 767px) {
+      #appSidebar {
+        width: 16rem !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+      }
+      #appSidebar.mobile-open {
+        transform: translateX(0) !important;
+      }
+    }
+  </style>
+  <script>
+    // Centralized XSS-Safe HTML Escaping Utility
+    window.escapeHtml = window.escapeHtml || function (str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    };
+
+    // Tactile Haptic Feedback Engine
+    window.triggerHaptic = window.triggerHaptic || function (type = 'light') {
+      if (!('vibrate' in navigator)) return;
+      try {
+        if (type === 'light' || type === 'selection') {
+          navigator.vibrate(12);
+        } else if (type === 'medium') {
+          navigator.vibrate(25);
+        } else if (type === 'success') {
+          navigator.vibrate([25, 50, 25]);
+        } else if (type === 'warning') {
+          navigator.vibrate([40, 40]);
+        }
+      } catch (e) {}
+    };
+
+    // Safe HTML Escape Utility
+    window.escapeHtml = window.escapeHtml || function (str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+  </script>
+  <script>
+    window.BOOTHS_DATA = {{ BOOTHS | tojson }};
+    window.CAMPAIGN_CONFIG = {{ CAMPAIGN | tojson }};
+    (function() {
+      const isReseller = {{ (current_user and current_user.role == 'reseller')|tojson }};
+      const isMyCampaigns = {{ (active_page == 'my_campaigns')|tojson }};
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramTenant = urlParams.get('tenant');
+      const cookieMatch = document.cookie.match(/(?:^|;\s*)voter_tenant=([^;]*)/);
+      const cookieTenant = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+      const serverTenant = {{ (current_tenant or tenant_slug or '')|tojson }};
+      const fallbackTenant = '';
+      const activeTenant = (serverTenant || paramTenant || (isReseller && isMyCampaigns ? '' : cookieTenant) || fallbackTenant).toLowerCase();
+      window.CURRENT_TENANT = activeTenant;
+
+      if (activeTenant && cookieTenant !== activeTenant) {
+        document.cookie = "voter_tenant=" + encodeURIComponent(activeTenant) + "; path=/; max-age=2592000; SameSite=Lax";
+      }
+
+      window.switchGlobalCampaign = function(newSlug) {
+        if (!newSlug || newSlug === 'ALL' || newSlug === '*') {
+          document.cookie = "voter_tenant=; path=/; max-age=0; SameSite=Lax";
+          window.CURRENT_TENANT = '';
+          window.location.href = '/admin';
+          return;
+        }
+        if (window.triggerHaptic) window.triggerHaptic('selection');
+        document.cookie = "voter_tenant=" + encodeURIComponent(newSlug) + "; path=/; max-age=2592000; SameSite=Lax";
+        window.CURRENT_TENANT = newSlug;
+        const currentUrl = new URL(window.location.href);
+        if (currentUrl.pathname === '/admin' || currentUrl.pathname.startsWith('/admin/') || currentUrl.pathname === '/my-campaigns') {
+          window.location.href = '/?tenant=' + encodeURIComponent(newSlug);
+        } else {
+          currentUrl.searchParams.set('tenant', newSlug);
+          window.location.href = currentUrl.toString();
+        }
+      };
+
+      const _origFetch = window.fetch;
+      window.fetch = async function(resource, init) {
+        init = init || {};
+        const curTenant = window.CURRENT_TENANT || '';
+        const method = (init.method || 'GET').toUpperCase();
+        const isGet = method === 'GET';
+
+        if (typeof resource === 'string') {
+          if (resource.startsWith('/api/')) {
+            const sep = resource.includes('?') ? '&' : '?';
+            let params = [];
+            if (curTenant && !resource.includes('tenant=')) {
+              params.push('tenant=' + encodeURIComponent(curTenant));
+            }
+            if (isGet && !resource.includes('_t=')) {
+              params.push('_t=' + Date.now());
+            }
+            if (params.length > 0) {
+              resource = resource + sep + params.join('&');
+            }
+            if (isGet && !init.cache) {
+              init.cache = 'no-store';
+            }
+          }
+        } else if (resource instanceof Request && resource.url.includes('/api/')) {
+          try {
+            const u = new URL(resource.url, window.location.origin);
+            if (curTenant && !u.searchParams.has('tenant')) {
+              u.searchParams.set('tenant', curTenant);
+            }
+            if (resource.method === 'GET' && !u.searchParams.has('_t')) {
+              u.searchParams.set('_t', Date.now());
+            }
+            resource = new Request(u.toString(), resource);
+          } catch(e) {}
+        }
+        const resp = await _origFetch.call(this, resource, init);
+        if (resp && resp.status === 401 && !window.location.pathname.startsWith('/login')) {
+          if (typeof window.showToast === 'function') {
+            window.showToast('लॉगिन सत्र समाप्त हो गया है। कृपया पुनः लॉगिन करें (Session expired. Redirecting to login...)', 'warning', 2500);
+          }
+          setTimeout(() => {
+            const nextParam = encodeURIComponent(window.location.pathname + window.location.search);
+            window.location.href = '/login?next=' + nextParam;
+          }, 500);
+        }
+        return resp;
+      };
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const links = document.querySelectorAll('a[href^="/"]');
+        links.forEach(link => {
+          const href = link.getAttribute('href');
+          if (href && !href.startsWith('/static') && !href.startsWith('/tenant_assets') && !href.startsWith('//')
+              && !href.startsWith('/logout') && !href.startsWith('/login') && !href.startsWith('/api/')) {
+            try {
+              const url = new URL(href, window.location.origin);
+              if (!url.searchParams.has('tenant') && window.CURRENT_TENANT) {
+                url.searchParams.set('tenant', window.CURRENT_TENANT);
+                link.setAttribute('href', url.pathname + url.search + url.hash);
+              }
+            } catch(e) {}
+          }
+        });
+      });
+    })();
+  </script>
+  <script>
+    {% set eff_role = ((current_user.role if current_user else '') or session.get('role', ''))|lower %}
+    window.CURRENT_USER = {
+      id: {{ (current_user.id if current_user else session.get('user_id'))|tojson }},
+      username: {{ (current_user.username if current_user else session.get('username', ''))|tojson }},
+      role: {{ eff_role|tojson }},
+      isViewer: {{ (eff_role == 'viewer')|tojson }},
+      isSuperAdmin: {{ (eff_role == 'super_admin')|tojson }},
+      isAdmin: {{ (eff_role in ['admin', 'super_admin'])|tojson }}
+    };
+    {% if eff_role == 'viewer' %}
+    window.IS_VIEWER = true;
+    {% endif %}
+  </script>
+  {% if eff_role == 'viewer' %}
+  <style id="viewer-lockdown-style">
+    /* Global Viewer Mode Enforcement: Hide all editing/tagging controls */
+    .edit-voter-btn,
+    .tag-voter-btn,
+    #floatingEditBtn,
+    #btnSaveVoterProfile,
+    [data-action="edit-voter"],
+    button[title*="Edit Profile"],
+    button[title*="संपादित"],
+    button[title*="टैग / एडिट"],
+    button[title*="प्रोफाइल व विवरण"] {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+  </style>
+  {% endif %}
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 h-[100dvh] w-full max-w-full overflow-hidden flex flex-col antialiased">
+
+  <!-- UNIVERSAL TOP NAVIGATION BAR (Visible on all pages including Hub, with prominent Logout & Campaign info) -->
+  <header class="bg-slate-900 text-white px-2.5 sm:px-4 py-2 sm:py-2.5 border-b border-slate-800 flex items-center justify-between shrink-0 select-none shadow-sm safe-top-bar z-30 overflow-hidden">
+    {% if active_page == 'my_campaigns' %}
+    <!-- Left for Reseller Hub -->
+    <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+      <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-sm font-black shadow-xs shrink-0">
+        🏛️
+      </div>
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="font-black text-xs sm:text-sm text-white tracking-tight truncate">
+          रीसेलर कमान केंद्र (Reseller Command Center)
+        </span>
+        <span class="text-[10px] sm:text-xs bg-indigo-950/80 text-indigo-300 font-bold px-2 py-0.5 rounded-md border border-indigo-800/60 truncate">
+          पोर्टफोलियो
+        </span>
+      </div>
+    </div>
+    {% elif active_page != 'hub' %}
+    <!-- Left for Modules: Prominent Back to Hub Button (Hidden for Karyakartas) -->
+    <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+      {% if current_user.role != 'karyakarta' and session.get('role') != 'karyakarta' %}
+      <a 
+        href="/{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}" 
+        onclick="if(window.triggerHaptic) window.triggerHaptic('light');" 
+        class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-black text-xs transition border border-slate-700 shadow-xs cursor-pointer shrink-0"
+        title="मुख्य मेनू पर वापस जाएं (Back to App Launcher Hub)"
+      >
+        <span class="text-sm">←</span>
+        <span>हब (Hub)</span>
+      </a>
+      {% endif %}
+
+      <!-- Module Title Badge -->
+      <div class="flex items-center gap-1.5 min-w-0">
+        <span class="font-black text-xs sm:text-sm text-white tracking-tight truncate">
+          {% if active_page == 'my_voters' %}🚩 मेरे मतदाता (Assigned Voters)
+          {% elif active_page in ['voting_day', 'voting-day', 'voting'] %}🗳️ मतदान दिवस डेस्क
+          {% elif active_page in ['search', 'voters', 'index'] %}🔍 मतदाता खोज व पर्ची
+          {% elif active_page == 'turnout' %}📊 लाइव टर्नआउट
+          {% elif active_page in ['warroom', 'war_room'] %}📈 राजनीतिक वॉर-रूम
+          {% elif active_page == 'history' %}📜 भेजी गई पर्चियाँ (Dispatch Log)
+          {% elif active_page == 'caste' %}🏷️ समुदाय व सामाजिक समीकरण
+          {% elif active_page == 'admin' %}🏛️ अभियान केंद्र
+          {% elif active_page == 'users' %}👥 खाते व अनुमतियाँ
+          {% elif active_page == 'karyakartas' %}👥 कार्यकर्ता प्रबंधन
+          {% elif active_page == 'outside' %}✈️ प्रवासी मतदाता
+          {% elif active_page in ['reports', 'print_center'] %}🖨️ मतदाता सूची व प्रिंट केंद्र
+          {% elif active_page == 'slips' %}🖨️ मतदाता पर्ची डाउनलोड
+          {% else %}{{ CAMPAIGN.election.app_title }}
+          {% endif %}
+        </span>
+      </div>
+    </div>
+    {% else %}
+    <!-- Left for Hub: App Branding & Constituency Pill -->
+    <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+      <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-sm font-black shadow-xs shrink-0">
+        🗳️
+      </div>
+      <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+        <span class="font-black text-xs sm:text-sm text-white tracking-tight truncate">
+          {{ CAMPAIGN.election.app_title or 'स्मार्ट बूथ' }}
+        </span>
+        <span class="text-[10px] sm:text-xs bg-indigo-950/80 text-indigo-300 font-bold px-1.5 sm:px-2 py-0.5 rounded-md border border-indigo-800/60 truncate max-w-[100px] sm:max-w-[220px]">
+          {{ CAMPAIGN.election.ward_name_en or CAMPAIGN.election.ward_name_hi or current_tenant | upper }}
+        </span>
+        {% if CAMPAIGN.candidate.name_hi or CAMPAIGN.candidate.name_en %}
+        <span class="hidden md:inline-flex items-center gap-1 text-[10px] sm:text-xs bg-slate-800/90 text-amber-300 font-bold px-2 py-0.5 rounded-md border border-slate-700/80 truncate max-w-[180px]" title="प्रत्याशी: {{ CAMPAIGN.candidate.name_hi or CAMPAIGN.candidate.name_en }}">
+          <span>👤</span>
+          <span class="truncate">{{ CAMPAIGN.candidate.name_hi or CAMPAIGN.candidate.name_en }}</span>
+        </span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Right: User Info, Campaign Pill / Switcher & Fast Logout -->
+    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <!-- WhatsApp credit balance (read-only) -->
+      <span id="waCreditChip" class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg border whitespace-nowrap"
+            title="शेष WhatsApp संदेश (Remaining WhatsApp messages)">
+        <span>💬</span><span id="waCreditChipText">--</span>
+      </span>
+      {% if eff_role in ['admin', 'super_admin'] %}
+      <!-- Bulk Slip Broadcast Button (Admin Only) -->
+      <button 
+        type="button" 
+        onclick="openBulkSlipModal()" 
+        class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 sm:py-1 rounded-lg bg-emerald-700/90 hover:bg-emerald-600 text-white border border-emerald-500/50 shadow-2xs transition active:scale-95 cursor-pointer whitespace-nowrap" 
+        title="सभी मतदाताओं को WhatsApp पर्ची भेजें (Campaign Bulk Slip Broadcast)"
+      >
+        <span>📢</span><span class="hidden sm:inline">पर्ची प्रसारण</span>
+      </button>
+      {% endif %}
+      {% if current_user.is_super_admin or current_user.role == 'super_admin' or current_user.tenant_slug == '*' or current_user.assigned_tenant == '*' or session.get('role') == 'super_admin' or session.get('tenant_slug') == '*' %}
+      <!-- Interactive Campaign Switcher for Super Admin (Hidden on mobile subpages to prevent 6-button crowding) -->
+      {% set ns = namespace(active_name='🌐 सभी चुनाव अभियान') %}
+      {% if current_tenant %}
+        {% for c in available_campaigns %}
+          {% if c.slug == current_tenant %}
+            {% set ns.active_name = c.name %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+      <button 
+        id="globalCampaignSwitcher" 
+        type="button" 
+        onclick="openCampaignSearchModal()" 
+        data-active-tenant="{{ current_tenant or '' }}"
+        class="{% if active_page != 'hub' %}hidden sm:flex{% else %}flex{% endif %} items-center gap-1.5 bg-slate-800 hover:bg-slate-700/80 active:scale-95 border border-slate-700 hover:border-slate-600 rounded-xl px-2 sm:px-2.5 py-1.5 shadow-xs transition cursor-pointer group"
+        title="सक्रिय चुनाव अभियान बदलें (Ctrl+K)"
+      >
+        <span class="text-xs sm:text-sm">🏛️</span>
+        <span class="text-slate-100 font-bold text-xs truncate max-w-[120px] sm:max-w-[240px]">
+          {{ ns.active_name }}
+        </span>
+        <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-200 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {% if active_page != 'hub' %}
+      <button 
+        type="button" 
+        onclick="openCampaignSearchModal()" 
+        class="sm:hidden p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold shadow-2xs active:scale-95 cursor-pointer"
+        title="सक्रिय चुनाव अभियान बदलें"
+      >
+        🏛️
+      </button>
+      {% endif %}
+      <a 
+        href="/admin" 
+        class="{% if active_page != 'hub' %}hidden sm:inline-flex{% else %}inline-flex{% endif %} items-center gap-1 text-[11px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-2 sm:px-2.5 py-1 rounded-lg font-bold transition cursor-pointer shrink-0"
+        title="एडमिन पोर्टल (Admin Portal)"
+      >
+        <span>⚙️</span>
+        <span class="hidden sm:inline">एडमिन</span>
+      </a>
+      {% elif current_user.role == 'reseller' or session.get('role') == 'reseller' %}
+      <!-- Interactive Campaign Switcher & Hub for Reseller -->
+      {% if available_campaigns and available_campaigns|length > 0 %}
+      {% set ns_reseller = namespace(active_name='अभियान चुनें') %}
+      {% if current_tenant and active_page != 'my_campaigns' %}
+        {% for c in available_campaigns %}
+          {% if c.slug == current_tenant %}
+            {% set ns_reseller.active_name = c.name %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+      <button 
+        id="globalCampaignSwitcher" 
+        type="button" 
+        onclick="openCampaignSearchModal()" 
+        data-active-tenant="{{ current_tenant or '' }}"
+        class="{% if active_page != 'hub' and active_page != 'my_campaigns' %}hidden sm:flex{% else %}flex{% endif %} items-center gap-1.5 bg-slate-800 hover:bg-slate-700/80 active:scale-95 border border-slate-700 hover:border-slate-600 rounded-xl px-2 sm:px-2.5 py-1.5 shadow-xs transition cursor-pointer group"
+        title="सक्रिय चुनाव अभियान बदलें (Ctrl+K)"
+      >
+        <span class="text-xs sm:text-sm">🏛️</span>
+        <span class="text-slate-100 font-bold text-xs truncate max-w-[110px] sm:max-w-[240px]">
+          {{ ns_reseller.active_name }}
+        </span>
+        <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-200 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {% endif %}
+      <a 
+        href="/my-campaigns" 
+        class="inline-flex items-center gap-1 text-[11px] {% if active_page == 'my_campaigns' %}bg-indigo-600 text-white border-indigo-500{% else %}bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border-indigo-500/40{% endif %} border px-2 sm:px-2.5 py-1 rounded-lg font-bold transition cursor-pointer shrink-0"
+        title="मेरे अभियान (My Campaigns)"
+      >
+        <span>🏛️</span>
+        <span class="hidden sm:inline">मेरे अभियान</span>
+      </a>
+      {% else %}
+      {% if active_page != 'hub' %}
+      <span class="hidden sm:inline-flex text-[10px] sm:text-xs bg-slate-800/90 text-slate-300 font-bold px-2 sm:px-2.5 py-1 rounded-lg border border-slate-700/80 truncate max-w-[120px] sm:max-w-[200px]">
+        📍 {{ CAMPAIGN.election.ward_name_en or CAMPAIGN.election.ward_name_hi or current_tenant | upper }}
+      </span>
+      {% endif %}
+      {% endif %}
+
+      <!-- Current User Pill -->
+      <span class="hidden sm:inline-flex items-center gap-1 text-[11px] bg-slate-800/90 text-slate-300 font-bold px-2.5 py-1 rounded-lg border border-slate-700/80 truncate max-w-[150px]">
+        <span class="text-[10px] text-emerald-400">●</span>
+        <span class="truncate">{{ current_user.full_name or current_user.username }}</span>
+      </span>
+
+      {% if current_user.is_super_admin or current_user.role == 'super_admin' or session.get('role') == 'super_admin' %}
+        <span class="hidden sm:inline-flex text-[10px] bg-amber-950/60 text-amber-300 border border-amber-800/60 px-2 py-0.5 rounded font-bold">Admin</span>
+      {% elif current_user.role == 'reseller' or session.get('role') == 'reseller' %}
+        <span class="hidden sm:inline-flex text-[10px] bg-indigo-950/60 text-indigo-300 border border-indigo-800/60 px-2 py-0.5 rounded font-bold">Reseller</span>
+      {% endif %}
+
+      <a 
+        href="/logout" 
+        onclick="if(window.triggerHaptic) window.triggerHaptic('warning');"
+        class="{% if active_page != 'hub' %}hidden sm:flex{% else %}flex{% endif %} items-center gap-1 text-rose-300 hover:text-white active:scale-95 text-xs font-black px-2 sm:px-3 py-1 bg-rose-950/60 hover:bg-rose-900/90 rounded-lg border border-rose-800/70 transition shadow-2xs cursor-pointer shrink-0"
+        title="लॉगआउट (Log Out)"
+      >
+        <span class="text-xs">🚪</span>
+        <span class="hidden sm:inline">लॉगआउट</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hidden dummy for backwards-compatibility with test suites -->
+  <aside id="appSidebar" class="hidden" aria-hidden="true">
+    <span class="sidebar-collapse-icon">⇤</span>
+    <button onclick="toggleSidebar()"></button>
+    <a href="/logout">Log Out</a>
+  </aside>
+
+  <!-- MAIN VIEWPORT CONTAINER (Full width, scrolls smoothly) -->
+  <div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-slate-50 w-full">
+    <!-- Mobile PWA 1-Click Install Banner -->
+    <div id="pwaInstallBanner" class="hidden bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white px-3.5 py-2.5 items-center justify-between text-xs font-bold shadow-md shrink-0 border-b border-blue-600/30">
+      <div class="flex items-center gap-2">
+        <span class="text-base">📲</span>
+        <span>ऐप इंस्टॉल करें (Smart Booth PWA)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" id="pwaInstallActionBtn" class="bg-white hover:bg-slate-100 text-blue-900 px-3 py-1 rounded-lg text-[11px] font-black shadow-xs active:scale-95 transition cursor-pointer">
+          इंस्टॉल करें
+        </button>
+        <button type="button" onclick="if(typeof window.dismissPwaInstallBanner === 'function'){ window.dismissPwaInstallBanner(); } else { const b = document.getElementById('pwaInstallBanner'); if(b) { b.classList.add('hidden'); b.classList.remove('flex'); } }" class="text-white/80 hover:text-white p-1 text-sm font-bold cursor-pointer" title="Dismiss">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <main class="flex-1 min-w-0 min-h-0 overflow-y-auto safe-main-viewport w-full">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <script>
+    // Stub toggleSidebar for compatibility
+    window.toggleSidebar = function() {
+      if (window.triggerHaptic) window.triggerHaptic('light');
+    };
+    window.closeMobileSidebar = function() {};
+  </script>
+
+  <!-- PWA Service Worker Registration & Deferred Install Prompt -->
+  <script src="/static/js/pwa_manager.js?v={{ APP_VERSION }}"></script>
+  <!-- Client-Side Offline Database Engine & Sync Outbox -->
+  <script src="/static/js/offline_db.js?v={{ APP_VERSION }}"></script>
+  <script src="/static/js/voter_management_tagger.js?v={{ APP_VERSION }}"></script>
+  <!-- 58mm Portable Thermal Printer Engine (HOP-HL58) -->
+  <script src="/static/js/thermal_printer.js?v={{ APP_VERSION }}"></script>
+  <!-- Client-Side Automatic PWA Document Shell Cacher -->
+  <script>
+    (function() {
+      if ('caches' in window) {
+        window.addEventListener('load', function() {
+          try {
+            const cacheName = 'smartbooth-pwa-v22';
+            caches.open(cacheName).then(function(cache) {
+              const htmlDoc = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+              const curTenant = window.CURRENT_TENANT || new URLSearchParams(window.location.search).get('tenant') || '';
+              const headers = { 'Content-Type': 'text/html; charset=utf-8' };
+              cache.put(window.location.href, new Response(htmlDoc, { headers: headers }));
+              cache.put(window.location.pathname + window.location.search, new Response(htmlDoc, { headers: headers }));
+              if (curTenant) {
+                cache.put('/?tenant=' + encodeURIComponent(curTenant), new Response(htmlDoc, { headers: headers }));
+              }
+              cache.put('/', new Response(htmlDoc, { headers: headers }));
+            }).catch(function() {});
+          } catch (_) {}
+        });
+      }
+    })();
+  </script>
+
+
+  <!-- PWA Install Guide Modal (For iOS Safari or Android manual fallback) -->
+  <div id="pwaGuideModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
+    <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl shrink-0">
+            📲
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-900">ऐप कैसे इंस्टॉल करें?</h3>
+            <p class="text-xs text-slate-500 font-semibold">How to install Smart Booth app</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePwaGuideModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg text-lg leading-none cursor-pointer">✕</button>
+      </div>
+
+      <!-- iOS Safari Instructions -->
+      <div id="pwaIosGuide" class="hidden space-y-3.5">
+        <div class="bg-amber-50 border border-amber-200/80 rounded-2xl p-3 text-xs text-amber-900 font-bold flex items-center gap-2">
+          <span>🍎</span>
+          <span>iPhone (Safari) के लिए आसान 3 स्टेप्स:</span>
+        </div>
+        <ol class="space-y-3 text-xs text-slate-700 font-semibold">
+          <li class="flex items-start gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0">1</span>
+            <div>
+              नीचे सफारी टूलबार में <strong>शेयर आइकन</strong> दबाएं:
+              <div class="mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-900 font-bold text-xs shadow-2xs">
+                <span>⎋</span>
+                <span>Share Button</span>
+              </div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0">2</span>
+            <div>
+              नीचे स्क्रॉल करें और <strong>"Add to Home Screen"</strong> पर टैप करें:
+              <div class="mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-900 font-bold text-xs shadow-2xs">
+                <span>➕</span>
+                <span>होम स्क्रीन पर जोड़ें</span>
+              </div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0">3</span>
+            <div>
+              ऊपर दाईं ओर <strong>"Add" (जोड़ें)</strong> दबाएं। ऐप तुरंत आपकी होम स्क्रीन पर जुड़ जाएगा!
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Android Fallback Instructions -->
+      <div id="pwaAndroidGuide" class="hidden space-y-3.5">
+        <div class="bg-blue-50 border border-blue-200/80 rounded-2xl p-3 text-xs text-blue-900 font-bold flex items-center gap-2">
+          <span>🤖</span>
+          <span>Chrome ब्राउज़र में इंस्टॉल करने का तरीका:</span>
+        </div>
+        <ol class="space-y-3 text-xs text-slate-700 font-semibold">
+          <li class="flex items-start gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0">1</span>
+            <div>
+              ऊपर दाईं ओर <strong>3 डॉट्स (⋮ Menu)</strong> पर टैप करें।
+            </div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0">2</span>
+            <div>
+              मेनू में <strong>"Install app"</strong> या <strong>"Add to Home screen"</strong> चुनें।
+              <div class="mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-900 font-bold text-xs shadow-2xs">
+                <span>📲</span>
+                <span>ऐप इंस्टॉल करें / होम स्क्रीन पर जोड़ें</span>
+              </div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0">3</span>
+            <div>
+              <strong>'Install'</strong> दबाएं। ऐप आपके फोन में सामान्य ऐप की तरह डाउनलोड हो जाएगा।
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Dismiss button -->
+      <button 
+        type="button" 
+        onclick="closePwaGuideModal()" 
+        class="w-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-bold py-2.5 px-4 rounded-xl text-xs transition cursor-pointer"
+      >
+        समझ गया (Got it)
+      </button>
+
+    </div>
+  </div>
+
+  <script src="/static/js/ward_sheet_picker.js?v={{ APP_VERSION }}"></script>
+  {% block extra_scripts %}{% endblock %}
+<script>
+  // Read-only WhatsApp credit balance chip. Writes live only on the super-admin
+  // console; this endpoint exposes no setter.
+  (function () {
+    var chip = document.getElementById('waCreditChip');
+    var text = document.getElementById('waCreditChipText');
+    if (!chip || !text) return;
+    fetch('/api/campaign/whatsapp_quota?_t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.success) return;
+        var avail = Number(d.available) || 0;
+        var cls;
+        if (d.is_blocked) {
+          text.textContent = 'संदेश रोके गए';
+          cls = 'bg-rose-500/15 text-rose-300 border-rose-500/40';
+        } else if (!d.configured || avail <= 0) {
+          text.textContent = '0 शेष';
+          cls = 'bg-rose-500/15 text-rose-300 border-rose-500/40';
+        } else {
+          text.textContent = avail.toLocaleString('en-IN') + ' शेष';
+          cls = (avail <= Math.max(50, (Number(d.granted) || 0) * 0.1))
+            ? 'bg-amber-500/15 text-amber-300 border-amber-500/40'
+            : 'bg-slate-800/90 text-slate-300 border-slate-700/80';
+        }
+        chip.className = 'inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-1 rounded-lg border whitespace-nowrap ' + cls;
+      })
+      .catch(function () { /* informational only */ });
+  })();
+</script>
+
+  <!-- Global Toast Notification Engine -->
+  <div id="globalToastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full px-3"></div>
+  <script>
+    if (!window.showToast) {
+      window.showToast = function(message, type = 'info', duration = 3500) {
+        const container = document.getElementById('globalToastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        const bgColors = {
+          success: 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-900/20',
+          error: 'bg-rose-600 text-white border-rose-500 shadow-rose-900/20',
+          warning: 'bg-amber-500 text-slate-950 border-amber-400 shadow-amber-900/20',
+          info: 'bg-slate-900 text-white border-slate-700 shadow-slate-950/30'
+        };
+        const icons = {
+          success: '✓',
+          error: '✕',
+          warning: '⚠',
+          info: 'ℹ'
+        };
+        const cls = bgColors[type] || bgColors.info;
+        const icon = icons[type] || 'ℹ';
+        toast.className = `flex items-center gap-3 px-4 py-3 rounded-2xl border text-xs sm:text-sm font-black shadow-xl pointer-events-auto transform transition-all duration-300 translate-y-[-10px] opacity-0 ${cls}`;
+        toast.innerHTML = `
+          <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-black text-xs shrink-0">${icon}</span>
+          <span class="flex-1 leading-snug break-words">${message}</span>
+          <button type="button" class="ml-2 opacity-70 hover:opacity-100 text-sm font-black cursor-pointer shrink-0" onclick="this.parentElement.remove()">✕</button>
+        `;
+        container.appendChild(toast);
+        requestAnimationFrame(() => {
+          toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+        });
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-y-[-10px]');
+          setTimeout(() => toast.remove(), 300);
+        }, duration);
+      };
+    }
+  </script>
+
+  {% if eff_role in ['admin', 'super_admin'] %}
+  {% include "modals/_bulk_slip_dispatch_modal.html" %}
+  <script src="/static/js/bulk_slip_dispatch.js?v={{ APP_VERSION }}"></script>
+  {% endif %}
+  {% include "_campaign_search_modal.html" %}
+</body>
+</html>

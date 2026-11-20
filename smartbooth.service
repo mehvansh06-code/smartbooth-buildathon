@@ -1,0 +1,39 @@
+[Unit]
+Description=SmartBooth Unified Multi-Tenant Election Platform (Gunicorn)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/smartbooth
+Environment="PATH=/home/ubuntu/smartbooth/venv/bin:/usr/local/bin:/usr/bin"
+Environment="PYTHONUNBUFFERED=1"
+Environment="APP_ENV=production"
+EnvironmentFile=-/home/ubuntu/smartbooth/.env
+Environment="SECRET_KEY=smartbooth_production_secret_key_2026_secured"
+Environment="VOTER_STORAGE=postgres"
+Environment="PGHOST=localhost"
+Environment="PGPORT=5432"
+Environment="PGDATABASE=voter_platform"
+Environment="PGUSER=postgres"
+Environment="PGPASSWORD=postgres"
+Environment="PRIMARY_WA_GATEWAY=aoc"
+Environment="AOC_API_KEY=cc3uNWmCxr9utFa2V716rBYarq8IPd"
+Environment="AOC_SENDER_NUMBER=919351147539"
+Environment="AOC_TEMPLATE_NAME=info_update_short"
+Environment="META_WA_PHONE_NUMBER_ID=1435580822961907"
+Environment="META_WA_WABA_ID=948940291139396"
+Environment="META_WA_TEMPLATE_NAME=info_update_short"
+Environment="META_WA_TEMPLATE_LANG=en"
+Environment="META_WA_API_VERSION=v22.0"
+Environment="META_WA_SENDER_DISPLAY=+91 93511 47539"
+ExecStart=/home/ubuntu/smartbooth/venv/bin/gunicorn --bind 127.0.0.1:5030 --workers 4 --threads 8 --timeout 60 --access-logfile /home/ubuntu/smartbooth/logs/access.log --error-logfile /home/ubuntu/smartbooth/logs/error.log electionapp.wsgi:app
+
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+Alias=chunaav360.service

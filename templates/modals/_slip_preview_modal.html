@@ -1,0 +1,182 @@
+<!-- SLIP PREVIEW & DISPATCH MODAL -->
+<div id="slipPreviewModal" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex bottom-sheet-modal items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="bg-white bottom-sheet-content rounded-t-3xl sm:rounded-2xl max-w-2xl w-full max-h-[88vh] overflow-hidden flex flex-col shadow-2xl border border-slate-200 animate-in fade-in duration-200">
+
+    <!-- Mobile Pull Drag Handle -->
+    <div class="sm:hidden w-12 h-1 bg-slate-300 rounded-full mx-auto mt-2.5 mb-1 shrink-0"></div>
+
+    <!-- Modal Header -->
+    <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">📄</span>
+        <div>
+          <h3 class="font-black text-sm text-white leading-tight">डिजिटल मतदाता पर्ची (Digital Voter Slip)</h3>
+          <p class="text-[10px] text-slate-400">Meta WhatsApp Cloud API & Direct Dispatch</p>
+        </div>
+      </div>
+      <button onclick="closeSlipModal()" class="text-slate-400 hover:text-white font-black text-xl p-1 leading-none cursor-pointer">✕</button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-4 overflow-y-auto space-y-3.5 text-xs flex-1">
+
+      {% set user_eff_role = ((current_user.role if current_user else '') or session.get('role', ''))|lower %}
+      {% if user_eff_role in ['admin', 'super_admin'] %}
+      <!-- Bulk campaign broadcast shortcut banner (Admin Only) -->
+      <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs">
+        <div class="flex items-center gap-2 text-emerald-950 font-bold text-xs">
+          <span class="text-base">📢</span>
+          <span>पूरे अभियान के सभी मतदाताओं को एक साथ पर्ची भेजें?</span>
+        </div>
+        <button 
+          type="button" 
+          onclick="closeSlipModal(); openBulkSlipModal();" 
+          class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black px-2.5 py-1 rounded-lg text-[11px] shrink-0 transition active:scale-95 cursor-pointer shadow-xs"
+        >
+          थोक प्रसारण खोलें →
+        </button>
+      </div>
+      {% endif %}
+
+      <!-- Mode Toggle (when 2+ voters) -->
+      <div id="slipModeToggleContainer" class="hidden">
+        <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200 text-xs">
+          <button
+            type="button"
+            id="slipModeSingleBtn"
+            onclick="setSlipModalMode('single')"
+            class="flex-1 py-1.5 px-3 rounded-lg font-bold text-center transition flex items-center justify-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900"
+          >
+            <span>👤</span><span>केवल इनकी पर्ची</span>
+          </button>
+          <button
+            type="button"
+            id="slipModeFamilyBtn"
+            onclick="setSlipModalMode('family')"
+            class="flex-1 py-1.5 px-3 rounded-lg font-bold text-center transition flex items-center justify-center gap-1.5 cursor-pointer bg-white text-blue-700 shadow-xs"
+          >
+            <span>🏠</span><span id="slipModeFamilyLabel">पूरे परिवार की</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Voter Summary Card (Dynamic) -->
+      <div id="slipVoterSummaryCard">
+        <!-- Rendered synchronously by slip_engine.js -->
+      </div>
+
+      <!-- Recipient Phone Number Input with +91 prefix and Family Chips -->
+      <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-3.5 space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <label for="slipRecipientPhone" class="block text-xs font-black text-emerald-950">
+            📱 प्राप्तकर्ता का व्हाट्सएप नंबर (WhatsApp Number / Numbers):
+          </label>
+          <span id="slipPhoneStatus" class="text-[11px] font-bold text-emerald-700"></span>
+        </div>
+
+        <div class="relative flex items-center">
+          <div class="absolute left-3.5 flex items-center pointer-events-none select-none text-slate-500 font-bold text-xs font-mono">
+            <span>🇮🇳 +91</span>
+          </div>
+          <input
+            type="tel"
+            inputmode="tel"
+            id="slipRecipientPhone"
+            placeholder="उदा: 9829012345, 9414056789 (एक या एक से अधिक)"
+            autocomplete="off"
+            class="w-full bg-white border border-emerald-300 rounded-xl pl-16 pr-4 py-2.5 text-sm font-mono font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
+          >
+        </div>
+
+        <!-- Clickable Family Phone Chips -->
+        <div id="familyPhoneChipsContainer" class="hidden space-y-1.5 pt-1">
+          <div class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+            <span>💡</span>
+            <span>उपलब्ध संपर्क नंबर (टैप कर जोड़ें या हटाएं):</span>
+          </div>
+          <div id="familyPhoneChipsList" class="flex flex-wrap gap-1.5">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Background fallback container for slip text (hidden) -->
+      <pre id="slipTextPreview" class="hidden"></pre>
+
+    </div>
+
+    <!-- Modal Footer Actions (Sticky Thumb Zone) -->
+    <div class="bg-slate-50 border-t border-slate-200 px-4 py-3 flex items-center justify-between gap-2 shrink-0 flex-wrap">
+      
+      {% if current_tenant in ['sarana', 'mandawariya', 'mandawariya_sarpanch'] or CAMPAIGN.enable_thermal_printer %}
+      <!-- Thermal Print Section (HOP-HL58 Bluetooth) - Active for Sarana & Mandawariya Campaigns -->
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button
+          type="button"
+          onclick="thermalPrintCurrentSlip()"
+          class="bg-indigo-900 hover:bg-indigo-800 active:bg-indigo-950 text-white font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-2 min-h-[42px] shadow-sm active:scale-95"
+          title="HOP-HL58 ब्लूटूथ थर्मल प्रिंटर पर पर्ची निकालें"
+        >
+          <span class="text-sm">🖨️</span>
+          <span>पर्ची प्रिंट करें</span>
+        </button>
+
+        <button
+          type="button"
+          onclick="ThermalPrinter.connect()"
+          class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2 py-2 rounded-xl text-xs transition cursor-pointer flex items-center justify-center min-h-[42px]"
+          title="ब्लूटूथ प्रिंटर जोड़ें (Connect HOP-HL58)"
+        >
+          <span>⚙️</span>
+        </button>
+
+        <button
+          type="button"
+          onclick="printSlipCard()"
+          class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-2.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1 min-h-[42px] border border-slate-200"
+          title="पोस्टर / इमेज कार्ड प्रिंट (A4 / Poster)"
+        >
+          <span>🖼️</span><span class="hidden sm:inline">इमेज कार्ड</span>
+        </button>
+
+        <span class="thermal-printer-status-badge hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-300">
+          <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+          <span>प्रिंटर कनेक्ट नहीं है</span>
+        </span>
+      </div>
+      {% else %}
+      <!-- Standard Slip Card Print for Other Campaigns -->
+      <button
+        type="button"
+        onclick="printSlipCard()"
+        class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 min-h-[42px]"
+      >
+        <span>🖨️</span><span>प्रिंट कार्ड</span>
+      </button>
+      {% endif %}
+
+      <!-- WhatsApp Dispatch Options -->
+      <div class="flex items-center gap-2 ml-auto">
+        <button
+          type="button"
+          id="btnWaMeSendSlip"
+          onclick="dispatchSlipViaWaMe()"
+          class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold px-3 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1 min-h-[42px]"
+          title="WhatsApp Web / App Fallback"
+        >
+          <span>💬</span><span>WhatsApp Web</span>
+        </button>
+
+        <button
+          type="button"
+          id="btnMetaSendSlip"
+          onclick="dispatchSlipViaMeta()"
+          class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black px-4 py-2 rounded-xl text-xs transition shadow-md cursor-pointer flex items-center gap-1.5 min-h-[42px]"
+        >
+          <span>🗳️</span><span>WhatsApp पर तुरंत भेजें (Auto Card)</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<div id="mobileMultiSelectBar" class="hidden md:hidden fixed safe-floating-multiselect left-3 right-3 z-40 bg-slate-900/95 text-white p-2.5 rounded-2xl shadow-2xl border border-slate-700 backdrop-blur-md flex flex-col gap-2 animate-in slide-in-from-bottom duration-200">
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="bg-blue-600 text-white font-black text-xs px-2.5 py-1 rounded-full shadow-xs whitespace-nowrap">
+          📌 <span id="mobileMultiSelectCount">0</span> Selected
+        </span>
+        <button type="button" onclick="clearTableSelection()" class="text-rose-400 hover:text-rose-300 text-xs font-bold underline cursor-pointer">
+          ✕ Clear
+        </button>
+      </div>
+      <div class="flex items-center gap-1">
+        <button type="button" onclick="openMobileMultiWhatsAppModal()" class="bg-emerald-600 active:bg-emerald-700 text-white font-black text-xs py-1.5 px-3 rounded-lg shadow-md flex items-center gap-1 cursor-pointer">
+          <span>📲 WhatsApp</span>
+          <span id="mobileMultiSelectBtnCount" class="bg-white text-emerald-950 rounded-full px-1.5 py-0.2 text-[10px] font-black">0</span>
+        </button>
+        <button type="button" onclick="openSlipViewForSelected()" class="bg-blue-600 active:bg-blue-700 text-white font-black text-xs py-1.5 px-2.5 rounded-lg shadow-md flex items-center gap-1 cursor-pointer">
+          <span>📄 Slips</span>
+        </button>
+      </div>
+  </div>
+</div>

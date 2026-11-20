@@ -1,0 +1,93 @@
+{
+  "_note": "Demonstration configuration for Gram Panchayat Jelatra Election 2026 (Neutral Demo Mode).",
+  "candidate": {
+    "name_hi": "ग्राम पंचायत जेलातरा",
+    "name_en": "",
+    "photo_filename": "",
+    "fallback_photo_filename": ""
+  },
+  "election": {
+    "ward_no": "1-9",
+    "ward_name_hi": "ग्राम पंचायत जेलातरा",
+    "ward_name_en": "Gram Panchayat Jelatra",
+    "constituency": "144-सांचौर, जालोर",
+    "city": "जेलातरा",
+    "district": "जालोर",
+    "panchayat_samiti": "भादरुणा",
+    "zila_parishad": "जालोर",
+    "app_title": "जेलातरा Smart Booth",
+    "portal_subtitle": "ग्राम पंचायत चुनाव 2026 — मतदाता सेवा व खोज पोर्टल"
+  },
+  "party": {
+    "name_hi": "",
+    "name_en": "",
+    "symbol_name_hi": "",
+    "symbol_name_en": "",
+    "symbol_filename": "",
+    "theme_color": "#2563eb",
+    "ballot_serial": ""
+  },
+  "campaign_message": "ग्राम पंचायत जेलातरा चुनाव 2026 — आपकी डिजिटल मतदाता सूचना पर्ची संलग्न है।\n\n🗳️ मतदान हमारा अधिकार एवं कर्तव्य है। कृपया मतदान दिवस पर अपना पहचान पत्र (Voter ID / आधार कार्ड) साथ लाएं।",
+  "database": {
+    "engine": "postgresql",
+    "database_name": "voter_platform",
+    "db_filename": "voters_jelatra.db",
+    "phone_enrichment": {
+      "status": "ENRICHED_HYBRID",
+      "last_enriched": "2026-09-29",
+      "total_voters": 2893,
+      "reachable_voters": 2179,
+      "reach_percent": "75.3%",
+      "direct_matches": 773,
+      "household_matches": 1398,
+      "sources": [
+        "Jan Aadhaar",
+        "KYC",
+        "PM-Kisan Farmer"
+      ]
+    }
+  },
+  "booths": {
+    "77": {
+      "booth_no": 77,
+      "name": "77 - राजकीय उच्च माध्यमिक विद्यालय (कमरा नंबर 1)",
+      "name_en": "77 - Govt. Sr. Sec. School, Room No. 1, Jelatra",
+      "area": "वार्ड 1 व 9 (विश्नोईयों की ढाणी, भीलों का वास, मेधवालों का वास)",
+      "maps_url": "https://maps.google.com/?q=Government+Senior+Secondary+School+Jelatra+Sanchore+Jalore+Rajasthan"
+    },
+    "78": {
+      "booth_no": 78,
+      "name": "78 - राजकीय उच्च माध्यमिक विद्यालय (कमरा नंबर 2)",
+      "name_en": "78 - Govt. Sr. Sec. School, Room No. 2, Jelatra",
+      "area": "वार्ड 2, 3 व 4 (रबारीयों का वास, भीलों की ढाणी, चौधरियों की ढाणी, राजपूतों की ढाणी)",
+      "maps_url": "https://maps.google.com/?q=Government+Senior+Secondary+School+Jelatra+Sanchore+Jalore+Rajasthan"
+    },
+    "79": {
+      "booth_no": 79,
+      "name": "79 - राजकीय उच्च माध्यमिक विद्यालय (कमरा नंबर 3)",
+      "name_en": "79 - Govt. Sr. Sec. School, Room No. 3, Jelatra",
+      "area": "वार्ड 5 व 6 (चौधरियों की ढाणी, सुनारों की ढाणी, मुख्य आबादी, मेधवालों की ढाणी)",
+      "maps_url": "https://maps.google.com/?q=Government+Senior+Secondary+School+Jelatra+Sanchore+Jalore+Rajasthan"
+    },
+    "80": {
+      "booth_no": 80,
+      "name": "80 - राजकीय उच्च माध्यमिक विद्यालय (कमरा नंबर 4)",
+      "name_en": "80 - Govt. Sr. Sec. School, Room No. 4, Jelatra",
+      "area": "वार्ड 7 व 8 (मुख्य आबादी, विश्नोईयों की ढाणी, बुनकरों का वास, राजपूतों की ढाणी)",
+      "maps_url": "https://maps.google.com/?q=Government+Senior+Secondary+School+Jelatra+Sanchore+Jalore+Rajasthan"
+    }
+  },
+  "tenant_slug": "jelatra",
+  "whatsapp": {
+    "channel": "meta_cloud",
+    "channel_priority": [
+      "meta_cloud",
+      "wa_me"
+    ],
+    "phone_number_id": "1382048191650184",
+    "waba_id": "1288509326773409",
+    "template_name": "info_update_suchna_1",
+    "template_lang": "en"
+  },
+  "max_sub_accounts": 5
+}

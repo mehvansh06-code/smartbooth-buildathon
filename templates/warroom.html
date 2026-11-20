@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% block title %}{{ CAMPAIGN.election.ward_name_en }} — Political Strategy & War Room{% endblock %}
+{% block content %}
+<!-- VIEW: WAR ROOM STRATEGY & POLITICAL SENTIMENT DASHBOARD -->
+  <div id="warroomViewContainer" class="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4">
+
+    <!-- Projected Win Margin Calculator Card (Responsive Mobile Grid, Zero Overflow Clipping) -->
+    <div class="warroom-forecast-card bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-3.5 sm:p-5 shadow-lg border-2 border-indigo-500/40 space-y-3 sm:space-y-4">
+      <div class="flex items-center justify-between flex-wrap gap-2 border-b border-indigo-800/80 pb-2.5 sm:pb-3">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 class="text-xs sm:text-base font-black flex items-center gap-1.5 sm:gap-2 text-white">
+              <span>🎯 Winning Margin Forecast (विजयी मत अनुमान)</span>
+            </h2>
+            <button 
+              type="button" 
+              onclick="toggleMarginHelp()" 
+              class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-300 hover:text-white bg-indigo-900/60 hover:bg-indigo-800/90 px-2 py-0.5 rounded-md border border-indigo-700 transition cursor-pointer"
+              title="गणना सूत्र और विवरण देखें"
+            >
+              <span>ℹ️ गणना कैसे हुई? (Breakdown)</span>
+              <span id="wrMarginHelpChevron" class="text-[10px]">▼</span>
+            </button>
+          </div>
+          <p class="text-[11px] sm:text-xs text-indigo-200 mt-0.5">गणना सूत्र: 100% पक्का समर्थक + 50% स्विंग वोटर + 30% बेसलाइन सामान्य मतदान</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div id="wrLiveSyncBadge" class="hidden sm:inline-flex items-center gap-1.5 text-[10px] text-emerald-300 bg-slate-950/80 border border-emerald-500/40 px-2.5 py-1 rounded-full font-mono">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="wrLastUpdatedText">लाइव डेटा</span>
+          </div>
+          <div id="wrWinBadge" class="bg-emerald-500 text-slate-950 text-[11px] sm:text-xs font-black px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-sm border border-emerald-300">
+            Calculating Margin...
+          </div>
+        </div>
+      </div>
+
+      <!-- Expandable Mathematical Breakdown & Explanation Drawer -->
+      <div id="wrMarginHelpDrawer" class="hidden bg-slate-950/80 border border-indigo-500/30 rounded-xl p-3 sm:p-4 text-xs space-y-2.5">
+        <div class="flex items-center justify-between text-indigo-300 font-black border-b border-slate-800 pb-1.5">
+          <span>📖 विजयी मत अनुमान का गणितीय विश्लेषण (Scientific Margin Model)</span>
+          <button type="button" onclick="toggleMarginHelp()" class="text-slate-400 hover:text-white text-xs">✕ बंद करें</button>
+        </div>
+        <p class="text-slate-300 leading-relaxed text-[11px] sm:text-xs">
+          यह सांख्यिकीय अनुमान (Statistical Forecast) आपके ग्राउंड सर्वे और मतदान व्यवहार पर आधारित है:
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-[11px]">
+          <div class="bg-slate-900/90 p-2.5 rounded-lg border border-emerald-500/30">
+            <div class="font-black text-emerald-300">1. पक्का समर्थक (100% Base)</div>
+            <p class="text-slate-300 mt-1">वे मतदाता जो निश्चित रूप से आपके पक्ष में हैं। इनका 100% वोट आपके खाते में जुड़ा है।</p>
+            <div class="text-emerald-400 font-mono font-bold mt-1.5" id="wrHelpFavCount">0 मत</div>
+          </div>
+          <div class="bg-slate-900/90 p-2.5 rounded-lg border border-amber-500/30">
+            <div class="font-black text-amber-300">2. स्विंग वोटर (50% Toss-Up)</div>
+            <p class="text-slate-300 mt-1">जो मतदाता दुविधा में हैं। चुनावी विज्ञान के अनुसार इनमें से 50% आपके पक्ष में और 50% विपक्षी के पक्ष में माने जाते हैं।</p>
+            <div class="text-amber-400 font-mono font-bold mt-1.5" id="wrHelpSwgCount">+0 मत (50%)</div>
+          </div>
+          <div class="bg-slate-900/90 p-2.5 rounded-lg border border-indigo-500/30">
+            <div class="font-black text-indigo-300">3. अनमार्क वोटर (30% Baseline)</div>
+            <p class="text-slate-300 mt-1">जिनका ग्राउंड सर्वे बाकी है, उनमें से न्यूनतम 30% बेसलाइन सामान्य मतदान आपके खाते में जोड़ा गया है।</p>
+            <div class="text-indigo-300 font-mono font-bold mt-1.5" id="wrHelpUncCount">+0 मत (30%)</div>
+          </div>
+        </div>
+        <div class="bg-indigo-950/60 p-2 rounded-lg border border-indigo-800/80 text-[11px] text-indigo-200 flex items-center justify-between flex-wrap gap-1">
+          <span>💡 <strong>जीत का अंतर (Lead):</strong> (अनुमानित मत) - (विपक्षी अनुमानित मत) = <span id="wrHelpLeadFormula" class="font-mono font-bold text-amber-300">+0 मत</span></span>
+          <span id="wrHelpPolledLeadNote" class="text-emerald-300 font-bold"></span>
+        </div>
+      </div>
+
+      <!-- 3-KPI Grid: Responsive on all mobile screens without horizontal scroll -->
+      <div class="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+        <div class="bg-slate-950/90 rounded-xl p-2.5 sm:p-3.5 border border-emerald-500/50 shadow-sm flex flex-col justify-center">
+          <div class="text-[10px] sm:text-xs text-emerald-300 font-black uppercase tracking-wider truncate">अनुमानित {{ CAMPAIGN.party.name_hi }} मत</div>
+          <div class="text-xl sm:text-3xl font-black text-emerald-400 mt-0.5 sm:mt-1 font-mono tracking-tight" id="wrProjVotes">0</div>
+          <div class="text-[9px] sm:text-[11px] text-emerald-200 font-bold truncate">{{ CAMPAIGN.party.name_en or 'Party' }} Projected</div>
+        </div>
+        <div class="bg-slate-950/90 rounded-xl p-2.5 sm:p-3.5 border border-rose-500/50 shadow-sm flex flex-col justify-center">
+          <div class="text-[10px] sm:text-xs text-rose-300 font-black uppercase tracking-wider truncate">अनुमानित विपक्षी मत</div>
+          <div class="text-xl sm:text-3xl font-black text-rose-400 mt-0.5 sm:mt-1 font-mono tracking-tight" id="wrProjOpp">0</div>
+          <div class="text-[9px] sm:text-[11px] text-rose-200 font-bold truncate">Opp Projected</div>
+        </div>
+        <div class="bg-slate-950/90 rounded-xl p-2.5 sm:p-3.5 border border-amber-400/60 shadow-sm flex flex-col justify-center">
+          <div class="text-[10px] sm:text-xs text-amber-300 font-black uppercase tracking-wider truncate">अनुमानित बढ़त / अंतर</div>
+          <div class="text-xl sm:text-3xl font-black text-amber-300 mt-0.5 sm:mt-1 font-mono tracking-tight" id="wrProjLead">0</div>
+          <div class="text-[9px] sm:text-[11px] text-amber-200 font-bold truncate">Projected Lead</div>
+        </div>
+      </div>
+
+      <!-- Live Polled Ballots Reality Strip -->
+      <div id="wrLiveTurnoutStrip" class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 flex items-center justify-between text-xs flex-wrap gap-2">
+        <div class="flex items-center gap-1.5 text-slate-300 font-bold text-[11px] sm:text-xs">
+          <span>🗳️</span>
+          <span>अब तक पड़े वोटों में बढ़त (Live Polled Lead):</span>
+          <span id="wrPolledLeadBadge" class="font-mono font-black text-emerald-400 text-xs sm:text-sm">0 मत</span>
+        </div>
+        <div class="text-[10px] sm:text-[11px] text-slate-400 font-semibold" id="wrPolledDetailText">
+          मतदान प्रगति के आधार पर वास्तविक बढ़त
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Header & Quick Search/Sort Toolbar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white rounded-xl border border-slate-200 p-3 shadow-xs">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs sm:text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+          <span>🛡️</span>
+          <span>{% if IS_WARD_ELECTION %}वार्ड रणनीति व मजबूती वर्गीकरण (Ward Strategy Matrix){% else %}बूथ मजबूती व रणनीति वर्गीकरण (Booth Strategy Matrix){% endif %}</span>
+        </h3>
+        <span id="wrUnitCountBadge" class="text-[11px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-full border border-indigo-200 ml-2">
+          0 इकाइयां
+        </span>
+      </div>
+
+      <!-- Quick Search & Sort Filters for Mobile & Desktop (Responsive Full Width on Mobile) -->
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <div class="relative flex-1 min-w-0 sm:w-56">
+          <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+          <input 
+            type="text" 
+            id="wrSearchInput" 
+            placeholder="{% if IS_WARD_ELECTION %}वार्ड खोजें...{% else %}बूथ / भाग खोजें...{% endif %}" 
+            class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-7 pr-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white placeholder:text-slate-400"
+            oninput="if(typeof filterWarroomUnits === 'function') filterWarroomUnits()"
+          >
+        </div>
+        <select 
+          id="wrSortSelect" 
+          onchange="if(typeof sortWarroomUnits === 'function') sortWarroomUnits(this.value)" 
+          class="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-700 focus:outline-none focus:border-indigo-600 cursor-pointer shrink-0 max-w-[130px] sm:max-w-none truncate"
+        >
+          <option value="num_asc">{% if IS_WARD_ELECTION %}🔢 वार्ड संख्या{% else %}🔢 भाग संख्या{% endif %}</option>
+          <option value="deficit_first">🔴 कमजोर वार्ड पहले (Deficit)</option>
+          <option value="strong_first">🟢 मजबूत किला पहले (Stronghold)</option>
+          <option value="turnout_asc">🗳️ कम मतदान पहले (Turnout)</option>
+          <option value="total_desc">👥 सर्वाधिक मतदाता (Voters)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- PURE CARD-BASED MOBILE & PWA STRATEGY DECK (Zero Tables on Mobile) -->
+    <div id="wrCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div class="col-span-full p-8 text-center bg-white rounded-xl border border-slate-200 text-slate-400 text-xs font-bold">
+        लोड हो रहा है (Loading war room metrics)...
+      </div>
+    </div>
+
+    <!-- DESKTOP-ONLY TABLE FALLBACK (Strictly hidden on Mobile & PWA, preserved for desktop widescreen & test compatibility) -->
+    <div class="hidden md:block bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+      <div class="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <h4 class="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+          <span>📊</span>
+          <span>{% if IS_WARD_ELECTION %}विस्तृत वार्ड तालिका (Detailed Ward Table){% else %}विस्तृत बूथ तालिका (Detailed Booth Table){% endif %}</span>
+        </h4>
+        <span class="text-[11px] text-slate-500 font-semibold">डेस्कटॉप विस्तृत दृश्य (Desktop Widescreen View)</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+            <tr>
+              <th class="py-2.5 px-3 w-16 text-center">{% if IS_WARD_ELECTION or BOOTHS_WITH_WARDS or (WARDS and WARDS|length > 1) %}वार्ड{% else %}भाग{% endif %}</th>
+              <th class="py-2.5 px-3">{% if IS_WARD_ELECTION %}वार्ड{% elif BOOTHS_WITH_WARDS or (WARDS and WARDS|length > 1) %}वार्ड / मतदान केंद्र{% else %}मतदान केंद्र (Booth Name){% endif %}</th>
+              <th class="py-2.5 px-3 text-center w-28 text-slate-800" title="मतदान हुआ / कुल मतदाता">
+                <div>कुल मत</div>
+                <div class="text-[10px] font-normal text-slate-500">(वोट / कुल)</div>
+              </th>
+              <th class="py-2.5 px-3 text-center w-24 text-emerald-700" title="मतदान हुआ / कुल पक्के समर्थक">
+                <div>🟢 100% पक्के</div>
+                <div class="text-[10px] font-normal text-emerald-600">(वोट / कुल)</div>
+              </th>
+              <th class="py-2.5 px-3 text-center w-24 text-amber-700" title="मतदान हुआ / कुल 50-50 समर्थक">
+                <div>🟡 50-50</div>
+                <div class="text-[10px] font-normal text-amber-600">(वोट / कुल)</div>
+              </th>
+              <th class="py-2.5 px-3 text-center w-24 text-rose-700" title="मतदान हुआ / कुल विपक्षी">
+                <div>🔴 विपक्षी</div>
+                <div class="text-[10px] font-normal text-rose-600">(वोट / कुल)</div>
+              </th>
+              <th class="py-2.5 px-3 text-center w-24 text-blue-700">🗳️ मतदान %</th>
+              <th class="py-2.5 px-3 text-center w-36">रणनीतिक स्थिति</th>
+            </tr>
+          </thead>
+          <tbody id="wrBoothTableBody" class="divide-y divide-slate-200">
+            <tr><td colspan="8" class="p-4 text-center text-slate-400">Loading warroom stats...</td></tr>
+          </tbody>
+          <tfoot id="wrBoothTableFoot" class="bg-slate-900 border-t-2 border-slate-700 text-white">
+            <!-- Rendered by warroom.js -->
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+{% include '_sub_accounts_modal.html' %}
+{% include '_modals.html' %}
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/app_state.js?v={{ APP_VERSION }}"></script>
+<script src="/static/js/warroom.js?v={{ APP_VERSION }}"></script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (typeof loadWarroomData === 'function') loadWarroomData(); });</script>
+{% endblock %}

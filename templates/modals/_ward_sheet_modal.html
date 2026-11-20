@@ -1,0 +1,386 @@
+{# Reusable Macro for Ultra-Clean Ward & Booth Mobile Sheet Picker #}
+
+{% macro ward_select_options() %}
+  {% set is_multi = (IS_MULTI_GP and PANCHAYAT_HIERARCHY and PANCHAYAT_HIERARCHY.panchayats and PANCHAYAT_HIERARCHY.panchayats|length > 1) %}
+  {% if is_multi %}
+    {# MULTI-GRAM PANCHAYAT ELECTION (Panchayat Samiti / Zila Parishad) #}
+    <option value="">सभी क्षेत्र (All Areas — कुल {{ PANCHAYAT_HIERARCHY.total_voters }} मतदाता)</option>
+    {% for gp in PANCHAYAT_HIERARCHY.panchayats %}
+      <optgroup label="🏛️ {{ gp.gp_name_hi }} ({{ gp.total_voters }} मत)">
+        <option value="{{ gp.filter_value }}">
+          समस्त {{ gp.gp_name_hi }} (सभी {{ gp.wards|length }} वार्ड — {{ gp.total_voters }} मतदाता)
+        </option>
+        {% for w in gp.wards %}
+          <option value="{{ w.filter_value }}">
+            वार्ड {{ w.ward_no }} ({{ w.voter_count }} मतदाता)
+          </option>
+        {% endfor %}
+      </optgroup>
+    {% endfor %}
+
+  {% elif IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat %}
+    {# LOCAL BODY ELECTION (Gram Panchayat, Nagar Palika) #}
+    {% if WARDS and WARDS|length > 1 %}
+      <option value="">सभी वार्ड (All {{ WARDS|length }} Wards — कुल {{ WARDS.values()|sum(attribute='voter_count') }} मतदाता)</option>
+      {% for w_no, w_info in WARDS.items() %}
+        <option value="ward:{{ w_no }}">
+          वार्ड {{ w_no }} — {{ w_info.voter_count or w_info.total }} मतदाता
+        </option>
+      {% endfor %}
+
+    {% elif WARDS and WARDS|length == 1 %}
+      {% set single_ward_no = (WARDS.keys()|list)[0] %}
+      <option value="">समस्त भाग (वार्ड {{ single_ward_no }} — All {{ BOOTHS|length }} Parts{% if WARDS[single_ward_no].voter_count %} — कुल {{ WARDS[single_ward_no].voter_count }} मतदाता{% endif %})</option>
+      <optgroup label="📋 वार्ड {{ single_ward_no }} के भाग (भाग संख्या / Parts)">
+        {% for p_no, b_info in BOOTHS.items() %}
+          {% set b_name = (b_info.name or b_info.booth_name or ('भाग ' ~ p_no))|replace('\ufffd', '')|replace(' ं', '') %}
+          {% set b_count = b_info.voter_count or b_info.total %}
+          {% set clean_name = b_name %}
+          {% if b_info.booth_no and clean_name.startswith(b_info.booth_no|string ~ ' - ') %}
+            {% set clean_name = clean_name[((b_info.booth_no|string|length) + 3):] %}
+          {% elif clean_name.startswith(p_no|string ~ ' - ') %}
+            {% set clean_name = clean_name[((p_no|string|length) + 3):] %}
+          {% endif %}
+          <option value="part:{{ p_no }}">
+            भाग {{ p_no }}{% if b_info.booth_no and b_info.booth_no|string != p_no|string %} (बूथ {{ b_info.booth_no }}){% endif %} — {{ clean_name }}{% if b_count %} ({{ b_count }} मतदाता){% endif %}
+          </option>
+        {% endfor %}
+      </optgroup>
+
+    {% else %}
+      <option value="">सभी वार्ड व मतदान केंद्र (All Areas)</option>
+      {% for p_no, b_info in BOOTHS.items() %}
+        {% set b_name = (b_info.name or b_info.booth_name or ('भाग ' ~ p_no))|replace('\ufffd', '')|replace(' ं', '') %}
+        {% set b_count = b_info.voter_count or b_info.total %}
+        <option value="{{ p_no }}">
+          {{ b_name }}{% if b_count %} — {{ b_count }} मतदाता{% endif %}
+        </option>
+      {% endfor %}
+    {% endif %}
+
+  {% else %}
+    {# STATE ASSEMBLY / VIDHAN SABHA (Strictly Booth-Wise) #}
+    <option value="">सभी मतदान केंद्र (All {{ BOOTHS|length }} Booths)</option>
+    {% for p_no, b_info in BOOTHS.items() %}
+      {% set b_name = (b_info.name or b_info.booth_name or ('भाग ' ~ p_no))|replace('\ufffd', '')|replace(' ं', '') %}
+      {% set b_count = b_info.voter_count or b_info.total %}
+      <option value="{{ p_no }}">
+        {{ b_name }}{% if b_count %} — {{ b_count }} मतदाता{% endif %}
+      </option>
+    {% endfor %}
+  {% endif %}
+{% endmacro %}
+
+{% macro ward_sheet_trigger(modal_id, select_id, label_id, title_label='वार्ड') %}
+{% set is_multi = (IS_MULTI_GP and PANCHAYAT_HIERARCHY and PANCHAYAT_HIERARCHY.panchayats and PANCHAYAT_HIERARCHY.panchayats|length > 1) %}
+{% set total_ward_voters = (PANCHAYAT_HIERARCHY.total_voters if is_multi else ((WARDS.values()|sum(attribute='voter_count')) if (WARDS and WARDS|length > 1) else (WARDS.values()|list)[0].voter_count if (WARDS and WARDS|length == 1) else 0)) %}
+<button
+  type="button"
+  data-ward-trigger="true"
+  data-select-id="{{ select_id }}"
+  data-label-id="{{ label_id }}"
+  onclick="openWardSheet('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}')"
+  class="w-full flex items-center justify-between bg-blue-50/80 hover:bg-blue-100/80 border border-blue-300 hover:border-blue-400 px-3 py-1.5 sm:py-2 rounded-xl transition text-left cursor-pointer min-w-0 shadow-2xs tap-target-44"
+>
+  <div class="flex items-center gap-1.5 min-w-0">
+    <span class="text-xs shrink-0">📍</span>
+    <span class="font-black text-blue-900 text-xs shrink-0">{{ 'क्षेत्र' if is_multi else title_label }}:</span>
+    <span id="{{ label_id }}" class="font-black text-blue-950 text-xs sm:text-sm truncate">
+      {% if is_multi %}
+        सभी क्षेत्र (कुल {{ total_ward_voters }} मत)
+      {% elif WARDS and WARDS|length > 1 %}
+        सभी वार्ड (कुल {{ total_ward_voters }} मत)
+      {% elif WARDS and WARDS|length == 1 %}
+        {% set single_ward_no = (WARDS.keys()|list)[0] %}
+        समस्त भाग (वार्ड {{ single_ward_no }}{% if total_ward_voters %} — {{ total_ward_voters }} मत{% endif %})
+      {% elif BOOTHS %}
+        सभी मतदान केंद्र (All {{ BOOTHS|length }} Booths)
+      {% else %}
+        सभी क्षेत्र (All Areas)
+      {% endif %}
+    </span>
+  </div>
+  <span class="text-blue-700 text-xs shrink-0 ml-1.5 font-bold">▼</span>
+</button>
+{% endmacro %}
+
+{% macro ward_sheet_modal(modal_id, select_id, label_id) %}
+{% set is_multi = (IS_MULTI_GP and PANCHAYAT_HIERARCHY and PANCHAYAT_HIERARCHY.panchayats and PANCHAYAT_HIERARCHY.panchayats|length > 1) %}
+{% set is_single_ward = (WARDS and WARDS|length == 1) %}
+{% set single_ward_no = (WARDS.keys()|list)[0] if is_single_ward else '' %}
+{% set total_ward_voters = (PANCHAYAT_HIERARCHY.total_voters if is_multi else ((WARDS.values()|sum(attribute='voter_count')) if (WARDS and WARDS|length > 1) else (WARDS[single_ward_no].voter_count if is_single_ward else 0))) %}
+
+<div 
+  id="{{ modal_id }}" 
+  data-select-id="{{ select_id }}"
+  data-label-id="{{ label_id }}"
+  class="ward-sheet-modal hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-xs flex bottom-sheet-modal items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150"
+>
+  <div class="ward-sheet-backdrop fixed inset-0"></div>
+  <div onclick="event.stopPropagation()" class="bg-white bottom-sheet-content rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[85vh] max-h-[85dvh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden relative z-10 pb-safe">
+    
+    <!-- Clean Header -->
+    <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
+      <div>
+        <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+          <span class="text-blue-600">📍</span>
+          {% if is_multi %}
+            {% if CAMPAIGN.election.election_type == 'ZILA_PARISHAD' or 'जिला परिषद' in (CAMPAIGN.election.ward_name_hi or '') %}
+              ग्राम पंचायत व वार्ड चुनें (Select Gram Panchayat / Ward)
+            {% else %}
+              क्षेत्र व वार्ड चुनें (Select Area / Ward)
+            {% endif %}
+          {% elif WARDS and WARDS|length > 1 %}
+            वार्ड चुनें (Select Ward)
+          {% elif is_single_ward %}
+            वार्ड {{ single_ward_no }} के भाग (Parts)
+          {% else %}
+            मतदान केंद्र चुनें (Select Booth)
+          {% endif %}
+        </h3>
+        <p class="text-xs text-slate-500 font-semibold">
+          {% if is_multi %}
+            कुल {{ PANCHAYAT_HIERARCHY.panchayats|length }} ग्राम पंचायत · {{ total_ward_voters }} मतदाता
+          {% elif WARDS and WARDS|length > 1 %}
+            {% if CAMPAIGN.election.ward_name_hi %}
+              {{ CAMPAIGN.election.ward_name_hi }} · कुल {{ WARDS|length }} वार्ड · {{ total_ward_voters }} मतदाता
+            {% else %}
+              कुल {{ WARDS|length }} वार्ड · {{ total_ward_voters }} मतदाता
+            {% endif %}
+          {% elif is_single_ward %}
+            वार्ड {{ single_ward_no }} · {{ BOOTHS|length }} भाग · {{ total_ward_voters }} मतदाता
+          {% elif BOOTHS %}
+            कुल {{ BOOTHS|length }} मतदान केंद्र
+          {% endif %}
+        </p>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button 
+          type="button" 
+          id="{{ modal_id }}_apply_btn"
+          onclick="applyWardMultiSelection('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}')" 
+          class="ward-apply-btn hidden px-2.5 py-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-black text-xs rounded-lg transition cursor-pointer shadow-xs"
+        >
+          लागू करें
+        </button>
+        <button type="button" onclick="closeWardSheet('{{ modal_id }}')" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-700 font-bold text-sm cursor-pointer transition">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Options List Container: Server-rendered for instant speed & reliability, enhanced client-side -->
+    <div class="ward-sheet-options modal-options-scroll overflow-y-auto divide-y divide-slate-100 flex-1">
+      {% if is_multi %}
+        {# MULTI-GRAM PANCHAYAT #}
+        <div 
+          data-ward-value=""
+          onclick="selectWardOption('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}', '', '{% if CAMPAIGN.election.election_type == 'ZILA_PARISHAD' or 'जिला परिषद' in (CAMPAIGN.election.ward_name_hi or '') %}सभी ग्राम पंचायतें (कुल {{ total_ward_voters }} मत){% else %}सभी क्षेत्र (कुल {{ total_ward_voters }} मत){% endif %}')"
+          class="px-4 py-3 bg-blue-50/70 hover:bg-blue-100/70 flex items-center justify-between cursor-pointer border-l-4 border-blue-600 rounded-xl mx-2 my-2 transition shadow-2xs"
+        >
+          <div>
+            {% if CAMPAIGN.election.election_type == 'ZILA_PARISHAD' or 'जिला परिषद' in (CAMPAIGN.election.ward_name_hi or '') %}
+              <div class="text-sm sm:text-base font-black text-blue-950">सभी ग्राम पंचायतें (All Gram Panchayats)</div>
+              <div class="text-xs text-blue-700 font-semibold">संपूर्ण जिला परिषद क्षेत्र के सभी मतदाता</div>
+            {% elif CAMPAIGN.election.election_type in ('PANCHAYAT_SAMITI', 'PS') or 'पंचायत समिति' in (CAMPAIGN.election.ward_name_hi or '') %}
+              <div class="text-sm sm:text-base font-black text-blue-950">सभी क्षेत्र (All Areas)</div>
+              <div class="text-xs text-blue-700 font-semibold">संपूर्ण पंचायत समिति क्षेत्र के सभी मतदाता</div>
+            {% else %}
+              <div class="text-sm sm:text-base font-black text-blue-950">सभी क्षेत्र (All Areas)</div>
+              <div class="text-xs text-blue-700 font-semibold">संपूर्ण चुनाव क्षेत्र के सभी मतदाता</div>
+            {% endif %}
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-black bg-blue-600 text-white px-2.5 py-1 rounded-full shadow-xs">{{ total_ward_voters }} मत</span>
+            <span class="ward-check text-blue-600 font-black text-base">✓</span>
+          </div>
+        </div>
+
+        {% for gp in PANCHAYAT_HIERARCHY.panchayats %}
+          <div class="gp-accordion-card mb-2.5 mx-2 border border-slate-200/90 rounded-2xl overflow-hidden bg-white shadow-2xs transition-all">
+            <div 
+              onclick="toggleGpAccordion(this)" 
+              class="gp-accordion-header px-4 py-3 bg-slate-50 hover:bg-slate-100 flex items-center justify-between cursor-pointer select-none transition border-b border-slate-100"
+            >
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-base shrink-0">🏛️</span>
+                <span class="font-black text-slate-900 text-sm sm:text-base truncate">{{ gp.gp_name_hi }}</span>
+                {% if gp.panchayat_samiti %}
+                  <span class="text-[10px] bg-slate-200/90 text-slate-700 font-extrabold px-2 py-0.5 rounded-md shrink-0 border border-slate-300/60">{{ gp.panchayat_samiti }}</span>
+                {% endif %}
+              </div>
+              <div class="flex items-center gap-2 shrink-0 ml-2">
+                <span class="text-xs font-black bg-blue-100/80 text-blue-900 border border-blue-200/60 px-2.5 py-0.5 rounded-full">{{ gp.total_voters }} मत</span>
+                <span class="gp-accordion-arrow text-slate-400 font-black text-xs transition-transform duration-200">▼</span>
+              </div>
+            </div>
+            <div class="gp-accordion-body divide-y divide-slate-100 bg-white">
+              <div 
+                data-ward-value="{{ gp.filter_value }}"
+                onclick="selectWardOption('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}', '{{ gp.filter_value }}', 'समस्त {{ gp.gp_name_hi }} ({{ gp.total_voters }} मत)')"
+                class="px-4 py-2.5 hover:bg-blue-50/50 flex items-center justify-between cursor-pointer transition border-l-4 border-transparent hover:border-blue-400"
+              >
+                <div>
+                  <div class="text-sm font-bold text-slate-900">समस्त {{ gp.gp_name_hi }}</div>
+                  <div class="text-xs text-blue-700 font-semibold">सभी {{ gp.wards|length }} वार्ड</div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">{{ gp.total_voters }} मत</span>
+                  <span class="ward-check hidden text-blue-600 font-black text-base">✓</span>
+                </div>
+              </div>
+              {% for w in gp.wards %}
+                <div 
+                  data-ward-value="{{ w.filter_value }}"
+                  onclick="selectWardOption('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}', '{{ w.filter_value }}', '{{ gp.gp_name_hi }} — वार्ड {{ w.ward_no }} ({{ w.voter_count }} मत)')"
+                  class="px-4 py-2.5 hover:bg-slate-50 flex items-center justify-between cursor-pointer transition border-l-4 border-transparent hover:border-slate-300"
+                >
+                  <div class="text-sm font-bold text-slate-800">वार्ड {{ w.ward_no }}</div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">{{ w.voter_count }} मत</span>
+                    <span class="ward-check hidden text-blue-600 font-black text-base">✓</span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+
+      {% elif is_single_ward %}
+        {# SINGLE WARD (e.g. Ward 82) #}
+        <div 
+          data-ward-value=""
+          onclick="selectWardOption('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}', '', 'समस्त भाग (वार्ड {{ single_ward_no }}{% if total_ward_voters %} — {{ total_ward_voters }} मत{% endif %})')"
+          class="px-4 py-3 bg-blue-50/80 hover:bg-blue-100/70 flex items-center justify-between cursor-pointer border-l-4 border-blue-600 transition"
+        >
+          <div>
+            <div class="text-sm sm:text-base font-black text-blue-950">समस्त भाग (वार्ड {{ single_ward_no }})</div>
+            <div class="text-xs text-blue-700 font-semibold">कुल {{ BOOTHS|length }} भाग · समस्त मतदाता</div>
+          </div>
+          <div class="flex items-center gap-2">
+            {% if total_ward_voters %}
+              <span class="text-xs font-black bg-blue-600 text-white px-2.5 py-1 rounded-full shadow-xs">{{ total_ward_voters }} मत</span>
+            {% endif %}
+            <span class="ward-check text-blue-600 font-black text-base">✓</span>
+          </div>
+        </div>
+
+        {% for p_no, b_info in BOOTHS.items() %}
+          {% set b_name = (b_info.name or b_info.booth_name or ('भाग ' ~ p_no))|replace('\ufffd', '')|replace(' ं', '') %}
+          {% set b_count = b_info.voter_count or b_info.total %}
+          {% set clean_name = b_name %}
+          {% if b_info.booth_no and clean_name.startswith(b_info.booth_no|string ~ ' - ') %}
+            {% set clean_name = clean_name[((b_info.booth_no|string|length) + 3):] %}
+          {% elif clean_name.startswith(p_no|string ~ ' - ') %}
+            {% set clean_name = clean_name[((p_no|string|length) + 3):] %}
+          {% endif %}
+          <div
+            data-ward-value="part:{{ p_no }}"
+            onclick="selectWardOption('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}', 'part:{{ p_no }}', 'भाग {{ p_no }}{% if b_count %} ({{ b_count }} मत){% endif %}')"
+            class="px-4 py-3 hover:bg-slate-50 flex items-center justify-between cursor-pointer transition border-l-4 border-transparent hover:border-slate-300"
+          >
+            <div class="min-w-0 pr-2">
+              <div class="text-sm sm:text-base font-bold text-slate-900 truncate">
+                भाग {{ p_no }}{% if b_info.booth_no and b_info.booth_no|string != p_no|string %} (बूथ {{ b_info.booth_no }}){% endif %}
+              </div>
+              <div class="text-xs text-slate-600 font-medium truncate mt-0.5">
+                {{ clean_name }}
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              {% if b_count %}
+                <span class="text-xs font-black text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+                  {{ b_count }} मत
+                </span>
+              {% endif %}
+              <span class="ward-check hidden text-blue-600 font-black text-base">✓</span>
+            </div>
+          </div>
+        {% endfor %}
+
+      {% elif WARDS and WARDS|length > 1 %}
+        {# MULTI-WARD ELECTION (e.g. Gram Panchayat Chhoti Virol) #}
+        <div 
+          data-ward-value=""
+          onclick="selectWardOption('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}', '', 'सभी वार्ड (कुल {{ total_ward_voters }} मत)')"
+          class="px-4 py-3 bg-blue-50/80 hover:bg-blue-100/70 flex items-center justify-between cursor-pointer border-l-4 border-blue-600 transition"
+        >
+          <div>
+            <div class="text-sm sm:text-base font-black text-blue-950">सभी वार्ड (All {{ WARDS|length }} Wards)</div>
+            <div class="text-xs text-blue-700 font-semibold">संपूर्ण ग्राम पंचायत के सभी मतदाता</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-black bg-blue-600 text-white px-2.5 py-1 rounded-full shadow-xs">{{ total_ward_voters }} मत</span>
+            <span class="ward-check text-blue-600 font-black text-base">✓</span>
+          </div>
+        </div>
+
+        {% for w_no, w_info in WARDS.items() %}
+          {% set w_count = w_info.voter_count or w_info.total %}
+          <div
+            data-ward-value="ward:{{ w_no }}"
+            onclick="selectWardOption('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}', 'ward:{{ w_no }}', 'वार्ड {{ w_no }} ({{ w_count }} मत)')"
+            class="px-4 py-3 hover:bg-slate-50 flex items-center justify-between cursor-pointer transition border-l-4 border-transparent hover:border-slate-300"
+          >
+            <div>
+              <div class="text-sm sm:text-base font-bold text-slate-900">
+                वार्ड {{ w_no }}
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-black text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+                {{ w_count }} मत
+              </span>
+              <span class="ward-check hidden text-blue-600 font-black text-base">✓</span>
+            </div>
+          </div>
+        {% endfor %}
+
+      {% elif BOOTHS %}
+        {# ASSEMBLY / BOOTH-WISE (e.g. Sanchore) #}
+        <div 
+          data-ward-value=""
+          onclick="selectWardOption('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}', '', 'सभी मतदान केंद्र (All {{ BOOTHS|length }} Booths)')"
+          class="px-4 py-3 bg-blue-50/80 hover:bg-blue-100/70 flex items-center justify-between cursor-pointer border-l-4 border-blue-600 transition"
+        >
+          <div>
+            <div class="text-sm sm:text-base font-black text-blue-950">सभी मतदान केंद्र (All Booths)</div>
+            <div class="text-xs text-blue-700 font-semibold">समस्त {{ BOOTHS|length }} भाग</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="ward-check text-blue-600 font-black text-base">✓</span>
+          </div>
+        </div>
+
+        {% for p_no, b_info in BOOTHS.items() %}
+          {% set b_name = (b_info.name or b_info.booth_name or ('भाग ' ~ p_no))|replace('\ufffd', '')|replace(' ं', '') %}
+          {% set b_count = b_info.voter_count or b_info.total %}
+          <div
+            data-ward-value="{{ p_no }}"
+            onclick="selectWardOption('{{ modal_id }}', '{{ select_id }}', '{{ label_id }}', '{{ p_no }}', 'भाग {{ p_no }}{% if b_count %} ({{ b_count }} मत){% endif %}')"
+            class="px-4 py-3 hover:bg-slate-50 flex items-center justify-between cursor-pointer transition border-l-4 border-transparent hover:border-slate-300"
+          >
+            <div class="min-w-0 pr-2">
+              <div class="text-sm sm:text-base font-bold text-slate-900 truncate">
+                भाग {{ p_no }}
+              </div>
+              <div class="text-xs text-slate-600 font-medium truncate mt-0.5">
+                {{ b_name }}
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              {% if b_count %}
+                <span class="text-xs font-black text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+                  {{ b_count }} मत
+                </span>
+              {% endif %}
+              <span class="ward-check hidden text-blue-600 font-black text-base">✓</span>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endmacro %}

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block title %}{{ CAMPAIGN.election.ward_name_en }} — Voting Desk (मतदान डेस्क){% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-3">
+
+  <!-- TOP COMPACT BANNER & BOOTH STATS -->
+  <div class="bg-slate-900 text-white rounded-2xl p-3.5 sm:p-4 shadow-md border border-slate-800 space-y-2.5">
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🗳️</span>
+        <div>
+          <h1 class="text-sm sm:text-base font-black text-white leading-tight">
+            मतदान डेस्क · Voting Day Desk
+          </h1>
+          <p id="vdBoothHeaderTitle" class="text-[11px] text-slate-400 font-semibold truncate max-w-[240px] sm:max-w-md">
+            लोड हो रहा है...
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Counter Pill -->
+      <div class="bg-slate-800/90 border border-slate-700/80 rounded-xl px-3 py-1.5 text-right shrink-0">
+        <div class="text-[10px] text-emerald-400 font-black uppercase tracking-wider">
+          <span id="vdBoothVotedCount">0</span> / <span id="vdBoothTotalCount">0</span>
+        </div>
+        <div id="vdBoothTurnoutPercent" class="text-xs sm:text-sm font-black text-white leading-none mt-0.5">
+          0.0%
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Turnout Progress Bar -->
+    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+      <div id="vdProgressBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+    </div>
+
+    <!-- Action Island: Live Marking Sheet & Unvoted List Print Triggers -->
+    <div class="flex items-center gap-2 pt-1 border-t border-slate-800">
+      <button 
+        type="button" 
+        onclick="vdOpenMarkingSheetModal()" 
+        class="flex-1 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-xs py-2 px-3 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-98"
+      >
+        <span>📝</span>
+        <span>बूथ अंकन पत्रक</span>
+        <span class="text-[10px] opacity-80 font-normal hidden sm:inline">(Live Fresh Sheet)</span>
+      </button>
+
+      <button 
+        type="button" 
+        onclick="vdOpenUnvotedModal()" 
+        class="flex-1 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-black text-xs py-2 px-3 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-98"
+      >
+        <span>🖨️</span>
+        <span>शेष मतदाता सूची</span>
+        <span class="text-[10px] opacity-80 font-normal hidden sm:inline">(Print Unvoted List)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- BOOTH / WARD SELECTOR (STRICT SINGLE UNIT VIEW, ZERO 'ALL BOOTHS' CLUTTER) -->
+  <div class="bg-white rounded-xl border border-slate-200/90 p-2 shadow-xs">
+    <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar" style="-webkit-overflow-scrolling: touch;">
+      {% set source_booths = BOOTHS_WITH_WARDS if BOOTHS_WITH_WARDS else BOOTHS %}
+      {% for part, b in source_booths.items() %}
+      {% set b_parts = b.parts_str if b.parts_str else ((b.wards|map(attribute='part_no')|unique|join(',')) if (b.wards) else (BOOTHS_WITH_WARDS[part].wards|map(attribute='part_no')|unique|join(',') if (BOOTHS_WITH_WARDS and BOOTHS_WITH_WARDS.get(part) and BOOTHS_WITH_WARDS[part].wards) else part)) %}
+      {% set b_wards = (b.wards|map(attribute='ward_no')|unique|join(',')) if (b.wards) else (BOOTHS_WITH_WARDS[part].wards|map(attribute='ward_no')|unique|join(',') if (BOOTHS_WITH_WARDS and BOOTHS_WITH_WARDS.get(part)) else '') %}
+      {% set b_wards_display = (b.wards|map(attribute='ward_no')|unique|join(', ')) if (b.wards) else (BOOTHS_WITH_WARDS[part].wards|map(attribute='ward_no')|unique|join(', ') if (BOOTHS_WITH_WARDS and BOOTHS_WITH_WARDS.get(part)) else '') %}
+      {% set b_gp = b.gp_name_hi if b.gp_name_hi else (BOOTHS_WITH_WARDS[part].gp_name_hi if (BOOTHS_WITH_WARDS and BOOTHS_WITH_WARDS.get(part) and BOOTHS_WITH_WARDS[part].gp_name_hi) else '') %}
+      {% set gp_label = (b_gp ~ ' · ') if b_gp else '' %}
+      <button 
+        type="button" 
+        onclick="vdSelectBooth('{{ part }}', '{{ b_parts }}')" 
+        id="vdTab{{ part }}" 
+        class="vd-booth-tab px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 active:scale-95 {% if loop.first %}bg-emerald-600 text-white font-black shadow-xs{% else %}bg-slate-100 hover:bg-slate-200 text-slate-700{% endif %}"
+        data-part="{{ part }}"
+        data-parts="{{ b_parts }}"
+        data-wards="{{ b_wards }}"
+        data-gp="{{ b_gp }}"
+      >
+        <span>
+          {% if IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat or IS_MULTI_GP %}
+            {% if b_wards_display %}
+              बूथ {{ b.booth_no or part }} ({{ gp_label }}वार्ड {{ b_wards_display }})
+            {% elif WARDS and WARDS.get(part) %}
+              वार्ड {{ part }}
+            {% else %}
+              वार्ड {{ part }}
+            {% endif %}
+          {% else %}
+            भाग {{ part }}
+          {% endif %}
+        </span>
+        {% if b.booth_no and b.booth_no|string != part|string and not b_wards_display %}
+          <span class="text-[10px] bg-slate-200/80 text-slate-700 px-1.5 py-0.2 rounded font-mono font-bold">{{ b.booth_no }}</span>
+        {% endif %}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- DYNAMIC WARD SELECTOR TABS (Visible when multiple wards exist in the selected booth) -->
+  <div id="vdWardSelectorContainer" class="hidden bg-white rounded-xl border border-slate-200/90 p-2 shadow-xs">
+    <div class="flex items-center gap-2">
+      <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider shrink-0 pl-1">वार्ड (Ward):</span>
+      <div id="vdWardTabsList" class="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar" style="-webkit-overflow-scrolling: touch;">
+        <!-- Injected dynamically by voting_day.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS: FAST JUMP INPUT + FILTER PILLS + CENTURY JUMPERS -->
+  <div class="bg-white rounded-xl border border-slate-200/90 p-3 shadow-xs space-y-2.5">
+    
+    <!-- Row 1: Direct Serial Number Jump / Mark + Filter Toggle -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+      <!-- Direct Serial Input -->
+      <div class="relative flex-1 flex items-center">
+        <span class="absolute left-3 text-slate-400 font-black text-xs">⚡ क्रम सं.</span>
+        <input 
+          type="text" 
+          id="vdQuickSerialInput" 
+          inputmode="numeric" 
+          placeholder="नंबर लिखकर Enter दबाएं (उदा: 142)..." 
+          class="w-full bg-slate-50 focus:bg-white border-2 border-slate-200 focus:border-emerald-600 rounded-xl pl-20 pr-24 py-2.5 text-sm font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 shadow-2xs transition"
+          onkeydown="if(event.key === 'Enter') { event.preventDefault(); vdMarkByDirectInput(); }"
+        >
+        <button 
+          type="button" 
+          onclick="vdMarkByDirectInput()" 
+          class="absolute right-1.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-xs px-3 py-1.5 rounded-lg transition cursor-pointer shadow-xs"
+        >
+          मार्क करें
+        </button>
+      </div>
+
+      <!-- Filter Toggle Pills: All vs Pending vs Voted -->
+      <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 text-xs font-bold shrink-0">
+        <button type="button" onclick="vdSetStatusFilter('all')" id="vdFilterAll" class="px-3 py-1.5 rounded-lg text-center bg-white text-slate-900 font-black shadow-xs transition">सभी</button>
+        <button type="button" onclick="vdSetStatusFilter('pending')" id="vdFilterPending" class="px-3 py-1.5 rounded-lg text-center text-slate-600 hover:text-slate-900 transition">बाकी</button>
+        <button type="button" onclick="vdSetStatusFilter('voted')" id="vdFilterVoted" class="px-3 py-1.5 rounded-lg text-center text-slate-600 hover:text-slate-900 transition">वोटेड</button>
+      </div>
+    </div>
+
+    <!-- Row 2: Century Jumpers (Scroll to 1-100, 101-200, etc.) -->
+    <div id="vdCenturyBar" class="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-xs" style="-webkit-overflow-scrolling: touch;">
+      <!-- Populated dynamically based on total serial count -->
+    </div>
+  </div>
+
+  <!-- THE SERIAL NUMBER GRID (TAP TO TURN GREEN, NO POPUPS, PURE SPEED) -->
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-4 shadow-xs">
+    <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 text-xs text-slate-500 font-bold">
+      <span id="vdGridStatusText">मतदाता क्रम संख्या ग्रिड</span>
+      <span class="text-slate-400 text-[11px]">टैप करें = वोट मार्क | दोबारा टैप करें = अनडू</span>
+    </div>
+
+    <div 
+      id="vdSerialGrid" 
+      class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2 sm:gap-2.5 min-h-[350px]"
+    >
+      <div class="col-span-full py-16 text-center text-slate-400 font-bold">
+        <div class="text-2xl mb-2 animate-spin">⏳</div>
+        <div>क्रम संख्या सूची लोड हो रही है...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOTING DAY PRINT MODALS (BOOTH MARKING SHEET & UNVOTED LIST) -->
+  {% include 'modals/_voting_day_print_modals.html' %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/app_state.js?v={{ APP_VERSION }}"></script>
+<script src="/static/js/voting_day.js?v={{ APP_VERSION }}"></script>
+<script>
+  (function() {
+    function startVd() {
+      const firstTab = document.querySelector('.vd-booth-tab');
+      const firstPart = firstTab ? (firstTab.dataset.part || '1') : '1';
+      const firstParts = firstTab ? (firstTab.dataset.parts || firstPart) : firstPart;
+      if (typeof window.vdInit === 'function') {
+        window.vdInit(firstPart, firstParts);
+      } else {
+        setTimeout(startVd, 50);
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startVd);
+    } else {
+      startVd();
+    }
+  })();
+</script>
+{% endblock %}

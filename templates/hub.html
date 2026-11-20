@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% block title %}{{ CAMPAIGN.election.app_title }} — {{ CAMPAIGN.election.ward_name_en }}{% endblock %}
+
+{% block content %}
+{% set is_reseller = current_user.role == 'reseller' %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-28 sm:pb-16 space-y-4 sm:space-y-6">
+
+  {% set user_mods = current_user.allowed_modules or ['all'] %}
+  {% set is_super = current_user.is_super_admin or current_user.role == 'super_admin' %}
+  {% set has_all = is_super or 'all' in user_mods or '*' in user_mods %}
+
+  <!-- Access Denied Banner if redirected from unauthorized module -->
+  {% if request.args.get('denied_module') %}
+  <div class="bg-amber-50 border-2 border-amber-300 text-amber-950 px-4 py-3 rounded-2xl flex items-center justify-between text-xs sm:text-sm font-bold shadow-xs animate-in fade-in duration-200">
+    <div class="flex items-center gap-2.5">
+      <span class="text-xl">🔒</span>
+      <div>
+        <div class="font-extrabold text-amber-900">मॉड्यूल एक्सेस सीमित (Module Restricted)</div>
+        <div class="text-[11px] sm:text-xs text-amber-800 font-medium mt-0.5">
+          आपके खाते को इस मॉड्यूल के लिए अनुमति नहीं दी गई है। केवल नीचे दिखाए गए अधिकृत मॉड्यूल ही आपके लिए सक्रिय हैं।
+        </div>
+      </div>
+    </div>
+    <a href="/{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}" class="bg-amber-200 hover:bg-amber-300 text-amber-900 px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer shrink-0">
+      ✕ ठीक है
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- MODULE LAUNCHER TILES (1-COLUMN HIGH-VISIBILITY BIG TILES ON MOBILE/PWA, MULTI-COLUMN GRID ON DESKTOP) -->
+  <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+
+    <!-- 1. Search & Slip -->
+    {% if has_all or 'search' in user_mods %}
+    <a
+      href="/voters{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-blue-50/50 active:scale-[0.98] border-2 border-slate-200/90 hover:border-blue-500 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-blue-600 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">🔍</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-blue-600 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-blue-700 transition leading-snug">मतदाता खोज व पर्ची</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">पर्ची वितरण व त्वरित खोज</p>
+      </div>
+    </a>
+    {% endif %}
+
+
+    <!-- 2. Voting Day Desk -->
+    {% if has_all or 'voting_day' in user_mods %}
+    <a
+      href="/voting-day{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-emerald-50/50 active:scale-[0.98] border-2 border-slate-200/90 hover:border-emerald-500 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-emerald-600 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">🗳️</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-emerald-600 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-emerald-700 transition leading-snug">मतदान दिवस डेस्क</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">बूथ-वार लाइव मार्किंग</p>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- 3. Voice Broadcast & Calls -->
+    {% if ENABLE_VOICE_MODULE and (has_all or 'voice' in user_mods) %}
+    <a
+      href="/campaigns/voice{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-emerald-50/50 active:scale-[0.98] border-2 border-slate-200/90 hover:border-emerald-500 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-emerald-600 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">📢</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-emerald-600 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-emerald-700 transition leading-snug">वॉयस कॉल प्रचार</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">ऑडियो संदेश व पोलिंग डे कॉल</p>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- 4. Political War Room -->
+    {% if has_all or 'warroom' in user_mods %}
+    <a
+      href="/warroom{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-purple-50/50 active:scale-[0.98] border-2 border-slate-200/90 hover:border-purple-500 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-purple-600 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">📈</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-purple-600 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-purple-700 transition leading-snug">राजनीतिक वॉर-रूम</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">रणनीतिक विश्लेषण व आंकड़े</p>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- 5. Dispatch History -->
+    {% if has_all or 'history' in user_mods %}
+    <a
+      href="/history{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-slate-100/70 active:scale-[0.98] border-2 border-slate-200/90 hover:border-slate-400 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-slate-800 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">📜</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-slate-700 transition leading-snug">भेजी गई पर्चियाँ</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">WhatsApp डिस्पैच ऑडिट</p>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- 6. Caste Demographics -->
+    {% if has_all or 'caste' in user_mods %}
+    <a
+      href="/caste{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-indigo-50/50 active:scale-[0.98] border-2 border-slate-200/90 hover:border-indigo-500 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-indigo-600 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">🏷️</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-indigo-600 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-indigo-700 transition leading-snug">समुदाय व सामाजिक समीकरण</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">Community Demographics & Analytics</p>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- 7. Family & Mukhiya Directory -->
+    {% if has_all or 'family' in user_mods %}
+    <a
+      href="/family{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-amber-50/50 active:scale-[0.98] border-2 border-slate-200/90 hover:border-amber-500 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-amber-600 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">👨‍👩‍👧</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-amber-600 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-amber-700 transition leading-snug">परिवार व मुखिया प्रबंधन</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">Family & Household Directory</p>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- 8. Karyakarta Directory & Turnout Tracking -->
+    {% if has_all or 'karyakartas' in user_mods %}
+    <a
+      href="/karyakartas{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-indigo-50/50 active:scale-[0.98] border-2 border-slate-200/90 hover:border-indigo-500 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-indigo-700 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">👥</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-indigo-600 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-indigo-700 transition leading-snug">कार्यकर्ता प्रबंधन</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">पन्ना प्रमुख व दायित्व ट्रैकिंग</p>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- 9. Outside / Migrant Voters -->
+    {% if has_all or 'outside' in user_mods %}
+    <a
+      href="/outside{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-blue-50/50 active:scale-[0.98] border-2 border-slate-200/90 hover:border-blue-500 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-blue-700 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">✈️</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-blue-600 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-blue-700 transition leading-snug">प्रवासी मतदाता</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">कॉलिंग व यात्रा समन्वय सूची</p>
+      </div>
+    </a>
+    {% endif %}
+
+
+    <!-- Admin Modules (Super Admin Fleet Command Center) — resellers use their own
+         scoped "मेरे अभियान" card above instead, not this fleet-wide portal. -->
+    {% if current_user.is_super_admin or current_user.role == 'super_admin' or session.get('role') == 'super_admin' or current_user.tenant_slug == '*' %}
+    <a
+      href="/admin{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-amber-50/50 active:scale-[0.98] border-2 border-amber-300 hover:border-amber-500 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-amber-600 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">🏛️</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-amber-600 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-amber-700 transition leading-snug">अभियान केंद्र</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">डेटा व कॉन्फ़िगरेशन</p>
+      </div>
+    </a>
+    {% endif %}
+
+    {% if current_user.is_super_admin or current_user.role == 'reseller' or (current_user.role in ['admin', 'operator'] and (has_all or 'users' in user_mods)) %}
+    <a
+      href="/users{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+      onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+      class="group bg-white hover:bg-rose-50/50 active:scale-[0.98] border-2 border-rose-300 hover:border-rose-500 rounded-3xl md:rounded-2xl p-5 sm:p-6 md:p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-row md:flex-col items-center md:items-stretch justify-between min-h-[120px] sm:min-h-[130px] md:min-h-[165px]"
+    >
+      <div class="flex items-center md:justify-between shrink-0 md:shrink">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-14 md:h-14 rounded-2xl sm:rounded-3xl bg-rose-600 text-white flex items-center justify-center text-3xl sm:text-4xl md:text-2xl lg:text-3xl font-black shadow-md shrink-0">👥</div>
+        <span class="hidden md:inline-block text-xs font-bold text-slate-400 group-hover:text-rose-600 transition-colors">खोलें →</span>
+      </div>
+      <div class="flex-1 min-w-0 text-center md:text-left pr-12 sm:pr-16 md:pr-0 pl-2 sm:pl-3 md:pl-0 md:mt-3">
+        <h3 class="text-xl sm:text-2xl md:text-base lg:text-lg font-black text-slate-900 group-hover:text-rose-700 transition leading-snug">खाते व अनुमतियाँ</h3>
+        <p class="text-sm sm:text-base md:text-xs lg:text-sm text-slate-600 font-semibold mt-1">उप-खाते व दल प्रबंधन</p>
+      </div>
+    </a>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

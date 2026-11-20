@@ -1,0 +1,198 @@
+<!-- QUICK SEARCHABLE CAMPAIGN SWITCHER MODAL -->
+<div id="campaignSearchModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-start justify-center p-4 pt-12 sm:pt-20">
+  <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[80vh] animate-in fade-in zoom-in duration-150">
+    
+    <!-- Modal Header & Search Bar -->
+    <div class="p-4 border-b border-slate-100 space-y-3 bg-slate-50">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🏛️</span>
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-900">चुनाव अभियान बदलें (Switch Campaign)</h3>
+            <p class="text-[11px] text-slate-500">प्रत्याशी, पंचायत, वार्ड या जिला लिखकर तुरंत खोजें</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCampaignSearchModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg text-lg leading-none cursor-pointer">✕</button>
+      </div>
+
+      <!-- Real-time search box -->
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </span>
+        <input 
+          type="text" 
+          id="campaignModalSearchInput" 
+          oninput="filterCampaignModal()" 
+          placeholder="खोजें: प्रत्याशी नाम, ग्राम पंचायत, वार्ड, जिला, स्लग..." 
+          class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-xs"
+        >
+      </div>
+
+      <!-- Filter chips -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[11px] font-bold text-slate-600">
+        <button type="button" onclick="setCampaignModalTypeFilter('ALL')" id="cmFilter-ALL" class="cm-filter-btn px-2.5 py-1 rounded-lg bg-indigo-600 text-white shadow-2xs">सभी (All)</button>
+        <button type="button" onclick="setCampaignModalTypeFilter('PANCHAYAT')" id="cmFilter-PANCHAYAT" class="cm-filter-btn px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100">🌾 ग्राम पंचायत</button>
+        <button type="button" onclick="setCampaignModalTypeFilter('PANCHAYAT_SAMITI')" id="cmFilter-PANCHAYAT_SAMITI" class="cm-filter-btn px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100">🚜 पंचायत समिति</button>
+        <button type="button" onclick="setCampaignModalTypeFilter('ZILA_PARISHAD')" id="cmFilter-ZILA_PARISHAD" class="cm-filter-btn px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100">🏢 जिला परिषद</button>
+        <button type="button" onclick="setCampaignModalTypeFilter('ASSEMBLY')" id="cmFilter-ASSEMBLY" class="cm-filter-btn px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100">🏛️ विधान सभा</button>
+        <button type="button" onclick="setCampaignModalTypeFilter('MUNICIPAL')" id="cmFilter-MUNICIPAL" class="cm-filter-btn px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100">🏙️ नगर पालिका</button>
+      </div>
+    </div>
+
+    <!-- Campaigns List -->
+    <div id="campaignModalList" class="divide-y divide-slate-100 overflow-y-auto flex-1 p-2 space-y-1">
+      <!-- Populated dynamically -->
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+      <div class="flex items-center gap-1">
+        <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded font-mono text-[10px] shadow-2xs">Esc</kbd>
+        <span>बंद करने हेतु</span>
+      </div>
+      <span id="campaignModalCountBadge" class="font-bold text-slate-700">0 अभियान उपलब्ध</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  let modalCampaigns = {{ (available_campaigns or []) | tojson }};
+  let currentModalType = 'ALL';
+  const activeTenant = {{ (current_tenant or '') | tojson }};
+
+  window.openCampaignSearchModal = function() {
+    const modal = document.getElementById('campaignSearchModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    const input = document.getElementById('campaignModalSearchInput');
+    if (input) {
+      input.value = '';
+      setTimeout(() => input.focus(), 50);
+    }
+    currentModalType = 'ALL';
+    updateCampaignModalFilterButtons();
+    renderCampaignModalList(modalCampaigns);
+  };
+
+  window.closeCampaignSearchModal = function() {
+    const modal = document.getElementById('campaignSearchModal');
+    if (modal) modal.classList.add('hidden');
+  };
+
+  window.setCampaignModalTypeFilter = function(tier) {
+    currentModalType = tier;
+    updateCampaignModalFilterButtons();
+    filterCampaignModal();
+  };
+
+  function updateCampaignModalFilterButtons() {
+    document.querySelectorAll('.cm-filter-btn').forEach(btn => {
+      btn.className = 'cm-filter-btn px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-600';
+    });
+    const activeBtn = document.getElementById('cmFilter-' + currentModalType);
+    if (activeBtn) {
+      activeBtn.className = 'cm-filter-btn px-2.5 py-1 rounded-lg bg-indigo-600 text-white shadow-2xs';
+    }
+  }
+
+  window.filterCampaignModal = function() {
+    const q = (document.getElementById('campaignModalSearchInput')?.value || '').toLowerCase().trim();
+    const filtered = modalCampaigns.filter(c => {
+      const matchType = (currentModalType === 'ALL') || (c.election_type === currentModalType);
+      if (!matchType) return false;
+      if (!q) return true;
+      const name = String(c.name || '').toLowerCase();
+      const cand = String(c.candidate || c.raw_candidate || '').toLowerCase();
+      const area = String(c.clean_area || '').toLowerCase();
+      const slug = String(c.slug || '').toLowerCase();
+      const dist = String(c.district || '').toLowerCase();
+      const ward = String(c.ward_no || '').toLowerCase();
+      return name.includes(q) || cand.includes(q) || area.includes(q) || slug.includes(q) || dist.includes(q) || ward.includes(q);
+    });
+    renderCampaignModalList(filtered);
+  };
+
+  function renderCampaignModalList(items) {
+    const list = document.getElementById('campaignModalList');
+    const badge = document.getElementById('campaignModalCountBadge');
+    if (badge) badge.textContent = `${items.length} अभियान उपलब्ध`;
+    if (!list) return;
+
+    let html = '';
+
+    // Quick jump to global Fleet Command Center
+    html += `
+      <div onclick="switchGlobalCampaign('')" class="p-2.5 rounded-xl hover:bg-indigo-50/70 border ${!activeTenant ? 'border-indigo-400 bg-indigo-50/50' : 'border-slate-100 bg-white'} transition cursor-pointer flex items-center justify-between gap-3 group">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm font-black shrink-0 shadow-2xs">
+            🌐
+          </div>
+          <div class="min-w-0">
+            <div class="font-extrabold text-xs text-indigo-950 flex items-center gap-1.5">
+              <span>सभी चुनाव अभियान (All Campaigns Admin Dashboard)</span>
+              ${!activeTenant ? '<span class="text-[10px] bg-indigo-600 text-white px-1.5 py-0.2 rounded font-bold">सक्रिय</span>' : ''}
+            </div>
+            <div class="text-[11px] text-slate-500 truncate">समस्त अभियानों का केंद्रीकृत नियंत्रण, सांख्यिकी व खाता प्रबंधन</div>
+          </div>
+        </div>
+        <span class="text-xs text-indigo-600 font-bold group-hover:translate-x-0.5 transition shrink-0">खोलें →</span>
+      </div>
+    `;
+
+    if (!items.length) {
+      html += `<div class="p-8 text-center text-slate-400 text-xs font-bold">कोई अभियान नहीं मिला (No matching campaigns)</div>`;
+      list.innerHTML = html;
+      return;
+    }
+
+    html += items.map(c => {
+      const isSelected = (c.slug === activeTenant);
+      const tierBadge = c.election_type === 'PANCHAYAT' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                        c.election_type === 'ZILA_PARISHAD' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                        c.election_type === 'ASSEMBLY' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                        'bg-slate-100 text-slate-700 border-slate-200';
+      return `
+        <div onclick="switchGlobalCampaign('${c.slug}')" class="p-2.5 rounded-xl hover:bg-slate-50 border ${isSelected ? 'border-indigo-300 bg-indigo-50/30' : 'border-slate-100 bg-white'} transition cursor-pointer flex items-center justify-between gap-3 group">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center text-xs font-black shrink-0 shadow-2xs">
+              ${c.candidate ? '👤' : '🌾'}
+            </div>
+            <div class="min-w-0">
+              <div class="font-extrabold text-xs text-slate-900 flex items-center gap-1.5 truncate">
+                <span class="truncate">${c.name}</span>
+                ${isSelected ? '<span class="text-[9px] bg-emerald-600 text-white px-1.5 py-0.2 rounded font-bold shrink-0">सक्रिय</span>' : ''}
+              </div>
+              <div class="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5 truncate">
+                <span class="font-mono text-[10px] text-indigo-600 font-bold">${c.slug}</span>
+                ${c.district ? `<span>• ${c.district}</span>` : ''}
+                <span class="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded border ${tierBadge}">${c.election_type || 'PANCHAYAT'}</span>
+              </div>
+            </div>
+          </div>
+          <span class="text-xs text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition shrink-0 font-bold">स्विच करें →</span>
+        </div>
+      `;
+    }).join('');
+
+    list.innerHTML = html;
+  }
+
+  // Global Keyboard Shortcut: Ctrl+K or Cmd+K to open
+  window.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      const modal = document.getElementById('campaignSearchModal');
+      if (modal && !modal.classList.contains('hidden')) {
+        closeCampaignSearchModal();
+      } else {
+        openCampaignSearchModal();
+      }
+    } else if (e.key === 'Escape') {
+      closeCampaignSearchModal();
+    }
+  });
+})();
+</script>

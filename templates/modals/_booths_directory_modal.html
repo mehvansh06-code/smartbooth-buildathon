@@ -1,0 +1,48 @@
+<!-- MODAL: POLLING BOOTHS DIRECTORY -->
+  <div id="boothModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-slate-300 overflow-hidden">
+      
+      <div class="bg-slate-900 text-white px-5 py-3 flex items-center justify-between">
+        <h3 class="font-bold text-sm">{{ CAMPAIGN.election.ward_name_en }} — Polling Booths & Delimitation Directory</h3>
+        <button onclick="closeBoothInfoModal()" class="text-white/70 hover:text-white text-xl font-bold leading-none">&times;</button>
+      </div>
+
+      <div class="p-4 overflow-y-auto flex-1 text-xs">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 text-[11px] uppercase border-b border-slate-200 sticky top-0">
+              <th class="p-2.5 text-center w-20">Part</th>
+              <th class="p-2.5 text-center w-20">Booth</th>
+              <th class="p-2.5 w-60">Polling Station</th>
+              <th class="p-2.5">Areas / Mohallas Included</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-slate-800">
+            {% for p, b in booths.items() %}
+            <tr>
+              <td class="p-2.5 text-center font-bold">Part {{ p }}</td>
+              <td class="p-2.5 text-center font-bold text-blue-900">{{ b.booth_no }}</td>
+              <td class="p-2.5">
+                <strong class="text-slate-900 block font-bold text-xs">{{ b.name }}</strong>
+                <span class="text-[10px] text-slate-500">{{ b.name_en }}</span>
+                {% if b.maps_url %}
+                <div class="mt-1">
+                  <a href="{{ b.maps_url }}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-800 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                    <span>📍</span> Google Maps Location ↗
+                  </a>
+                </div>
+                {% endif %}
+              </td>
+              <td class="p-2.5 text-slate-700">{{ b.area }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="bg-slate-50 px-4 py-2 border-t border-slate-200 text-right">
+        <button onclick="closeBoothInfoModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-1.5 rounded text-xs">Close</button>
+      </div>
+
+    </div>
+  </div>

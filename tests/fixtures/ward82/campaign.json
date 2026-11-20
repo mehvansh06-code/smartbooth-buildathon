@@ -1,0 +1,110 @@
+{
+  "candidate": {
+    "name_hi": "प्रसन चाँद मेहता",
+    "name_en": "Prasann Chand Mehta",
+    "photo_filename": "candidate_photo.png",
+    "fallback_photo_filename": "candidate_photo.jpg"
+  },
+  "election": {
+    "ward_no": "82",
+    "ward_name_hi": "वार्ड नंबर 82",
+    "ward_name_en": "Ward 82",
+    "constituency": "127-Sardarpura, Jodhpur",
+    "city": "Jodhpur",
+    "app_title": "Ward 82 Smart Booth",
+    "portal_subtitle": "चुनाव प्रबंधन व वॉर-रूम पोर्टल",
+    "district": "Jodhpur"
+  },
+  "party": {
+    "name_hi": "भारतीय जनता पार्टी (भाजपा)",
+    "name_en": "BJP",
+    "symbol_name_hi": "कमल का फूल",
+    "symbol_name_en": "Lotus",
+    "symbol_filename": "symbol.png",
+    "theme_color": "#ea580c",
+    "ballot_serial": "1",
+    "slogan": "कमल का बटन दबाएं और भारी मतों से विजयी बनाएं"
+  },
+  "campaign_message": "वार्ड नंबर 82 से भाजपा प्रत्याशी प्रसन्न चंद मेहता को अपना अमूल्य वोट देकर भारी मतों से विजय बनाए।",
+  "database": {
+    "db_filename": "voters_ward82.db"
+  },
+  "booths": {
+    "1": {
+      "booth_no": 569,
+      "name": "569 - सामुदायिक भवन, जाटा बास, महामंदिर, जोधपुर",
+      "name_en": "Community Hall, Jata Baas, Mahamandir, Jodhpur",
+      "area": "1-घांचियों का बास, 2-जाटा बास, 3-आकाशवाणी के पीछे, 4-सदर बाजार",
+      "maps_url": "https://maps.google.com/?q=Community+Hall+Jata+Baas+Mahamandir+Jodhpur"
+    },
+    "2": {
+      "booth_no": 570,
+      "name": "570 - राजकीय बालिका उच्च माध्यमिक विद्यालय, महामंदिर लाल मैदान (कमरा नं. 4), जोधपुर",
+      "name_en": "Govt. Girls Sr. Sec. School, Mahamandir Lal Maidan (Room No. 4), Jodhpur",
+      "area": "1-जूनी बागर महामंदिर, 2-पावटा सी रोड",
+      "maps_url": "https://maps.google.com/?q=Govt+Girls+Senior+Secondary+School+Mahamandir+Lal+Maidan+Jodhpur"
+    },
+    "3": {
+      "booth_no": 571,
+      "name": "571 - सामुदायिक भवन, महामंदिर तीसरी पोल के अंदर, मेघवाल बस्ती, जोधपुर",
+      "name_en": "Community Hall, Mahamandir Inside 3rd Pol, Meghwal Basti, Jodhpur",
+      "area": "1-आसन, 2-मेघवाल बस्ती, 3-सुनारों का बास, 4-अशोक नगर",
+      "maps_url": "https://maps.google.com/?q=Community+Hall+Mahamandir+Meghwal+Basti+Jodhpur"
+    },
+    "4": {
+      "booth_no": 572,
+      "name": "572 - आर्य समाज भवन, पावटा सी रोड़, जोधपुर",
+      "name_en": "Arya Samaj Bhawan, Paota C Road, Jodhpur",
+      "area": "1-पुलिस थाना हेम सिंह जी का कटला, 2-नया बास, 3-धारीवालो का बास, 4-पाली बाजार, 5-धान मण्डी, 6-महामन्दिर गेट के अन्दर",
+      "maps_url": "https://maps.google.com/?q=Arya+Samaj+Bhawan+Paota+C+Road+Jodhpur"
+    },
+    "5": {
+      "booth_no": 573,
+      "name": "573 - राजकीय बालिका उच्च माध्यमिक विद्यालय, महामंदिर लाल मैदान (बायां भाग), जोधपुर",
+      "name_en": "Govt. Girls Sr. Sec. School, Mahamandir Lal Maidan (Left Wing), Jodhpur",
+      "area": "1-आकाशवाणी केन्द्र महामन्दिर, 2-हेम सिंह जी का कटले के अन्दर, 3-हेम सिंह जी कटले के बाहर, 4-आकाशवाणी, 5-रेलवे लाईन के पास महामन्दिर, 6-नाथ सागर के पास, 7-हेम सिंह जी के कटले के बाहर मेघवाल का बास, 8-हेम सिंह जी का कटला, 9-मेघवाल बस्ती",
+      "maps_url": "https://maps.google.com/?q=Govt+Girls+Senior+Secondary+School+Mahamandir+Lal+Maidan+Jodhpur"
+    },
+    "6": {
+      "booth_no": 574,
+      "name": "574 - राजकीय बालिका उच्च माध्यमिक विद्यालय, महामंदिर लाल मैदान (मध्य भाग), जोधपुर",
+      "name_en": "Govt. Girls Sr. Sec. School, Mahamandir Lal Maidan (Middle Wing), Jodhpur",
+      "area": "1-आकाशवाणी केन्द्र के पास पावटा सी रोड, 2-तीसरी रोड पावटा सी रोड, 3-पांचवी रोड पावटा सी रोड, 4-चौथी गली पावटा सी रोड, 5-पाली बाजार, 6-घांचियों का बास, 7-पाली बाजार महामन्दिर",
+      "maps_url": "https://maps.google.com/?q=Govt+Girls+Senior+Secondary+School+Mahamandir+Lal+Maidan+Jodhpur"
+    },
+    "7": {
+      "booth_no": 575,
+      "name": "575 - राजकीय बालिका उच्च माध्यमिक विद्यालय, महामंदिर लाल मैदान (स्टाफ रूम), जोधपुर",
+      "name_en": "Govt. Girls Sr. Sec. School, Mahamandir Lal Maidan (Staff Room), Jodhpur",
+      "area": "1-ओमजी का हत्था रोड, 2-मेघवाल बस्ती इमरतिया बेरा, 3-7वीं गली पावटा सी रोड, 4-7वीं रोड पावटा सी रोड, 5-जूनी बागर पावटा सी रोड, 6-6वीं रोड पावटा सी रोड, 7-साखला बास इमरतिया बेरा",
+      "maps_url": "https://maps.google.com/?q=Govt+Girls+Senior+Secondary+School+Mahamandir+Lal+Maidan+Jodhpur"
+    },
+    "8": {
+      "booth_no": 576,
+      "name": "576 - राजकीय बालिका उच्च माध्यमिक विद्यालय, महामंदिर लाल मैदान (कमरा नं. 08), जोधपुर",
+      "name_en": "Govt. Girls Sr. Sec. School, Mahamandir Lal Maidan (Room No. 08), Jodhpur",
+      "area": "1-तीसरी पोल महामन्दिर, 2-जैन कॉलोनी, 3-विकास कॉलोनी, 4-आयकर कॉलोनी",
+      "maps_url": "https://maps.google.com/?q=Govt+Girls+Senior+Secondary+School+Mahamandir+Lal+Maidan+Jodhpur"
+    },
+    "9": {
+      "booth_no": 577,
+      "name": "577 - राजकीय उच्च माध्यमिक विद्यालय पावटा (बायां भाग), जोधपुर",
+      "name_en": "Govt. Sr. Sec. School Paota (Left Wing), Jodhpur",
+      "area": "1-पावटा स्कूल, 2-रायपुर कॉलोनी, 3-खेजडला हाउस, 4-जसोल हाउस, 5-राजपुत सभा भवन, 6-सोनल अपार्टमेन्ट, 7-दुर्गादास कॉलोनी, 8-लाल मैदान",
+      "maps_url": "https://maps.google.com/?q=Govt+Senior+Secondary+School+Paota+Jodhpur"
+    }
+  },
+  "tenant_slug": "ward82",
+  "whatsapp": {
+    "channel": "meta_cloud",
+    "channel_priority": [
+      "meta_cloud",
+      "wa_me"
+    ],
+    "phone_number_id": "1382048191650184",
+    "waba_id": "1288509326773409",
+    "template_name": "info_update_suchna_1",
+    "template_lang": "en"
+  },
+  "status": "ACTIVE"
+}

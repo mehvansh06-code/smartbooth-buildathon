@@ -1,0 +1,482 @@
+{% extends 'base.html' %}
+{% block title %}रीसेलर कमान केंद्र (My Campaigns) — {{ CAMPAIGN.election.app_title or 'Smart Booth' }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
+
+  <!-- ======================================================== -->
+  <!-- 1. RESELLER COMMAND CENTER HEADER BANNER -->
+  <!-- ======================================================== -->
+  <div class="bg-white border-2 border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+      <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-700 text-white flex items-center justify-center text-2xl sm:text-3xl font-black shadow-md shrink-0">
+        🏛️
+      </div>
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h2 class="text-base sm:text-xl font-black text-slate-900 leading-tight truncate">
+            रीसेलर कमान केंद्र (Reseller Command Center)
+          </h2>
+          <span class="text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200">
+            Reseller
+          </span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-500 font-semibold mt-1">
+          अधिकृत पार्टनर: <strong class="text-slate-800">{{ current_user.full_name or current_user.username }}</strong>
+          {% if fleet_stats.max_campaigns is not none %}
+          • अभियान सीमा: <strong class="text-indigo-700">{{ fleet_stats.total_campaigns }} / {{ fleet_stats.max_campaigns }}</strong>
+          {% endif %}
+          • WhatsApp वॉलेट: <strong class="text-emerald-700">{{ "{:,}".format(fleet_stats.whatsapp_credits or 0) }} क्रेडिट</strong>
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+      <a
+        href="/campaign/new"
+        class="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs sm:text-sm shadow-sm transition active:scale-95 cursor-pointer"
+      >
+        <span>➕</span>
+        <span>नया अभियान जोड़ें (New Campaign)</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 2. FLEET METRICS KPI CARDS -->
+  <!-- ======================================================== -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <!-- Active Campaigns / Quota -->
+    <div class="bg-white border-2 border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-2xs flex items-center justify-between">
+      <div>
+        <div class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">कुल अभियान (Quota)</div>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+          {{ fleet_stats.total_campaigns }}
+          {% if fleet_stats.max_campaigns is not none %}
+          <span class="text-xs sm:text-sm font-semibold text-slate-400">/ {{ fleet_stats.max_campaigns }}</span>
+          {% else %}
+          <span class="text-xs sm:text-sm font-semibold text-slate-400">/ ∞</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-xl shrink-0">
+        🏛️
+      </div>
+    </div>
+
+    <!-- Total Electors -->
+    <div class="bg-white border-2 border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-2xs flex items-center justify-between">
+      <div>
+        <div class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">कुल मतदाता (Electors)</div>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+          {{ "{:,}".format(fleet_stats.total_voters) }}
+        </div>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center text-xl shrink-0">
+        👥
+      </div>
+    </div>
+
+    <!-- Total Dispatches -->
+    <div class="bg-white border-2 border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-2xs flex items-center justify-between">
+      <div>
+        <div class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">पर्ची प्रेषण (Dispatches)</div>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+          {{ "{:,}".format(fleet_stats.total_dispatches) }}
+        </div>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center text-xl shrink-0">
+        📜
+      </div>
+    </div>
+
+    <!-- Turnout Tracked -->
+    <div class="bg-white border-2 border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-2xs flex items-center justify-between">
+      <div>
+        <div class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">औसत टर्नआउट (Turnout)</div>
+        <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+          {{ fleet_stats.overall_turnout_pct }}%
+        </div>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center text-xl shrink-0">
+        📊
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 3. SEARCH & STATUS FILTER TOOLBAR -->
+  <!-- ======================================================== -->
+  <div class="bg-white border-2 border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <!-- Search Box -->
+    <div class="relative flex-1 max-w-md">
+      <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+        🔍
+      </span>
+      <input
+        type="text"
+        id="campaignSearchInput"
+        oninput="filterCampaignCards()"
+        placeholder="अभियान, प्रत्याशी या क्षेत्र खोजें..."
+        class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+      >
+    </div>
+
+    <!-- Status Tabs -->
+    <div class="flex items-center gap-1.5 self-start sm:self-auto overflow-x-auto pb-1 sm:pb-0">
+      <button
+        type="button"
+        id="tabFilterAll"
+        onclick="setFilterStatus('all')"
+        class="filter-tab-btn active px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-indigo-600 text-white shadow-xs"
+      >
+        सभी ({{ campaigns|length }})
+      </button>
+      <button
+        type="button"
+        id="tabFilterActive"
+        onclick="setFilterStatus('ACTIVE')"
+        class="filter-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200"
+      >
+        सक्रिय ({{ campaigns|selectattr('status', 'equalto', 'ACTIVE')|list|length }})
+      </button>
+      <button
+        type="button"
+        id="tabFilterPaused"
+        onclick="setFilterStatus('PAUSED')"
+        class="filter-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200"
+      >
+        रोकें ({{ campaigns|selectattr('status', 'equalto', 'PAUSED')|list|length }})
+      </button>
+      <button
+        type="button"
+        id="tabFilterArchived"
+        onclick="setFilterStatus('ARCHIVED')"
+        class="filter-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200"
+      >
+        पुरालेख ({{ campaigns|selectattr('status', 'equalto', 'ARCHIVED')|list|length }})
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 4. CAMPAIGN CARDS GRID -->
+  <!-- ======================================================== -->
+  {% if campaigns %}
+  <div id="campaignCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+    {% for c in campaigns %}
+    <div
+      class="campaign-card bg-white border-2 border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-xl hover:border-indigo-400 transition-all flex flex-col justify-between"
+      data-slug="{{ c.campaign_slug }}"
+      data-candidate="{{ (c.candidate_name or '')|lower }}"
+      data-ward="{{ (c.ward_name or '')|lower }}"
+      data-type="{{ (c.election_type or '')|lower }}"
+      data-status="{{ c.status or 'ACTIVE' }}"
+    >
+      <div>
+        <!-- Top Badges & Status -->
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-200">
+              {{ c.election_type or 'ELECTION' }}
+            </span>
+            <span class="font-mono text-[11px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg">
+              {{ c.campaign_slug }}
+            </span>
+          </div>
+
+          <span
+            id="statusBadge_{{ c.campaign_slug }}"
+            class="text-[10px] font-black uppercase px-2 py-0.5 rounded-lg border
+            {% if c.status == 'ACTIVE' %}bg-emerald-50 text-emerald-700 border-emerald-200
+            {% elif c.status == 'PAUSED' %}bg-amber-50 text-amber-700 border-amber-200
+            {% else %}bg-slate-50 text-slate-500 border-slate-200{% endif %}"
+          >
+            {{ c.status or 'ACTIVE' }}
+          </span>
+        </div>
+
+        <!-- Candidate Info Row -->
+        <div class="flex items-center gap-3 mb-3">
+          {% if c.photo_url %}
+          <img src="{{ c.photo_url }}" alt="Candidate" class="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 shrink-0 shadow-2xs">
+          {% else %}
+          <div class="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl font-black shrink-0 shadow-2xs">
+            🗳️
+          </div>
+          {% endif %}
+
+          <div class="min-w-0 flex-1">
+            <h3 class="text-base font-black text-slate-900 leading-snug truncate">
+              {{ c.candidate_name_hi or c.candidate_name }}
+            </h3>
+            {% if c.candidate_name_en and c.candidate_name_en != c.candidate_name_hi %}
+            <p class="text-xs text-slate-500 font-semibold truncate">{{ c.candidate_name_en }}</p>
+            {% endif %}
+            <p class="text-[11px] text-slate-400 font-semibold truncate mt-0.5">
+              {{ c.ward_name or c.state or 'Rajasthan' }}
+            </p>
+          </div>
+
+          {% if c.symbol_url %}
+          <img src="{{ c.symbol_url }}" alt="Symbol" class="w-8 h-8 rounded-lg object-contain shrink-0" title="{{ c.symbol_name }}">
+          {% endif %}
+        </div>
+
+        <!-- Mini Stats Grid -->
+        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs mb-3.5">
+          <div class="flex items-center gap-1.5">
+            <span class="text-slate-400">👥</span>
+            <span class="font-bold text-slate-700 truncate">{{ "{:,}".format(c.total_voters) }} मतदाता</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-slate-400">👤</span>
+            <span class="font-bold text-slate-700 truncate">{{ c.sub_accounts_count }}/{{ c.max_sub_accounts }} स्टाफ</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-slate-400">💬</span>
+            <span class="font-bold text-slate-700 truncate">
+              {% if c.wa_quota.configured %}
+                {{ "{:,}".format(c.wa_quota.available) }} WA
+              {% else %}
+                -- WA
+              {% endif %}
+              {% if ENABLE_VOICE_MODULE %}· {{ c.voice_quota.available if c.voice_quota else 0 }} Voice{% endif %}
+            </span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-slate-400">📊</span>
+            <span class="font-bold text-slate-700 truncate">{{ c.turnout_pct }}% मतदान</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5">
+        <!-- Launch Hub Button -->
+        <a
+          href="/?tenant={{ c.campaign_slug }}"
+          onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+          class="flex-1 flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-xs active:scale-95 transition cursor-pointer"
+          title="अभियान हब खोलें (Launch Campaign Hub)"
+        >
+          <span>🚀</span>
+          <span>हब खोलें</span>
+        </a>
+
+        <!-- Manage Users Button -->
+        <a
+          href="/users?tenant={{ c.campaign_slug }}"
+          onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+          class="flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs active:scale-95 transition cursor-pointer"
+          title="स्टाफ व ऑपरेटर खाते (Manage Staff & Operators)"
+        >
+          <span>👥</span>
+          <span class="hidden sm:inline">यूज़र्स</span>
+        </a>
+
+        <!-- Edit Campaign Button -->
+        <a
+          href="/campaign/edit/{{ c.campaign_slug }}"
+          onclick="if(window.triggerHaptic) window.triggerHaptic('light');"
+          class="flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs active:scale-95 transition cursor-pointer"
+          title="अभियान विवरण संपादित करें (Edit Campaign Details)"
+        >
+          <span>✏️</span>
+        </a>
+
+        <!-- Toggle Pause / Activate -->
+        <button
+          type="button"
+          id="btnToggle_{{ c.campaign_slug }}"
+          onclick="toggleCampaignStatus('{{ c.campaign_slug }}', '{{ c.status }}')"
+          class="flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl {% if c.status == 'ACTIVE' %}bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200{% else %}bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200{% endif %} font-bold text-xs active:scale-95 transition cursor-pointer"
+          title="{% if c.status == 'ACTIVE' %}अभियान रोकें (Pause){% else %}सक्रिय करें (Activate){% endif %}"
+        >
+          <span>{% if c.status == 'ACTIVE' %}⏸️{% else %}▶️{% endif %}</span>
+        </button>
+
+        <!-- Restore Button if Archived -->
+        {% if c.status == 'ARCHIVED' %}
+        <button
+          type="button"
+          onclick="if(window.triggerHaptic) window.triggerHaptic('light'); restoreCampaign('{{ c.campaign_slug }}');"
+          class="flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs active:scale-95 transition cursor-pointer"
+          title="पुनः सक्रिय करें (Restore Campaign)"
+        >
+          <span>♻️</span>
+        </button>
+        {% endif %}
+
+        <!-- Delete / Archive Button -->
+        <button
+          type="button"
+          onclick="if(window.triggerHaptic) window.triggerHaptic('light'); openDeleteCampaignModal('{{ c.campaign_slug }}', '{{ (c.candidate_name or c.campaign_slug)|urlencode }}', {{ c.total_voters or 0 }}, '{{ c.status or 'ACTIVE' }}', true);"
+          class="flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-xs active:scale-95 transition cursor-pointer"
+          title="अभियान सुरक्षित संग्रह करें (Archive Campaign)"
+        >
+          <span>🗑️</span>
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bg-white border-2 border-dashed border-slate-300 rounded-3xl p-8 sm:p-12 text-center">
+    <div class="text-5xl mb-3">🏛️</div>
+    <h3 class="text-base sm:text-lg font-black text-slate-800">अभी तक कोई अभियान नहीं (No campaigns yet)</h3>
+    <p class="text-xs sm:text-sm text-slate-500 font-semibold mt-1.5 max-w-md mx-auto">
+      आप अपने क्लाइंट या प्रत्याशी के लिए नया चुनाव अभियान 1-क्लिक में शुरू कर सकते हैं।
+    </p>
+    <div class="mt-4">
+      <a
+        href="/campaign/new"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm shadow-md transition active:scale-95 cursor-pointer"
+      >
+        <span>➕</span>
+        <span>नया अभियान बनाएं (Create First Campaign)</span>
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+
+<!-- Modal 2: Delete Campaign Confirmation -->
+{% include 'modals/_delete_campaign_modal.html' %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/admin_campaign_wizard.js?v={{ APP_VERSION }}"></script>
+<script>
+  let currentFilterStatus = 'all';
+
+  function setFilterStatus(status) {
+    currentFilterStatus = status;
+    document.querySelectorAll('.filter-tab-btn').forEach(btn => {
+      btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-xs');
+      btn.classList.add('bg-slate-100', 'text-slate-600');
+    });
+
+    const activeBtn = status === 'all' ? document.getElementById('tabFilterAll') :
+                      status === 'ACTIVE' ? document.getElementById('tabFilterActive') :
+                      status === 'PAUSED' ? document.getElementById('tabFilterPaused') :
+                      document.getElementById('tabFilterArchived');
+    if (activeBtn) {
+      activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+      activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-xs');
+    }
+    filterCampaignCards();
+  }
+
+  function filterCampaignCards() {
+    const query = (document.getElementById('campaignSearchInput')?.value || '').toLowerCase().trim();
+    const cards = document.querySelectorAll('.campaign-card');
+
+    cards.forEach(card => {
+      const slug = (card.dataset.slug || '').toLowerCase();
+      const cand = (card.dataset.candidate || '').toLowerCase();
+      const ward = (card.dataset.ward || '').toLowerCase();
+      const status = (card.dataset.status || '').toUpperCase();
+
+      const matchesQuery = !query || slug.includes(query) || cand.includes(query) || ward.includes(query);
+      const matchesStatus = currentFilterStatus === 'all' || status === currentFilterStatus;
+
+      if (matchesQuery && matchesStatus) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+  }
+
+  async function toggleCampaignStatus(slug, currentStatus) {
+    const isCurrentlyActive = (currentStatus || 'ACTIVE').toUpperCase() === 'ACTIVE';
+    const newStatus = isCurrentlyActive ? 'PAUSED' : 'ACTIVE';
+    const confirmMsg = isCurrentlyActive ?
+      `क्या आप वाकई अभियान '${slug}' को रोकना चाहते हैं? ऑपरेटर लॉगिन अस्थायी रूप से निलंबित रहेगा।` :
+      `क्या आप अभियान '${slug}' को पुनः सक्रिय करना चाहते हैं?`;
+
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      const res = await fetch(`/api/admin/campaigns/${encodeURIComponent(slug)}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`✅ अभियान स्थिति '${newStatus}' में परिवर्तित की गई`, 'success');
+        }
+        setTimeout(() => window.location.reload(), 600);
+      } else {
+        alert(data.error || 'अभियान स्थिति बदलने में विफल');
+      }
+    } catch (e) {
+      alert(`त्रुटि: ${e.message}`);
+    }
+  }
+
+  let latestCreds = null;
+  window.onCampaignCreated = function(result) {
+    latestCreds = result;
+    const modal = document.getElementById('campaignCredentialsModal');
+    if (!modal) {
+      window.location.reload();
+      return;
+    }
+
+    const titleEl = document.getElementById('credCampaignTitle');
+    if (titleEl) {
+      titleEl.textContent = `अभियान: ${result.campaign_slug || ''} (${Number(result.voters_imported || 0).toLocaleString('en-IN')} मतदाता)`;
+    }
+
+    document.getElementById('credAdminUser').textContent = result.admin_username || `${result.campaign_slug}_admin`;
+    document.getElementById('credAdminPass').textContent = result.admin_password || 'Admin@2026';
+    document.getElementById('credOperatorUser').textContent = result.operator_username || result.campaign_slug;
+    document.getElementById('credOperatorPass').textContent = result.operator_password || 'Operator@2026';
+
+    const launchBtn = document.getElementById('credLaunchBtn');
+    if (launchBtn) {
+      launchBtn.href = `/?tenant=${encodeURIComponent(result.campaign_slug)}`;
+    }
+
+    modal.classList.remove('hidden');
+  };
+
+  function closeCredentialsModal(reload = true) {
+    const modal = document.getElementById('campaignCredentialsModal');
+    if (modal) modal.classList.add('hidden');
+    if (reload) {
+      window.location.reload();
+    }
+  }
+
+  function copyCreds(type) {
+    if (!latestCreds) return;
+    let u = '', p = '';
+    if (type === 'admin') {
+      u = latestCreds.admin_username || `${latestCreds.campaign_slug}_admin`;
+      p = latestCreds.admin_password || 'Admin@2026';
+    } else {
+      u = latestCreds.operator_username || latestCreds.campaign_slug;
+      p = latestCreds.operator_password || 'Operator@2026';
+    }
+    const txt = `Smart Booth Login (${type.toUpperCase()}):\nURL: ${window.location.origin}/?tenant=${latestCreds.campaign_slug}\nUsername: ${u}\nPassword: ${p}`;
+    navigator.clipboard.writeText(txt).then(() => {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`📋 ${type.toUpperCase()} लॉगिन क्रेडेंशियल कॉपी किए गए`, 'success');
+      } else {
+        alert('क्रेडेंशियल क्लिपबोर्ड पर कॉपी किए गए!');
+      }
+    });
+  }
+
+  window.loadCampaigns = function() {
+    window.location.reload();
+  };
+</script>
+{% endblock %}

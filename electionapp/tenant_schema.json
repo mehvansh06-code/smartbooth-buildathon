@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SmartBoothCampaignConfig",
+  "description": "Canonical schema definition for SmartBooth tenant campaign configurations",
+  "type": "object",
+  "required": ["candidate", "election"],
+  "properties": {
+    "tenant_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "description": "Unique multi-tenant identifier"
+    },
+    "candidate": {
+      "type": "object",
+      "required": ["name_hi", "name_en"],
+      "properties": {
+        "name_hi": { "type": "string", "minLength": 1 },
+        "name_en": { "type": "string", "minLength": 1 },
+        "designation": { "type": "string" },
+        "phone": { "type": "string" },
+        "office_address": { "type": "string" },
+        "photo_filename": { "type": "string" },
+        "fallback_photo_filename": { "type": "string" }
+      }
+    },
+    "election": {
+      "type": "object",
+      "required": ["ward_name_hi", "ward_name_en", "app_title"],
+      "properties": {
+        "ward_no": { "type": ["string", "integer"] },
+        "ward_name_hi": { "type": "string", "minLength": 1 },
+        "ward_name_en": { "type": "string", "minLength": 1 },
+        "constituency": { "type": "string" },
+        "district": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "election_type": { "type": "string" },
+        "app_title": { "type": "string", "minLength": 1 },
+        "portal_subtitle": { "type": "string" },
+        "voting_method": { "type": "string" },
+        "ballot_color": { "type": "string" }
+      }
+    },
+    "party": {
+      "type": "object",
+      "properties": {
+        "name_hi": { "type": "string" },
+        "name_en": { "type": "string" },
+        "symbol_name_hi": { "type": "string" },
+        "symbol_name_en": { "type": "string" },
+        "symbol_filename": { "type": "string" },
+        "theme_color": { "type": "string" },
+        "ballot_serial": { "type": ["string", "integer"] },
+        "ballot_color": { "type": "string" },
+        "voting_method": { "type": "string" }
+      }
+    },
+    "campaign_message": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "PAUSED", "CONCLUDED", "ARCHIVED", "active", "paused", "concluded", "archived"]
+    },
+    "booths": {
+      "type": ["object", "array"]
+    },
+    "whatsapp": {
+      "type": "object"
+    },
+    "database": {
+      "type": "object"
+    }
+  }
+}

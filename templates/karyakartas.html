@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% from 'modals/_ward_sheet_modal.html' import ward_sheet_trigger, ward_sheet_modal, ward_select_options with context %}
+{% block title %}{{ CAMPAIGN.election.ward_name_en }} — Karyakarta Directory & Tracking{% endblock %}
+{% block content %}
+<style>
+  /* Ensure min 42px (standard 44px) touch targets for field operators */
+  #karyakartaCardsGrid a[href^="tel:"], 
+  #karyakartaCardsGrid a[href*="wa.me"],
+  .karyakarta-touch-btn {
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    touch-action: manipulation;
+  }
+</style>
+<!-- VIEW: KARYAKARTA & PANNA PRAMUKH DIRECTORY -->
+  <div id="karyakartaViewContainer" class="max-w-7xl mx-auto px-4 py-4 space-y-4">
+    <!-- Top Actions Row -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <h2 class="text-sm md:text-base font-black text-slate-900 flex items-center gap-2">
+        <span>👥 Karyakarta & Panna Pramukh Directory (कार्यकर्ता दायित्व)</span>
+      </h2>
+      <div class="flex items-center gap-2 flex-wrap">
+        <!-- Ward / Booth Filter Trigger (Minimal UI) -->
+        <div class="min-w-[150px] sm:min-w-[180px]">
+          {{ ward_sheet_trigger('karyakartaWardFilterModal', 'karyakartaWardFilter', 'karyakartaSelectedWardLabel', 'वार्ड' if (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat or WARDS) else 'भाग') }}
+          <select 
+            id="karyakartaWardFilter" 
+            data-filter-key="{{ 'ward_no' if (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat) else 'part_no' }}"
+            onchange="loadKaryakartas()" 
+            class="sr-only"
+            aria-hidden="true"
+            tabindex="-1">
+            {{ ward_select_options() }}
+          </select>
+        </div>
+        <button type="button" id="btnOpenAddKaryakarta" onclick="openAddKaryakartaModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer shrink-0 tap-target-44">
+          <span>➕ नया कार्यकर्ता जोड़ें</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Karyakarta Summary Metrics -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs">
+        <div class="text-[11px] font-bold text-slate-500 uppercase">कुल दायित्ववान कार्यकर्ता (Karyakartas)</div>
+        <div class="text-2xl font-black text-slate-900 mt-1" id="karyakartaTotalWorkers">0</div>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs">
+        <div class="text-[11px] font-bold text-slate-500 uppercase">आवंटित कुल मतदाता (Assigned Voters)</div>
+        <div class="text-2xl font-black text-blue-700 mt-1" id="karyakartaTotalAssigned">0</div>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs">
+        <div class="text-[11px] font-bold text-slate-500 uppercase">कार्यकर्ता कवरेज टर्नआउट (Voted So Far)</div>
+        <div class="text-2xl font-black text-emerald-700 mt-1" id="karyakartaTotalVoted">0</div>
+      </div>
+    </div>
+
+    <!-- Karyakarta Cards Grid -->
+    <div id="karyakartaCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="col-span-full p-8 text-center bg-white rounded-xl border border-slate-200 text-slate-400">
+        Loading karyakartas...
+      </div>
+    </div>
+  </div>
+
+{{ ward_sheet_modal('karyakartaWardFilterModal', 'karyakartaWardFilter', 'karyakartaSelectedWardLabel') }}
+{% include '_modals.html' %}
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/app_state.js?v={{ APP_VERSION }}"></script>
+<script src="/static/js/karyakartas.js?v={{ APP_VERSION }}"></script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (typeof karyakartaInit === 'function') karyakartaInit(); });</script>
+{% endblock %}

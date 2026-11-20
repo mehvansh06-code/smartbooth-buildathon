@@ -1,0 +1,2004 @@
+<!-- SUB-ACCOUNTS & BOOTH/WARD/VILLAGE ACCESS MANAGEMENT MODAL -->
+<div id="subAccountsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto overflow-x-hidden">
+  <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in duration-150">
+    
+    <!-- Modal Header -->
+    <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800 shrink-0">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-base font-black shadow-xs">
+          👥
+        </div>
+        <div>
+          <h3 class="text-sm sm:text-base font-black text-white flex items-center gap-2">
+            <span>अभियान दल एवं उप-खाते (Sub-Accounts & Booth Access)</span>
+          </h3>
+          <p class="text-[11px] text-slate-400">कार्यकर्ताओं व बूथ एजेंटों को बूथ, वार्ड या गाँव-वार सीमित एक्सेस दें</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-2.5">
+        <!-- Sub-account Quota Badge -->
+        <div id="subAccQuotaBadge" class="bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+          कोटा: <span id="subAccQuotaUsed" class="text-white font-black">0</span> / <span id="subAccQuotaTotal" class="text-white font-black">50</span>
+        </div>
+        <button onclick="closeSubAccountsModal()" class="text-slate-400 hover:text-white font-black text-lg p-1 transition cursor-pointer">✕</button>
+      </div>
+    </div>
+
+    <!-- Modal Tabs -->
+    <div class="flex border-b border-slate-200 bg-slate-50 px-4 pt-2.5 gap-2 shrink-0 text-xs font-bold">
+      <button id="tabBtnSubList" onclick="switchSubAccTab('list')" class="px-3.5 py-2 border-b-2 border-indigo-600 text-indigo-700 font-black flex items-center gap-1.5 transition cursor-pointer">
+        <span>📋 सक्रिय उप-खाते (Team Roster)</span>
+        <span id="subAccCountBadge" class="bg-indigo-100 text-indigo-800 text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+      </button>
+      <button id="tabBtnSubCreate" onclick="switchSubAccTab('create')" class="px-3.5 py-2 border-b-2 border-transparent text-slate-600 hover:text-slate-900 font-bold flex items-center gap-1.5 transition cursor-pointer">
+        <span>➕ नया उप-खाता बनाएं (New Sub-Account)</span>
+      </button>
+    </div>
+
+    <!-- Tab 1: Sub-Accounts List View -->
+    <div id="subAccTabList" class="p-4 overflow-y-auto flex-1 min-h-0 space-y-3 text-xs overscroll-contain">
+      <div class="flex items-center justify-between">
+        <span class="text-slate-500 font-bold">इस अभियान के तहत अधिकृत दल के सदस्य:</span>
+        <button onclick="switchSubAccTab('create')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2.5 py-1 rounded-lg text-xs shadow-xs transition flex items-center gap-1 cursor-pointer">
+          <span>➕ नया खाता</span>
+        </button>
+      </div>
+
+      <div class="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-slate-100 text-slate-700 font-extrabold text-[10px] uppercase tracking-wider border-b border-slate-200">
+            <tr>
+              <th class="py-2.5 px-3">नाम / यूज़रनेम</th>
+              <th class="py-2.5 px-3">भूमिका</th>
+              <th class="py-2.5 px-3">अधिकृत दायरा (Assigned Scope)</th>
+              <th class="py-2.5 px-3">फ़ोन</th>
+              <th class="py-2.5 px-3">स्थिति</th>
+              <th class="py-2.5 px-3 text-right">कार्य (Actions)</th>
+            </tr>
+          </thead>
+          <tbody id="subAccountsTableBody" class="divide-y divide-slate-100 bg-white">
+            <tr>
+              <td colspan="6" class="text-center py-8 text-slate-400 font-bold">
+                उप-खाते लोड हो रहे हैं (Loading team accounts)...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 2: Create Sub-Account Form View -->
+    <div id="subAccTabCreate" class="p-4 overflow-y-auto flex-1 min-h-0 hidden space-y-4 text-xs overscroll-contain">
+      <form id="createSubAccountForm" onsubmit="event.preventDefault(); handleCreateSubAccount(event); return false;" class="space-y-3.5">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">पूरा नाम (Full Name) *</label>
+            <input type="text" id="subFullName" required placeholder="उदा. रमेश कुमार" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-bold focus:outline-none focus:border-indigo-600" oninput="autoSuggestSubUsername()">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">मोबाइल नंबर (WhatsApp Mobile) *</label>
+            <input type="tel" inputmode="numeric" id="subPhone" required placeholder="98290XXXXX" maxlength="10" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-bold focus:outline-none focus:border-indigo-600" oninput="autoSuggestSubUsername()">
+          </div>
+        </div>
+
+        <!-- Role Picker -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">भूमिका एवं अधिकार (Role & Permissions) *</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <label class="border-2 border-indigo-200 bg-indigo-50/50 rounded-xl p-2.5 cursor-pointer flex flex-col justify-between hover:border-indigo-500 transition">
+              <div class="flex items-center justify-between">
+                <span class="font-black text-indigo-950">🗳️ बूथ एजेंट</span>
+                <input type="radio" name="subRoleRadio" value="booth_agent" checked onchange="handleSubRoleChange(this.value)" class="text-indigo-600 focus:ring-0">
+              </div>
+              <p class="text-[10px] text-slate-500 mt-1">मतदाता खोज, मतदान दिवस लाइव वोट मार्किंग व पर्ची</p>
+            </label>
+
+            <label class="border-2 border-slate-200 bg-white rounded-xl p-2.5 cursor-pointer flex flex-col justify-between hover:border-indigo-500 transition">
+              <div class="flex items-center justify-between">
+                <span class="font-black text-slate-800">🤝 कार्यकर्ता</span>
+                <input type="radio" name="subRoleRadio" value="karyakarta" onchange="handleSubRoleChange(this.value)" class="text-indigo-600 focus:ring-0">
+              </div>
+              <p class="text-[10px] text-slate-500 mt-1">डोर-टू-डोर संपर्क, परिवार क्लस्टर व पर्ची शेयरिंग</p>
+            </label>
+
+            <label class="border-2 border-slate-200 bg-white rounded-xl p-2.5 cursor-pointer flex flex-col justify-between hover:border-indigo-500 transition">
+              <div class="flex items-center justify-between">
+                <span class="font-black text-slate-800">👁️ दर्शक (Viewer)</span>
+                <input type="radio" name="subRoleRadio" value="viewer" onchange="handleSubRoleChange(this.value)" class="text-indigo-600 focus:ring-0">
+              </div>
+              <p class="text-[10px] text-slate-500 mt-1">केवल देखने का अधिकार (नो एडिट/मार्किंग)</p>
+            </label>
+
+            <label class="border-2 border-slate-200 bg-white rounded-xl p-2.5 cursor-pointer flex flex-col justify-between hover:border-indigo-500 transition">
+              <div class="flex items-center justify-between">
+                <span class="font-black text-slate-800">⚙️ उप-ऑपरेटर</span>
+                <input type="radio" name="subRoleRadio" value="operator" onchange="handleSubRoleChange(this.value)" class="text-indigo-600 focus:ring-0">
+              </div>
+              <p class="text-[10px] text-slate-500 mt-1">सीमित क्षेत्र हेतु पूर्ण ऑपरेटर टूलकिट</p>
+            </label>
+          </div>
+        </div>
+
+        <!-- Geographic Scope Selection -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2.5">
+          <label class="block font-black text-slate-900">
+            <span>📍 एक्सेस दायरा / अधिकार क्षेत्र (Assigned Geographic Scope) *</span>
+          </label>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <label class="flex items-center gap-1.5 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="radio" name="scopeTypeRadio" id="scopeRadioBooth" value="booth" {% if not (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat) or CAMPAIGN.election.election_type == 'ZILA_PARISHAD' or CAMPAIGN.election_type == 'ZILA_PARISHAD' or CAMPAIGN.election.voting_method == 'EVM' %}checked{% endif %} onchange="handleScopeTypeChange()" class="text-indigo-600">
+              <span class="font-bold">🏢 बूथ-वार (Booth)</span>
+            </label>
+            <label id="scopeRadioGpLabel" class="flex items-center gap-1.5 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="radio" name="scopeTypeRadio" id="scopeRadioGp" value="gp" onchange="handleScopeTypeChange()" class="text-indigo-600">
+              <span class="font-bold">🏛️ ग्राम पंचायत (GP)</span>
+            </label>
+            <label class="flex items-center gap-1.5 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="radio" name="scopeTypeRadio" id="scopeRadioWard" value="ward" {% if (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat) and not (CAMPAIGN.election.election_type == 'ZILA_PARISHAD' or CAMPAIGN.election_type == 'ZILA_PARISHAD' or CAMPAIGN.election.voting_method == 'EVM') %}checked{% endif %} onchange="handleScopeTypeChange()" class="text-indigo-600">
+              <span class="font-bold">📍 वार्ड-वार (Ward)</span>
+            </label>
+            <label class="flex items-center gap-1.5 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="radio" name="scopeTypeRadio" id="scopeRadioVillage" value="village" onchange="handleScopeTypeChange()" class="text-indigo-600">
+              <span class="font-bold">🏡 गाँव/क्षेत्र (Village)</span>
+            </label>
+            <label class="flex items-center gap-1.5 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="radio" name="scopeTypeRadio" id="scopeRadioAll" value="all" onchange="handleScopeTypeChange()" class="text-indigo-600">
+              <span class="font-bold">🌐 संपूर्ण (All)</span>
+            </label>
+          </div>
+
+          <!-- Gram Panchayat Picker Container -->
+          <div id="scopeContainerGp" class="space-y-1.5 hidden">
+            <div class="flex items-center justify-between text-[11px] text-slate-500 font-bold">
+              <span>ग्राम पंचायत चुनें (Select Gram Panchayats):</span>
+              <div class="space-x-2">
+                <button type="button" onclick="selectAllGps(true)" class="text-indigo-600 hover:underline">सभी चुनें</button>
+                <button type="button" onclick="selectAllGps(false)" class="text-slate-500 hover:underline">हटाएं</button>
+              </div>
+            </div>
+            <div id="gpsCheckboxList" class="max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-lg p-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
+              <div class="text-slate-400 py-2">ग्राम पंचायत सूची लोड हो रही है...</div>
+            </div>
+          </div>
+
+          <!-- Booth Picker Container -->
+          <div id="scopeContainerBooth" class="space-y-1.5 {% if (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat) %}hidden{% endif %}">
+            <div class="flex items-center justify-between text-[11px] text-slate-500 font-bold">
+              <span>मतदान केंद्र चुनें (Select Booths / Parts):</span>
+              <div class="space-x-2">
+                <button type="button" onclick="selectAllBooths(true)" class="text-indigo-600 hover:underline">सभी चुनें</button>
+                <button type="button" onclick="selectAllBooths(false)" class="text-slate-500 hover:underline">हटाएं</button>
+              </div>
+            </div>
+            <div id="boothsCheckboxList" class="max-h-36 overflow-y-auto bg-white border border-slate-200 rounded-lg p-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
+              <div class="text-slate-400 py-2">बूथ सूची लोड हो रही है...</div>
+            </div>
+          </div>
+
+          <!-- Ward Picker Container -->
+          <div id="scopeContainerWard" class="space-y-1.5 {% if not (IS_WARD_ELECTION or CAMPAIGN.is_ward_election or CAMPAIGN.is_panchayat) %}hidden{% endif %}">
+            <div class="flex items-center justify-between text-[11px] text-slate-500 font-bold">
+              <span>वार्ड चुनें (Select Wards):</span>
+              <div class="space-x-2">
+                <button type="button" onclick="selectAllWards(true)" class="text-indigo-600 hover:underline">सभी चुनें</button>
+                <button type="button" onclick="selectAllWards(false)" class="text-slate-500 hover:underline">हटाएं</button>
+              </div>
+            </div>
+            <div id="wardsCheckboxList" class="max-h-36 overflow-y-auto bg-white border border-slate-200 rounded-lg p-2 grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs">
+              <div class="text-slate-400 py-2">वार्ड सूची लोड हो रही है...</div>
+            </div>
+          </div>
+
+          <!-- Village Picker Container -->
+          <div id="scopeContainerVillage" class="space-y-1.5 hidden">
+            <div class="flex items-center justify-between text-[11px] text-slate-500 font-bold">
+              <span>गाँव / क्षेत्र चुनें (Select Villages / Booth Areas):</span>
+              <div class="space-x-2">
+                <button type="button" onclick="selectAllVillages(true)" class="text-indigo-600 hover:underline">सभी चुनें</button>
+                <button type="button" onclick="selectAllVillages(false)" class="text-slate-500 hover:underline">हटाएं</button>
+              </div>
+            </div>
+            <div id="villagesCheckboxList" class="max-h-36 overflow-y-auto bg-white border border-slate-200 rounded-lg p-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
+              <div class="text-slate-400 py-2">गाँव सूची लोड हो रही है...</div>
+            </div>
+          </div>
+
+          <!-- All Booths Info -->
+          <div id="scopeContainerAll" class="p-2.5 bg-blue-50/60 border border-blue-200 text-blue-900 rounded-lg text-xs font-semibold hidden">
+            ℹ️ यह उप-खाता इस अभियान के समस्त मतदाताओं और मतदान केंद्रों का डेटा देख सकेगा।
+          </div>
+
+        </div>
+
+        <!-- Module-Wise Access Selection -->
+        <div class="bg-indigo-50/40 border border-indigo-200/90 rounded-xl p-3 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-1.5">
+            <label class="block font-black text-slate-900">
+              <span>🔐 अनुमत मॉड्यूल (Module-Wise Feature Access) *</span>
+            </label>
+            <!-- 1-Click Presets -->
+            <div class="flex flex-wrap items-center gap-1 text-[11px]">
+              <span class="text-slate-500 font-semibold text-[10px]">प्रीसेट:</span>
+              <button type="button" onclick="applyModulePreset('all')" class="bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-bold cursor-pointer transition">
+                ✅ सभी (All)
+              </button>
+              <button type="button" onclick="applyModulePreset('booth_agent')" class="bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded font-bold cursor-pointer transition">
+                🗳️ बूथ एजेंट
+              </button>
+              <button type="button" onclick="applyModulePreset('karyakarta')" class="bg-white hover:bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded font-bold cursor-pointer transition">
+                🤝 कार्यकर्ता
+              </button>
+              <button type="button" onclick="applyModulePreset('warroom')" class="bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded font-bold cursor-pointer transition">
+                📈 वॉर-रूम
+              </button>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-500">उपयोगकर्ता केवल चयनित मॉड्यूल और उनसे संबंधित पेजों व सुविधाओं तक ही पहुंच सकेगा।</p>
+
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="checkbox" name="subAllowedModuleCheck" value="search" checked class="text-indigo-600 rounded">
+              <span class="font-bold text-slate-800">🔍 खोज व पर्ची</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="checkbox" name="subAllowedModuleCheck" value="voting_day" checked class="text-indigo-600 rounded">
+              <span class="font-bold text-slate-800">🗳️ मतदान डेस्क</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="checkbox" name="subAllowedModuleCheck" value="warroom" class="text-indigo-600 rounded">
+              <span class="font-bold text-slate-800">📈 वॉर-रूम</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="checkbox" name="subAllowedModuleCheck" value="history" class="text-indigo-600 rounded">
+              <span class="font-bold text-slate-800">📜 पर्चियाँ ऑडिट</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="checkbox" name="subAllowedModuleCheck" value="caste" class="text-indigo-600 rounded">
+              <span class="font-bold text-slate-800">🏷️ समुदाय समीकरण</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="checkbox" name="subAllowedModuleCheck" value="families" class="text-indigo-600 rounded">
+              <span class="font-bold text-slate-800">👨‍👩‍👧 परिवार क्लस्टर</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="checkbox" name="subAllowedModuleCheck" value="karyakartas" class="text-indigo-600 rounded">
+              <span class="font-bold text-slate-800">👥 कार्यकर्ता प्रबंधन</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="checkbox" name="subAllowedModuleCheck" value="outside" class="text-indigo-600 rounded">
+              <span class="font-bold text-slate-800">✈️ प्रवासी मतदाता</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+              <input type="checkbox" name="subAllowedModuleCheck" value="users" class="text-indigo-600 rounded">
+              <span class="font-bold text-slate-800">⚙️ दल व उप-खाते</span>
+            </label>
+            {% if ENABLE_VOICE_MODULE %}
+            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-emerald-400">
+              <input type="checkbox" name="subAllowedModuleCheck" value="voice" class="text-emerald-600 rounded">
+              <span class="font-bold text-slate-800">📢 वॉयस कॉल</span>
+            </label>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Login Credentials Auto-Generated -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">यूज़रनेम (Username) *</label>
+            <input type="text" id="subUsername" required placeholder="sanchore_b14_ramesh" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono font-bold focus:outline-none focus:border-indigo-600 bg-slate-50 min-w-0 max-w-full overflow-hidden text-ellipsis">
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block font-bold text-slate-700">पासवर्ड (Password) *</label>
+              <button type="button" onclick="generateAutoSubPassword()" class="text-[10px] text-indigo-600 font-extrabold hover:underline">🎲 Auto Generate</button>
+            </div>
+            <input type="text" id="subPassword" required placeholder="••••••••" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-mono font-bold focus:outline-none focus:border-indigo-600">
+          </div>
+        </div>
+
+        <label class="flex items-center gap-2 cursor-pointer mt-2">
+          <input type="checkbox" id="subAutoSendWhatsApp" checked class="rounded text-indigo-600">
+          <span class="text-xs font-semibold text-slate-700">खाता बनते ही सीधे WhatsApp पर लॉगिन लिंक व पासवर्ड भेजें</span>
+        </label>
+
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
+          <button type="button" onclick="if (window.location.pathname.includes('/users')) { closeSubAccountsModal(); } else { switchSubAccTab('list'); }" class="px-3.5 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg">रद्द करें</button>
+          <button type="button" onclick="event.preventDefault(); handleCreateSubAccount(event);" id="btnSubmitSubAcc" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-black px-4 py-2 rounded-lg shadow-sm cursor-pointer transition flex items-center gap-1.5">
+            <span>खाता बनाएं (Save Account) →</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 1. EDIT MODULES / PERMISSIONS MODAL -->
+<!-- ========================================== -->
+<div id="editModulesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[60] hidden flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto overflow-x-hidden">
+  <div class="bg-white rounded-2xl max-w-xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[88vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in duration-150">
+    <!-- Header -->
+    <div class="bg-slate-900 text-white px-4 sm:px-5 py-3 sm:py-3.5 flex items-center justify-between border-b border-slate-800 shrink-0">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-base font-black shadow-xs shrink-0">
+          🔐
+        </div>
+        <div class="min-w-0">
+          <h3 class="text-sm sm:text-base font-black text-white flex items-center gap-2 truncate">
+            <span>मॉड्यूल अनुमतियाँ (Module Permissions)</span>
+          </h3>
+          <p id="editModulesSubtitle" class="text-[11px] text-slate-400 truncate">उपयोगकर्ता की कार्यक्षमता व पेज एक्सेस प्रबंधित करें</p>
+        </div>
+      </div>
+      <button type="button" onclick="closeEditModulesModal()" class="text-slate-400 hover:text-white font-black text-lg p-1 transition cursor-pointer ml-2 shrink-0">✕</button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-3.5 sm:p-5 overflow-y-auto flex-1 min-h-0 space-y-3.5 sm:space-y-4 text-xs overscroll-contain" style="-webkit-overflow-scrolling: touch;">
+      <input type="hidden" id="editModulesUserId" value="">
+
+      <!-- User Card -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-2.5">
+        <div class="min-w-0 flex-1">
+          <div id="editModulesUserFullName" class="font-black text-slate-900 text-sm truncate">--</div>
+          <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
+            <span class="text-slate-500 font-bold shrink-0">यूज़रनेम:</span>
+            <span id="editModulesUsername" class="font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 break-all max-w-[200px] truncate">--</span>
+          </div>
+        </div>
+        <div id="editModulesSelectedCount" class="text-right shrink-0">
+          <span class="text-[11px] font-bold text-slate-500">सक्रिय मॉड्यूल:</span>
+          <div class="font-black text-indigo-600 text-base"><span id="editModulesActiveCount">0</span> / 11</div>
+        </div>
+      </div>
+
+      <!-- Presets -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="block font-black text-slate-800">
+            ⚡ त्वरित प्रीसेट (Quick Presets):
+          </label>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button type="button" onclick="applyEditModalPreset('all')" class="p-2 rounded-xl border border-indigo-200 bg-indigo-50/60 hover:bg-indigo-100 text-indigo-900 font-bold text-[11px] text-left transition flex items-center gap-1.5 cursor-pointer">
+            <span class="text-base shrink-0">🌐</span>
+            <div class="min-w-0">
+              <div class="font-black truncate">समस्त (All)</div>
+              <div class="text-[9px] text-indigo-600 truncate">सभी 11 मॉड्यूल</div>
+            </div>
+          </button>
+          <button type="button" onclick="applyEditModalPreset('booth_agent')" class="p-2 rounded-xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100 text-emerald-900 font-bold text-[11px] text-left transition flex items-center gap-1.5 cursor-pointer">
+            <span class="text-base shrink-0">🗳️</span>
+            <div class="min-w-0">
+              <div class="font-black truncate">बूथ एजेंट</div>
+              <div class="text-[9px] text-emerald-600 truncate">खोज + मतदान</div>
+            </div>
+          </button>
+          <button type="button" onclick="applyEditModalPreset('karyakarta')" class="p-2 rounded-xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100 text-amber-900 font-bold text-[11px] text-left transition flex items-center gap-1.5 cursor-pointer">
+            <span class="text-base shrink-0">🤝</span>
+            <div class="min-w-0">
+              <div class="font-black truncate">कार्यकर्ता</div>
+              <div class="text-[9px] text-amber-600 truncate">खोज, परिवार, प्रवासी</div>
+            </div>
+          </button>
+          <button type="button" onclick="applyEditModalPreset('warroom')" class="p-2 rounded-xl border border-purple-200 bg-purple-50/60 hover:bg-purple-100 text-purple-900 font-bold text-[11px] text-left transition flex items-center gap-1.5 cursor-pointer">
+            <span class="text-base shrink-0">📈</span>
+            <div class="min-w-0">
+              <div class="font-black truncate">वॉर-रूम</div>
+              <div class="text-[9px] text-purple-600 truncate">टर्नआउट, ऑडिट, समुदाय</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modules Checklist -->
+      <div>
+        <label class="block font-black text-slate-800 mb-2">
+          अनुमत मॉड्यूल सूची (Select Allowed Modules):
+        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="editModulesCheckboxesContainer">
+          <!-- Dynamically populated via renderEditModulesCheckboxes -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-slate-50 px-4 sm:px-5 py-3 border-t border-slate-200 flex items-center justify-between shrink-0">
+      <button type="button" onclick="closeEditModulesModal()" class="px-3.5 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-white transition cursor-pointer">
+        रद्द करें (Cancel)
+      </button>
+      <button type="button" id="btnSaveEditModules" onclick="saveUserModules()" class="px-4 sm:px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black shadow-sm flex items-center gap-1.5 transition cursor-pointer">
+        <span>💾</span>
+        <span>अनुमतियाँ सुरक्षित करें (Save)</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 2. USER PASSWORD RESET & SHARE MODAL -->
+<!-- ========================================== -->
+<div id="userPasswordResetModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[60] hidden flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto overflow-x-hidden">
+  <div class="bg-white rounded-2xl max-w-md w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in duration-150">
+    <!-- Header -->
+    <div class="bg-slate-900 text-white px-4 sm:px-5 py-3 sm:py-3.5 flex items-center justify-between border-b border-slate-800 shrink-0">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-base font-black text-white shadow-xs shrink-0">
+          🔑
+        </div>
+        <div class="min-w-0">
+          <h3 class="text-sm sm:text-base font-black text-white flex items-center gap-2 truncate">
+            <span>पासवर्ड रीसेट एवं शेयर (Reset Password)</span>
+          </h3>
+          <p class="text-[11px] text-slate-400 truncate">नया पासवर्ड बनाएं व कार्यकर्ता को WhatsApp पर भेजें</p>
+        </div>
+      </div>
+      <button type="button" onclick="closeUserPasswordResetModal()" class="text-slate-400 hover:text-white font-black text-lg p-1 transition cursor-pointer ml-2 shrink-0">✕</button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0 space-y-4 text-xs overscroll-contain" style="-webkit-overflow-scrolling: touch;">
+      <input type="hidden" id="resetUserTargetId" value="">
+      <input type="hidden" id="resetUserTargetTenant" value="">
+
+      <!-- User Card -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500 font-bold text-[11px]">खाता धारक (Name):</span>
+          <span id="resetUserFullNameDisplay" class="font-black text-slate-900 text-sm">--</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500 font-bold text-[11px]">यूज़रनेम (Username):</span>
+          <span id="resetUsernameDisplayModal" class="font-mono font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 break-all max-w-[200px] truncate">--</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500 font-bold text-[11px]">WhatsApp फ़ोन:</span>
+          <input type="tel" inputmode="numeric" id="resetUserPhoneInput" placeholder="98290XXXXX" class="text-right font-mono font-bold text-slate-800 bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-xs w-40 focus:outline-none focus:border-indigo-500">
+        </div>
+      </div>
+
+      <!-- Password Input & Generator -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="block font-black text-slate-800">नया पासवर्ड (New Password) *</label>
+          <button type="button" onclick="generateUserResetPassword()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-black flex items-center gap-1 cursor-pointer">
+            <span>🎲 Auto Generate</span>
+          </button>
+        </div>
+        <div class="relative">
+          <input type="text" id="resetUserNewPasswordInput" placeholder="नया पासवर्ड दर्ज करें..." class="w-full bg-slate-50 border-2 border-slate-200 focus:border-indigo-600 rounded-xl px-3.5 py-2.5 font-mono text-sm font-bold text-slate-900 focus:outline-none pr-10">
+          <button type="button" onclick="togglePasswordVisibility('resetUserNewPasswordInput')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 font-bold text-sm cursor-pointer" title="दिखाएं / छुपाएं">
+            👁️
+          </button>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">सुझाव: आसानी से याद रहने वाला 6-8 अक्षरों का पासवर्ड रखें।</p>
+      </div>
+
+      <!-- Quick Action Buttons: Copy & WhatsApp -->
+      <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-3 space-y-2">
+        <span class="text-[10px] font-black text-indigo-900 uppercase tracking-wider block">त्वरित क्रेडेंशियल्स शेयरिंग (Share Details):</span>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="copyUserCredentials()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs">
+            <span>📋</span>
+            <span>क्रेडेंशियल्स कॉपी</span>
+          </button>
+          <button type="button" onclick="shareUserCredentialsWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs">
+            <span>📲</span>
+            <span>WhatsApp भेजें</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-slate-50 px-4 sm:px-5 py-3 border-t border-slate-200 flex items-center justify-between shrink-0">
+      <button type="button" onclick="closeUserPasswordResetModal()" class="px-3.5 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-white transition cursor-pointer">
+        रद्द करें
+      </button>
+      <button type="button" id="btnSubmitResetPassword" onclick="executeUserPasswordReset()" class="px-4 sm:px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-black shadow-sm flex items-center gap-1.5 transition cursor-pointer">
+        <span>💾</span>
+        <span>पासवर्ड बदलें (Save)</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: UNIFIED EDIT SUB-ACCOUNT DETAILS, PERMISSIONS & CREDENTIALS -->
+<div id="editSubUserModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[60] hidden flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto overflow-x-hidden">
+  <div class="bg-white rounded-3xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-150 max-h-[calc(100dvh-1.5rem)] sm:max-h-[92vh] flex flex-col my-auto overflow-hidden">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <span class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 font-bold shrink-0">✏️</span>
+        <div class="min-w-0">
+          <h3 class="text-sm sm:text-base font-black text-slate-900 truncate">उप-खाता विवरण, दायरा व अनुमतियाँ</h3>
+          <p class="text-[11px] text-slate-500 font-mono break-all max-w-[200px] truncate" id="editSubUserSubtitle">@username</p>
+        </div>
+      </div>
+      <button onclick="closeEditSubUserModal()" class="text-slate-400 hover:text-slate-600 font-bold text-sm cursor-pointer shrink-0">✕</button>
+    </div>
+
+    <!-- Form Body -->
+    <form id="editSubUserForm" onsubmit="event.preventDefault(); handleEditSubUserSubmit(event); return false;" class="space-y-4 text-xs overflow-y-auto flex-1 min-h-0 pr-1 overscroll-contain" style="-webkit-overflow-scrolling: touch;">
+      <input type="hidden" id="editSubUserId" value="">
+      
+      <!-- Basic details -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div class="sm:col-span-1">
+          <label class="block font-bold text-slate-700 mb-1">पूरा नाम (Full Name) *</label>
+          <input type="text" id="editSubFullName" required class="w-full border border-slate-300 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-indigo-600">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">फ़ोन (WhatsApp Mobile)</label>
+          <input type="tel" inputmode="numeric" maxlength="10" id="editSubPhone" placeholder="10 अंक मोबाइल" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono font-bold focus:outline-none focus:border-indigo-600">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">भूमिका (Role) *</label>
+          <select id="editSubRole" onchange="handleEditSubRoleChange(this.value)" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-indigo-600 cursor-pointer bg-white">
+            <option value="operator">ऑपरेटर (Operator)</option>
+            <option value="booth_agent">बूथ एजेंट (Booth Agent)</option>
+            <option value="karyakarta">कार्यकर्ता (Karyakarta)</option>
+            <option value="viewer">दर्शक (Viewer Only)</option>
+            <option value="admin">एडमिन (Admin)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Scope Type -->
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">अधिकार क्षेत्र (Assigned Scope)</label>
+        <select id="editSubScopeType" onchange="handleEditSubScopeTypeChange(this.value)" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-indigo-600 cursor-pointer bg-white">
+          <option value="all">🌐 सम्पूर्ण अभियान (Entire Campaign)</option>
+          <option value="booth">🏢 विशिष्ट पोलिंग बूथ (Specific Booths)</option>
+          <option value="gp">🏛️ विशिष्ट ग्राम पंचायत (Specific Gram Panchayats)</option>
+          <option value="ward">📍 विशिष्ट वार्ड (Specific Wards)</option>
+          <option value="village">🏡 विशिष्ट गाँव (Specific Villages)</option>
+        </select>
+      </div>
+
+      <!-- Scope Inputs -->
+      <div id="editSubBoothsWrapper" class="hidden">
+        <label class="block font-bold text-slate-700 mb-1">बूथ संख्या (Booths, comma-separated)</label>
+        <input type="text" id="editSubAssignedBooths" placeholder="उदा. 1, 2, 5" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono focus:outline-none focus:border-indigo-600">
+      </div>
+      <div id="editSubGpsWrapper" class="hidden">
+        <label class="block font-bold text-slate-700 mb-1">ग्राम पंचायत (Gram Panchayats, comma-separated)</label>
+        <input type="text" id="editSubAssignedGps" placeholder="उदा. सरेरी, दूलहेपुरा" class="w-full border border-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-600">
+      </div>
+      <div id="editSubWardsWrapper" class="hidden">
+        <label class="block font-bold text-slate-700 mb-1">वार्ड संख्या (Wards, comma-separated)</label>
+        <input type="text" id="editSubAssignedWards" placeholder="उदा. 3, 4" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono focus:outline-none focus:border-indigo-600">
+      </div>
+      <div id="editSubVillagesWrapper" class="hidden">
+        <label class="block font-bold text-slate-700 mb-1">गाँव के नाम (Villages, comma-separated)</label>
+        <input type="text" id="editSubAssignedVillages" placeholder="उदा. विरोल, सांचौर" class="w-full border border-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-600">
+      </div>
+
+      <!-- Integrated Module Permissions Checklist & Presets -->
+      <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50/60 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <label class="block font-black text-slate-800">
+            🔐 अनुमत मॉड्यूल (Module Permissions):
+          </label>
+          <span class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+            <span id="editSubActiveModulesCount">0</span> / 11 अनुमत
+          </span>
+        </div>
+
+        <!-- Presets -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          <button type="button" onclick="applyEditSubPreset('all')" class="p-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 hover:bg-indigo-100 text-indigo-900 font-bold text-[10px] text-center transition cursor-pointer">
+            🌐 समस्त (All)
+          </button>
+          <button type="button" onclick="applyEditSubPreset('booth_agent')" class="p-1.5 rounded-lg border border-emerald-200 bg-emerald-50/80 hover:bg-emerald-100 text-emerald-900 font-bold text-[10px] text-center transition cursor-pointer">
+            🗳️ बूथ एजेंट
+          </button>
+          <button type="button" onclick="applyEditSubPreset('karyakarta')" class="p-1.5 rounded-lg border border-amber-200 bg-amber-50/80 hover:bg-amber-100 text-amber-900 font-bold text-[10px] text-center transition cursor-pointer">
+            🤝 कार्यकर्ता
+          </button>
+          <button type="button" onclick="applyEditSubPreset('warroom')" class="p-1.5 rounded-lg border border-purple-200 bg-purple-50/80 hover:bg-purple-100 text-purple-900 font-bold text-[10px] text-center transition cursor-pointer">
+            📈 वॉर-रूम
+          </button>
+        </div>
+
+        <!-- Checkbox grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1" id="editSubModulesContainer">
+          <!-- Dynamically populated via renderEditSubModulesCheckboxes -->
+        </div>
+      </div>
+
+      <!-- Password Reset & Dispatch Card -->
+      <div class="border border-amber-200 bg-amber-50/40 rounded-2xl p-3 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <label class="block font-black text-amber-950 flex items-center gap-1.5">
+            <span>🔑</span>
+            <span>पासवर्ड रीसेट एवं क्रेडेंशियल्स शेयर</span>
+          </label>
+          <button type="button" onclick="generateEditSubPassword()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-black flex items-center gap-1 cursor-pointer">
+            <span>🎲 Auto Generate</span>
+          </button>
+        </div>
+
+        <div class="relative">
+          <input type="text" id="editSubNewPassword" placeholder="खाली छोड़ें यदि पासवर्ड नहीं बदलना..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 font-mono text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600 pr-10">
+          <button type="button" onclick="togglePasswordVisibility('editSubNewPassword')" class="absolute right-3 top-2 text-slate-400 hover:text-slate-600 font-bold text-xs cursor-pointer" title="दिखाएं / छुपाएं">👁️</button>
+        </div>
+
+        <!-- 3 Sharing Options -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <button type="button" id="btnSendEditWhatsApp" onclick="sendUnifiedEditUserWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs">
+            <span>📲</span>
+            <span>WhatsApp API से भेजें</span>
+          </button>
+          <button type="button" onclick="copyUnifiedEditCredentials()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 px-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs">
+            <span>📋</span>
+            <span>कॉपी करें</span>
+          </button>
+          <button type="button" onclick="shareUnifiedEditWhatsAppWeb()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold py-2 px-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs">
+            <span>📱</span>
+            <span>WhatsApp Web</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Account Status -->
+      <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-2xl border border-slate-200">
+        <span class="font-bold text-slate-800">खाता स्थिति (Account Status)</span>
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-1 font-bold text-emerald-700 cursor-pointer">
+            <input type="radio" name="editSubStatusRadio" id="editSubStatusActive" value="1">
+            <span>● सक्रिय (Active)</span>
+          </label>
+          <label class="flex items-center gap-1 font-bold text-rose-700 cursor-pointer ml-2">
+            <input type="radio" name="editSubStatusRadio" id="editSubStatusInactive" value="0">
+            <span>○ निष्क्रिय (Disabled)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Form Footer -->
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 shrink-0">
+        <button type="button" onclick="closeEditSubUserModal()" class="px-4 py-2 rounded-xl border border-slate-200 font-bold text-slate-600 hover:bg-slate-100 cursor-pointer">रद्द करें</button>
+        <button type="submit" id="btnSaveEditSubUser" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black cursor-pointer shadow-xs">सुरक्षित करें (Save)</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: ACCOUNT CREATED READY (CONFIRMATION & CREDENTIALS SHARE) -->
+<div id="accountCreatedReadyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[70] hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-150 my-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div class="flex items-center gap-2.5">
+        <span class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 font-bold shrink-0 text-lg">✓</span>
+        <div>
+          <h3 class="text-base font-black text-slate-900">नया उप-खाता तैयार है (Account Ready)</h3>
+          <p class="text-xs text-slate-500 font-medium">ऑपरेटर खाता सफलतापूर्वक सक्रिय कर दिया गया है</p>
+        </div>
+      </div>
+      <button onclick="closeAccountCreatedReadyModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer shrink-0">✕</button>
+    </div>
+
+    <!-- WhatsApp Delivery Status Banner -->
+    <div id="readyWaBannerSuccess" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-start gap-3">
+      <span class="text-emerald-600 text-lg shrink-0">✅</span>
+      <div class="text-xs">
+        <div class="font-black text-emerald-900">WhatsApp संदेश सफलतापूर्वक डिलीवर हो गया!</div>
+        <p class="text-emerald-700 mt-0.5" id="readyWaSuccessPhoneText">लॉगिन क्रेडेंशियल्स सीधे ऑपरेटर के फ़ोन पर भेज दिए गए हैं।</p>
+      </div>
+    </div>
+
+    <div id="readyWaBannerFail" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3 space-y-2">
+      <div class="flex items-start gap-2.5">
+        <span class="text-amber-600 text-base shrink-0">⚠️</span>
+        <div class="text-xs">
+          <div class="font-black text-amber-900">WhatsApp API से स्वतः संदेश नहीं जा सका</div>
+          <p class="text-amber-700 mt-0.5" id="readyWaFailReason">विवरण नीचे उपलब्ध है। आप 1-क्लिक में WhatsApp Web से भेज सकते हैं।</p>
+        </div>
+      </div>
+      <div class="pt-1">
+        <button type="button" onclick="shareCreatedAccountWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs">
+          <span>📱</span>
+          <span>WhatsApp Web से अभी भेजें (1-Tap Share)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Account Details Card -->
+    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-200">
+        <span class="text-slate-500 font-medium">नाम (Full Name):</span>
+        <span class="font-black text-slate-800" id="readyFullName">-</span>
+      </div>
+
+      <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-200">
+        <span class="text-slate-500 font-medium">यूज़रनेम (Username):</span>
+        <span class="font-mono font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 break-all select-all" id="readyUsername">-</span>
+      </div>
+
+      <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-200">
+        <span class="text-slate-500 font-medium">पासवर्ड (Password):</span>
+        <div class="flex items-center gap-1.5">
+          <input type="text" id="readyPassword" readonly class="font-mono font-black text-slate-800 bg-white border border-slate-300 rounded px-2 py-0.5 text-xs text-right w-28 select-all focus:outline-none">
+          <button type="button" onclick="togglePasswordVisibility('readyPassword')" class="text-slate-400 hover:text-slate-600 text-xs cursor-pointer" title="दिखाएं / छुपाएं">👁️</button>
+        </div>
+      </div>
+
+      <div class="text-xs pt-1">
+        <span class="text-slate-500 font-medium block mb-1">लॉगिन पोर्टल (Login URL):</span>
+        <a id="readyLoginLink" href="#" target="_blank" class="font-mono text-[11px] text-indigo-600 hover:underline break-all block bg-white border border-slate-200 rounded p-1.5 font-bold"></a>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="space-y-2 pt-1">
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" onclick="copyCreatedAccountCredentials()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-2xs">
+          <span>📋</span>
+          <span>क्रेडेंशियल्स कॉपी करें</span>
+        </button>
+        <button type="button" onclick="shareCreatedAccountWhatsApp()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-2xs">
+          <span>📱</span>
+          <span>WhatsApp शेयर</span>
+        </button>
+      </div>
+      <button type="button" onclick="closeAccountCreatedReadyModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-2.5 px-4 rounded-xl text-xs transition cursor-pointer shadow-xs">
+        ✓ संपन्न (Done)
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showSubNotice(msg, type = 'info') {
+    if (typeof window.showToast === 'function') {
+      window.showToast(msg, type, type === 'error' ? 4000 : 2500);
+    } else {
+      alert(msg);
+    }
+  }
+
+  let _subScopeData = { booths: [], wards: [], villages: [], quota: null };
+  let _subAccountsList = [];
+
+  const MODULE_PRESETS = {
+    'all': ['search', 'voting_day', 'turnout', 'warroom', 'history', 'caste', 'families', 'users', 'karyakartas', 'outside', 'voice'],
+    'booth_agent': ['search', 'voting_day'],
+    'karyakarta': ['search', 'families', 'karyakartas'],
+    'warroom': ['search', 'turnout', 'warroom', 'caste', 'families', 'outside', 'voice'],
+    'caller': ['search', 'voice'],
+    'viewer': ['search', 'turnout']
+  };
+
+  function applyModulePreset(preset) {
+    const mods = MODULE_PRESETS[preset] || MODULE_PRESETS['all'];
+    document.querySelectorAll('input[name="subAllowedModuleCheck"]').forEach(cb => {
+      cb.checked = mods.includes(cb.value);
+    });
+  }
+
+  function handleSubRoleChange(role) {
+    if (role === 'booth_agent') applyModulePreset('booth_agent');
+    else if (role === 'karyakarta') applyModulePreset('karyakarta');
+    else if (role === 'viewer') applyModulePreset('viewer');
+    else if (role === 'operator') applyModulePreset('all');
+  }
+
+  function openSubAccountsModal(tab = 'create') {
+    const isUsersPage = window.location.pathname.includes('/users');
+    const initialTab = (isUsersPage || tab === 'create') ? 'create' : 'list';
+
+    const tabBtnList = document.getElementById('tabBtnSubList');
+    if (tabBtnList) {
+      if (isUsersPage) {
+        tabBtnList.classList.add('hidden');
+      } else {
+        tabBtnList.classList.remove('hidden');
+      }
+    }
+
+    document.getElementById('subAccountsModal').classList.remove('hidden');
+    loadSubAccountsData();
+    switchSubAccTab(initialTab);
+  }
+
+  function closeSubAccountsModal() {
+    document.getElementById('subAccountsModal').classList.add('hidden');
+  }
+
+  function switchSubAccTab(tab) {
+    const tabList = document.getElementById('subAccTabList');
+    const tabCreate = document.getElementById('subAccTabCreate');
+    const btnList = document.getElementById('tabBtnSubList');
+    const btnCreate = document.getElementById('tabBtnSubCreate');
+
+    if (tab === 'list') {
+      tabList.classList.remove('hidden');
+      tabCreate.classList.add('hidden');
+      btnList.className = 'px-3.5 py-2 border-b-2 border-indigo-600 text-indigo-700 font-black flex items-center gap-1.5 transition cursor-pointer';
+      btnCreate.className = 'px-3.5 py-2 border-b-2 border-transparent text-slate-600 hover:text-slate-900 font-bold flex items-center gap-1.5 transition cursor-pointer';
+    } else {
+      tabList.classList.add('hidden');
+      tabCreate.classList.remove('hidden');
+      btnCreate.className = 'px-3.5 py-2 border-b-2 border-indigo-600 text-indigo-700 font-black flex items-center gap-1.5 transition cursor-pointer';
+      btnList.className = 'px-3.5 py-2 border-b-2 border-transparent text-slate-600 hover:text-slate-900 font-bold flex items-center gap-1.5 transition cursor-pointer';
+      if (!document.getElementById('subPassword').value) {
+        generateAutoSubPassword();
+      }
+      const role = document.querySelector('input[name="subRoleRadio"]:checked')?.value || 'booth_agent';
+      handleSubRoleChange(role);
+    }
+  }
+
+  async function loadSubAccountsData() {
+    await Promise.all([loadScopeOptions(), loadSubAccountsList()]);
+  }
+
+  async function loadScopeOptions() {
+    try {
+      const res = await fetch('/api/campaign/scope_options');
+      const data = await res.json();
+      if (data.success) {
+        _subScopeData = data;
+        renderScopePickers();
+        if (data.quota) renderQuotaBadge(data.quota);
+      }
+    } catch (e) {
+      console.error("Failed to load scope options", e);
+    }
+  }
+
+  function renderQuotaBadge(quota) {
+    if (!quota) return;
+    const usedEl = document.getElementById('subAccQuotaUsed');
+    const totEl = document.getElementById('subAccQuotaTotal');
+    if (usedEl && totEl) {
+      usedEl.textContent = quota.used;
+      totEl.textContent = quota.limit;
+    }
+    const badge = document.getElementById('subAccQuotaBadge');
+    if (badge) {
+      if (quota.used >= quota.limit) {
+        badge.className = 'bg-rose-950/80 border border-rose-700/60 text-rose-300 text-[11px] font-bold px-2.5 py-1 rounded-lg';
+      } else {
+        badge.className = 'bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 text-[11px] font-bold px-2.5 py-1 rounded-lg';
+      }
+    }
+  }
+
+  function renderScopePickers() {
+    const isMultiGp = Boolean(_subScopeData.is_multi_gp || (_subScopeData.panchayats && _subScopeData.panchayats.length > 1));
+    const isEvmOrZp = (_subScopeData.election_type === 'ZILA_PARISHAD' || _subScopeData.voting_method === 'EVM');
+
+    // Auto-adjust default radio for Zila Parishad / EVM
+    if (isEvmOrZp) {
+      const bRadio = document.getElementById('scopeRadioBooth');
+      const wRadio = document.getElementById('scopeRadioWard');
+      if (wRadio && wRadio.checked) {
+        if (bRadio) bRadio.checked = true;
+        handleScopeTypeChange();
+      }
+    }
+
+    // 0. Gram Panchayats
+    const gList = document.getElementById('gpsCheckboxList');
+    if (gList) {
+      if (!_subScopeData.panchayats || !_subScopeData.panchayats.length) {
+        gList.innerHTML = '<div class="text-slate-400 py-1 text-xs">कोई ग्राम पंचायत उपलब्ध नहीं</div>';
+      } else {
+        gList.innerHTML = _subScopeData.panchayats.map(gp => {
+          const partsCount = (gp.parts || []).length;
+          const totalV = gp.total_voters ? gp.total_voters.toLocaleString('en-IN') : 0;
+          return `
+            <label class="flex items-center gap-2 p-2 bg-slate-50 hover:bg-indigo-50/50 rounded-xl border border-slate-200 cursor-pointer transition">
+              <input type="checkbox" name="subScopeGpCheck" value="${gp.gp_name}" class="text-indigo-600 rounded">
+              <div class="min-w-0">
+                <span class="font-extrabold text-slate-800 text-xs">🏛️ ${gp.gp_name_hi || gp.gp_name}</span>
+                <div class="text-[10px] text-slate-500 font-semibold">${totalV} मतदाता • ${partsCount} बूथ</div>
+              </div>
+            </label>
+          `;
+        }).join('');
+      }
+    }
+
+    // 1. Booths (Bifurcated by Gram Panchayat for multi-GP)
+    const bList = document.getElementById('boothsCheckboxList');
+    if (bList) {
+      if (!_subScopeData.booths || !_subScopeData.booths.length) {
+        bList.innerHTML = '<div class="text-slate-400 py-1 text-xs">कोई मतदान केंद्र उपलब्ध नहीं</div>';
+      } else if (isMultiGp && _subScopeData.panchayats && _subScopeData.panchayats.length) {
+        bList.className = "max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-lg p-2 space-y-2 text-xs";
+        bList.innerHTML = _subScopeData.panchayats.map(gp => {
+          const gpParts = gp.parts || [];
+          const gpBooths = (_subScopeData.booths || []).filter(b => gpParts.includes(b.part_no) || (b.gp_name && b.gp_name.toLowerCase() === gp.gp_name.toLowerCase()));
+          if (!gpBooths.length) return '';
+          const safeGpName = (gp.gp_name || '').replace(/'/g, "\\'");
+          return `
+            <div class="border border-slate-200 rounded-xl p-2 bg-slate-50/80">
+              <div class="flex items-center justify-between pb-1 mb-1.5 border-b border-slate-200">
+                <span class="font-black text-slate-800 text-xs flex items-center gap-1.5">
+                  <span>🏛️ ${gp.gp_name_hi || gp.gp_name}</span>
+                  <span class="text-[10px] font-bold text-slate-500">(${gp.total_voters ? gp.total_voters.toLocaleString('en-IN') : 0} मत • ${gpBooths.length} बूथ)</span>
+                </span>
+                <button type="button" onclick="selectBoothsInGp('${safeGpName}', true)" class="text-[10px] text-indigo-600 hover:text-indigo-800 font-black">सभी बूथ चुनें</button>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                ${gpBooths.map(b => `
+                  <label class="flex items-center gap-2 p-1.5 bg-white hover:bg-indigo-50/40 rounded-lg border border-slate-200 cursor-pointer">
+                    <input type="checkbox" name="subScopeBoothCheck" data-gp="${safeGpName}" value="${b.part_no}" class="text-indigo-600 rounded">
+                    <span class="font-bold text-slate-800">भाग ${b.part_no}: <span class="font-normal text-slate-600">${b.name || b.booth_name || ''}</span></span>
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        bList.className = "max-h-36 overflow-y-auto bg-white border border-slate-200 rounded-lg p-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs";
+        bList.innerHTML = _subScopeData.booths.map(b => `
+          <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded cursor-pointer">
+            <input type="checkbox" name="subScopeBoothCheck" value="${b.part_no}" class="text-indigo-600 rounded">
+            <span class="font-bold text-slate-800">भाग ${b.part_no}: <span class="font-normal text-slate-600">${b.name || b.booth_name || ''}</span></span>
+          </label>
+        `).join('');
+      }
+    }
+
+    // 2. Wards (Bifurcated by Gram Panchayat for multi-GP)
+    const wList = document.getElementById('wardsCheckboxList');
+    if (wList) {
+      if (isMultiGp && _subScopeData.panchayats && _subScopeData.panchayats.length) {
+        wList.className = "max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-lg p-2 space-y-2 text-xs";
+        wList.innerHTML = _subScopeData.panchayats.map(gp => {
+          const wards = gp.wards || [];
+          if (!wards.length) return '';
+          const safeGpName = (gp.gp_name || '').replace(/'/g, "\\'");
+          return `
+            <div class="border border-slate-200 rounded-xl p-2 bg-slate-50/80">
+              <div class="flex items-center justify-between pb-1 mb-1.5 border-b border-slate-200">
+                <span class="font-black text-slate-800 text-xs flex items-center gap-1.5">
+                  <span>🏛️ ${gp.gp_name_hi || gp.gp_name}</span>
+                  <span class="text-[10px] font-bold text-slate-500">(${wards.length} वार्ड)</span>
+                </span>
+                <button type="button" onclick="selectWardsInGp('${safeGpName}', true)" class="text-[10px] text-indigo-600 hover:text-indigo-800 font-black">सभी वार्ड चुनें</button>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                ${wards.map(w => `
+                  <label class="flex items-center gap-2 p-1.5 bg-white hover:bg-indigo-50/40 rounded-lg border border-slate-200 cursor-pointer">
+                    <input type="checkbox" name="subScopeWardCheck" data-gp="${safeGpName}" data-part="${w.part_no || ''}" value="${w.ward_no}" class="text-indigo-600 rounded">
+                    <span class="font-bold text-slate-800">वार्ड ${w.ward_no} <span class="font-normal text-[10px] text-slate-500">(${w.voter_count || 0})</span></span>
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else if (!_subScopeData.wards || !_subScopeData.wards.length) {
+        wList.innerHTML = '<div class="text-slate-400 py-1 text-xs">कोई वार्ड उपलब्ध नहीं</div>';
+      } else {
+        wList.className = "max-h-36 overflow-y-auto bg-white border border-slate-200 rounded-lg p-2 grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs";
+        wList.innerHTML = _subScopeData.wards.map(w => `
+          <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded cursor-pointer">
+            <input type="checkbox" name="subScopeWardCheck" value="${w.ward_no}" class="text-indigo-600 rounded">
+            <span class="font-bold text-slate-800">वार्ड ${w.ward_no}</span>
+          </label>
+        `).join('');
+      }
+    }
+
+    // 3. Villages
+    const vList = document.getElementById('villagesCheckboxList');
+    if (vList) {
+      if (!_subScopeData.villages || !_subScopeData.villages.length) {
+        vList.innerHTML = '<div class="text-slate-400 py-1 text-xs">कोई गाँव / क्षेत्र उपलब्ध नहीं</div>';
+      } else {
+        vList.innerHTML = _subScopeData.villages.map((v, idx) => `
+          <label class="flex items-center gap-2 p-1.5 hover:bg-slate-50 rounded cursor-pointer">
+            <input type="checkbox" name="subScopeVillageCheck" value="${v}" class="text-indigo-600 rounded">
+            <span class="font-bold text-slate-800">${v}</span>
+          </label>
+        `).join('');
+      }
+    }
+  }
+
+  function handleScopeTypeChange() {
+    const selected = document.querySelector('input[name="scopeTypeRadio"]:checked')?.value || 'booth';
+    document.getElementById('scopeContainerBooth').classList.toggle('hidden', selected !== 'booth');
+    const gpContainer = document.getElementById('scopeContainerGp');
+    if (gpContainer) gpContainer.classList.toggle('hidden', selected !== 'gp');
+    document.getElementById('scopeContainerWard').classList.toggle('hidden', selected !== 'ward');
+    document.getElementById('scopeContainerVillage').classList.toggle('hidden', selected !== 'village');
+    document.getElementById('scopeContainerAll').classList.toggle('hidden', selected !== 'all');
+  }
+
+  function selectAllBooths(check) {
+    document.querySelectorAll('input[name="subScopeBoothCheck"]').forEach(cb => cb.checked = check);
+  }
+
+  function selectAllGps(check) {
+    document.querySelectorAll('input[name="subScopeGpCheck"]').forEach(cb => cb.checked = check);
+  }
+
+  function selectBoothsInGp(gpName, check) {
+    document.querySelectorAll(`input[name="subScopeBoothCheck"][data-gp="${gpName}"]`).forEach(cb => cb.checked = check);
+  }
+
+  function selectWardsInGp(gpName, check) {
+    document.querySelectorAll(`input[name="subScopeWardCheck"][data-gp="${gpName}"]`).forEach(cb => cb.checked = check);
+  }
+
+  function selectAllWards(check) {
+    document.querySelectorAll('input[name="subScopeWardCheck"]').forEach(cb => cb.checked = check);
+  }
+
+  function selectAllVillages(check) {
+    document.querySelectorAll('input[name="subScopeVillageCheck"]').forEach(cb => cb.checked = check);
+  }
+
+  async function loadSubAccountsList() {
+    try {
+      const res = await fetch('/api/users/list');
+      const data = await res.json();
+      if (data.success) {
+        _subAccountsList = data.users || [];
+        renderSubAccountsTable();
+        const cntBadge = document.getElementById('subAccCountBadge');
+        if (cntBadge) cntBadge.textContent = _subAccountsList.length;
+        if (data.quota) renderQuotaBadge(data.quota);
+      }
+    } catch (e) {
+      console.error("Failed to load users list", e);
+    }
+  }
+
+  function renderSubAccountsTable() {
+    const tbody = document.getElementById('subAccountsTableBody');
+    if (!tbody) return;
+
+    if (!_subAccountsList.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-bold">अभी कोई उप-खाता नहीं बनाया गया है। "नया उप-खाता बनाएं" पर क्लिक करें।</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = _subAccountsList.map(u => {
+      const isSuper = u.role === 'super_admin';
+      const roleBadge = u.role === 'booth_agent' ? 'bg-indigo-100 text-indigo-800 border-indigo-200' :
+                        u.role === 'karyakarta' ? 'bg-amber-100 text-amber-800 border-amber-200' :
+                        u.role === 'viewer' ? 'bg-slate-100 text-slate-700 border-slate-200' :
+                        'bg-blue-100 text-blue-800 border-blue-200';
+      
+      const roleLabel = u.role === 'booth_agent' ? '🗳️ बूथ एजेंट' :
+                        u.role === 'karyakarta' ? '🤝 कार्यकर्ता' :
+                        u.role === 'viewer' ? '👁️ दर्शक' : '⚙️ ऑपरेटर';
+
+      let scopeBadge = '<span class="text-slate-400">सम्पूर्ण</span>';
+      if (u.assigned_gps && u.assigned_gps.length) {
+        scopeBadge = `<span class="bg-teal-50 text-teal-800 border border-teal-200 px-2 py-0.5 rounded text-[10px] font-bold">🏛️ GP: ${u.assigned_gps.join(', ')}</span>`;
+      } else if (u.assigned_booths && u.assigned_booths.length) {
+        scopeBadge = `<span class="bg-indigo-50 text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded text-[10px] font-bold">🏢 भाग: ${u.assigned_booths.join(', ')}</span>`;
+      } else if (u.assigned_wards && u.assigned_wards.length) {
+        scopeBadge = `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-bold">📍 वार्ड: ${u.assigned_wards.join(', ')}</span>`;
+      } else if (u.assigned_villages && u.assigned_villages.length) {
+        scopeBadge = `<span class="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded text-[10px] font-bold">🏡 ${u.assigned_villages.slice(0, 2).join(', ')}${u.assigned_villages.length > 2 ? ' +' + (u.assigned_villages.length - 2) : ''}</span>`;
+      } else {
+        scopeBadge = `<span class="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-[10px] font-bold">🌐 समस्त अभियान</span>`;
+      }
+
+      const mods = u.allowed_modules || ['all'];
+      let modText = '';
+      if (!mods || mods.length === 0 || mods.includes('all')) {
+        modText = '<div class="text-[11px] text-slate-500 mt-0.5">🌐 समस्त मॉड्यूल</div>';
+      } else {
+        modText = `<div class="text-[11px] text-slate-500 mt-0.5">${mods.length} मॉड्यूल अनुमत</div>`;
+      }
+
+      return `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="py-2.5 px-3">
+            <div class="font-bold text-slate-900">${u.full_name}</div>
+            <div class="font-mono text-[11px] text-blue-700 font-semibold">${u.username}</div>
+          </td>
+          <td class="py-2.5 px-3">
+            <span class="text-[10px] font-black border px-2 py-0.5 rounded-full ${roleBadge}">
+              ${roleLabel}
+            </span>
+          </td>
+          <td class="py-2.5 px-3">
+            ${scopeBadge}
+            ${modText}
+          </td>
+          <td class="py-2.5 px-3 font-semibold text-slate-700">
+            ${u.phone || '-'}
+          </td>
+          <td class="py-2.5 px-3">
+            <span class="text-[10px] font-black ${u.is_active ? 'text-emerald-600' : 'text-rose-600'}">
+              ${u.is_active ? '● सक्रिय' : '○ निष्क्रिय'}
+            </span>
+          </td>
+          <td class="py-2.5 px-3 text-right space-x-1 whitespace-nowrap">
+            <button onclick="openEditSubUserModal(${u.id})" title="खाता विवरण, दायरा व अनुमतियाँ संपादित करें" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold px-2.5 py-1 rounded-lg text-[11px] cursor-pointer inline-flex items-center gap-1 transition">
+              <span>✏️</span><span>संपादित</span>
+            </button>
+            <button onclick="toggleSubUserStatus(${u.id})" class="text-[11px] font-bold px-2 py-1 rounded border ${u.is_active ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'} cursor-pointer">
+              ${u.is_active ? 'Disable' : 'Enable'}
+            </button>
+            <button onclick="deleteSubUserAccount(${u.id}, '${u.username}')" title="खाता हटाएं" class="bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 font-bold px-2 py-1 rounded text-[11px] border border-slate-200 hover:border-rose-200 cursor-pointer">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function autoSuggestSubUsername() {
+    const unameInput = document.getElementById('subUsername');
+    if (!unameInput) return;
+    const phone = (document.getElementById('subPhone')?.value || '').replace(/\D/g, '');
+    const rawTenant = window.CURRENT_TENANT || new URLSearchParams(window.location.search).get('tenant') || '';
+    let shortTenant = rawTenant.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (shortTenant.length > 8) shortTenant = shortTenant.slice(0, 8);
+
+    if (phone.length >= 10) {
+      unameInput.value = shortTenant ? `${shortTenant}_${phone.slice(-4)}` : phone;
+    } else {
+      const fullName = (document.getElementById('subFullName')?.value || '').trim();
+      const firstName = fullName.split(/\s+/)[0] || '';
+      const sanitizedName = firstName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10);
+      if (sanitizedName) {
+        unameInput.value = shortTenant ? `${shortTenant}_${sanitizedName}` : sanitizedName;
+      }
+    }
+  }
+
+  function generateAutoSubPassword() {
+    const chars = '23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
+    let res = '';
+    for (let i = 0; i < 8; i++) {
+      res += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('subPassword').value = res;
+  }
+
+  async function handleCreateSubAccount(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitSubAcc');
+    btn.disabled = true;
+    btn.innerText = 'खाता बनाया जा रहा है...';
+
+    const role = document.querySelector('input[name="subRoleRadio"]:checked')?.value || 'booth_agent';
+    const scopeType = document.querySelector('input[name="scopeTypeRadio"]:checked')?.value || 'booth';
+
+    let assignedBooths = [];
+    if (scopeType === 'booth') {
+      document.querySelectorAll('input[name="subScopeBoothCheck"]:checked').forEach(cb => {
+        assignedBooths.push(parseInt(cb.value));
+      });
+    }
+
+    let assignedGps = [];
+    if (scopeType === 'gp') {
+      document.querySelectorAll('input[name="subScopeGpCheck"]:checked').forEach(cb => {
+        assignedGps.push(cb.value);
+      });
+    }
+
+    let assignedWards = [];
+    if (scopeType === 'ward') {
+      document.querySelectorAll('input[name="subScopeWardCheck"]:checked').forEach(cb => {
+        assignedWards.push(parseInt(cb.value));
+        // If ward is tied to a specific part, also record the part to anchor unambiguously
+        if (cb.dataset.part && !isNaN(parseInt(cb.dataset.part))) {
+          assignedBooths.push(parseInt(cb.dataset.part));
+        }
+      });
+    }
+
+    let assignedVillages = [];
+    if (scopeType === 'village') {
+      document.querySelectorAll('input[name="subScopeVillageCheck"]:checked').forEach(cb => {
+        assignedVillages.push(cb.value);
+      });
+    }
+
+    const allowedModules = [];
+    document.querySelectorAll('input[name="subAllowedModuleCheck"]:checked').forEach(cb => {
+      allowedModules.push(cb.value);
+    });
+
+    if (!allowedModules.length) {
+      showSubNotice('कृपया कम से कम एक मॉड्यूल का चयन करें (Please select at least one module)', 'warning');
+      btn.disabled = false;
+      btn.innerText = 'खाता बनाएं (Save Account) →';
+      return;
+    }
+
+    const payload = {
+      full_name: document.getElementById('subFullName').value.trim(),
+      phone: document.getElementById('subPhone').value.trim(),
+      role: role,
+      scope_type: scopeType,
+      assigned_booths: assignedBooths,
+      assigned_gps: assignedGps,
+      assigned_wards: assignedWards,
+      assigned_villages: assignedVillages,
+      allowed_modules: allowedModules,
+      username: document.getElementById('subUsername').value.trim(),
+      password: document.getElementById('subPassword').value.trim(),
+      tenant_slug: window.CURRENT_TENANT || new URLSearchParams(window.location.search).get('tenant') || ''
+    };
+
+    try {
+      const res = await fetch('/api/users/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        const newUserId = data.user_id;
+        const autoSend = document.getElementById('subAutoSendWhatsApp')?.checked;
+        const phoneDigits = (payload.phone || '').replace(/\D/g, '');
+
+        let waStatus = { sent: false, error: null };
+        if (autoSend && phoneDigits.length >= 10 && newUserId) {
+          try {
+            const waRes = await fetch(`/api/users/${newUserId}/send_credentials_whatsapp`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ password: payload.password })
+            });
+            const waData = await waRes.json().catch(() => ({}));
+            if (waRes.ok && waData.success) {
+              waStatus.sent = true;
+              if (typeof window.showToast === 'function') {
+                window.showToast(`📲 क्रेडेंशियल्स सीधे WhatsApp (+91 ${phoneDigits.slice(-10)}) पर भेज दिए गए!`, 'success');
+              }
+            } else {
+              waStatus.error = waData.error || `HTTP ${waRes.status}`;
+              console.warn('Auto WhatsApp dispatch warning:', waStatus.error);
+            }
+          } catch (waErr) {
+            waStatus.error = waErr.message || 'नेटवर्क त्रुटि';
+            console.error('Auto WhatsApp dispatch error:', waErr);
+          }
+        } else if (!autoSend) {
+          waStatus.error = 'ऑटो-डिस्पैच अनचेक था';
+        } else if (phoneDigits.length < 10) {
+          waStatus.error = 'वैध 10-अंकों का मोबाइल नंबर दर्ज नहीं था';
+        }
+
+        document.getElementById('createSubAccountForm').reset();
+        if (typeof loadSubAccountsList === 'function') await loadSubAccountsList();
+        if (typeof loadUsers === 'function') loadUsers();
+
+        // Close create modal immediately
+        closeSubAccountsModal();
+
+        // Open dedicated Account Ready confirmation dialog with credentials & WhatsApp feedback
+        openAccountCreatedReadyModal(payload.full_name, payload.username, payload.password, payload.phone, payload.tenant_slug, waStatus);
+      } else {
+      showSubNotice(data.error || 'खाता बनाने में त्रुटि हुई', 'error');
+    }
+  } catch (err) {
+    console.error(err);
+    showSubNotice('नेटवर्क त्रुटि: खाता नहीं बनाया जा सका।', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerText = 'खाता बनाएं (Save Account) →';
+    }
+  }
+
+  // ==========================================
+  // MODULE PERMISSIONS MODAL LOGIC
+  // ==========================================
+  const EDITABLE_MODULES_LIST = [
+    { key: 'search', icon: '🔍', label: 'खोज व पर्ची', desc: 'मतदाता खोज, पर्ची प्रिंट व WhatsApp शेयर' },
+    { key: 'voting_day', icon: '🗳️', label: 'मतदान डेस्क', desc: 'मतदान दिवस लाइव वोट मार्किंग' },
+    { key: 'warroom', icon: '📈', label: 'वॉर-रूम विश्लेषिकी', desc: 'रणनीतिक डैशबोर्ड व लाइव फीड' },
+    { key: 'history', icon: '📜', label: 'पर्चियाँ ऑडिट', desc: 'वितरित मतदाता पर्चियों का रिकॉर्ड' },
+    { key: 'caste', icon: '🏷️', label: 'समुदाय समीकरण', desc: 'समुदायवार मतदाता वर्गीकरण व समीकरण' },
+    { key: 'families', icon: '👨‍👩‍👧', label: 'परिवार क्लस्टर', desc: 'पारिवारिक समूह व मुखिया मैपिंग' },
+    { key: 'karyakartas', icon: '👥', label: 'कार्यकर्ता प्रबंधन', desc: 'कार्यकर्ता आवंटन व कार्य प्रगति' },
+    { key: 'outside', icon: '✈️', label: 'प्रवासी मतदाता', desc: 'बाहर रहने वाले मतदाताओं की ट्रैकिंग' },
+    { key: 'users', icon: '⚙️', label: 'दल व उप-खाते', desc: 'नए ऑपरेटर व कार्यकर्ता खाते बनाना' }{% if ENABLE_VOICE_MODULE %},
+    { key: 'voice', icon: '📢', label: 'वॉयस कॉल अभियान', desc: 'ऑडियो प्रसारण व पोलिंग डे शेष मतदाता कॉलिंग' }{% endif %}
+  ];
+
+  function renderEditModulesCheckboxes(selectedList) {
+    const container = document.getElementById('editModulesCheckboxesContainer');
+    if (!container) return;
+    const isAll = selectedList.includes('all');
+
+    container.innerHTML = EDITABLE_MODULES_LIST.map(m => {
+      const isChecked = isAll || selectedList.includes(m.key);
+      return `
+        <label class="flex items-start gap-2.5 p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-400 transition hover:bg-indigo-50/20 select-none">
+          <input type="checkbox" name="editAllowedModuleCheck" value="${m.key}" ${isChecked ? 'checked' : ''} onchange="updateEditModulesActiveCount()" class="mt-0.5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+          <div class="flex-1 min-w-0">
+            <div class="font-black text-slate-800 text-xs flex items-center gap-1.5">
+              <span>${m.icon}</span>
+              <span>${m.label}</span>
+            </div>
+            <p class="text-[10px] text-slate-500 leading-tight mt-0.5">${m.desc}</p>
+          </div>
+        </label>
+      `;
+    }).join('');
+    updateEditModulesActiveCount();
+  }
+
+  function updateEditModulesActiveCount() {
+    const checked = document.querySelectorAll('input[name="editAllowedModuleCheck"]:checked');
+    const countEl = document.getElementById('editModulesActiveCount');
+    if (countEl) countEl.textContent = checked.length;
+  }
+
+  function applyEditModalPreset(preset) {
+    const mods = MODULE_PRESETS[preset] || MODULE_PRESETS['all'];
+    document.querySelectorAll('input[name="editAllowedModuleCheck"]').forEach(cb => {
+      cb.checked = mods.includes(cb.value);
+    });
+    updateEditModulesActiveCount();
+  }
+
+  function openEditModulesModal(userId, username, fullName, currentMods) {
+    document.getElementById('editModulesUserId').value = userId;
+    document.getElementById('editModulesUsername').textContent = username;
+    document.getElementById('editModulesUserFullName').textContent = fullName || username;
+    
+    let currentList = [];
+    if (Array.isArray(currentMods)) {
+      currentList = currentMods;
+    } else if (typeof currentMods === 'string' && currentMods) {
+      try {
+        currentList = JSON.parse(currentMods);
+      } catch (e) {
+        currentList = currentMods.split(',').map(s => s.trim().toLowerCase());
+      }
+    } else {
+      currentList = ['all'];
+    }
+
+    renderEditModulesCheckboxes(currentList);
+    document.getElementById('editModulesModal').classList.remove('hidden');
+  }
+
+  function closeEditModulesModal() {
+    document.getElementById('editModulesModal').classList.add('hidden');
+  }
+
+  async function saveUserModules() {
+    const userId = document.getElementById('editModulesUserId').value;
+    const checkedBoxes = Array.from(document.querySelectorAll('input[name="editAllowedModuleCheck"]:checked'));
+    const btn = document.getElementById('btnSaveEditModules');
+
+    if (!checkedBoxes.length) {
+      showSubNotice('कम से कम एक मॉड्यूल चुनना अनिवार्य है', 'warning');
+      return;
+    }
+
+    let selected = checkedBoxes.map(cb => cb.value);
+    if (selected.length === EDITABLE_MODULES_LIST.length) {
+      selected = ['all'];
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span><span>सुरक्षित हो रहा है...</span>';
+
+    try {
+      const res = await fetch(`/api/users/${userId}/update_modules`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ allowed_modules: selected })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showSubNotice('✅ मॉड्यूल अनुमतियाँ सफलतापूर्वक अपडेट हो गईं!', 'success');
+        closeEditModulesModal();
+        if (typeof loadUsers === 'function') loadUsers();
+        if (typeof loadSubAccountsList === 'function') loadSubAccountsList();
+      } else {
+        showSubNotice(data.error || 'अनुमतियाँ अपडेट करने में त्रुटि हुई', 'error');
+      }
+    } catch(e) {
+      showSubNotice('नेटवर्क त्रुटि: अनुमतियाँ अपडेट नहीं हो सकीं', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span>💾</span><span>अनुमतियाँ सुरक्षित करें (Save)</span>';
+    }
+  }
+
+  // ==========================================
+  // PASSWORD RESET & CREDENTIAL DISPATCH LOGIC
+  // ==========================================
+  function generateUserResetPassword() {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
+    let res = '';
+    for (let i = 0; i < 8; i++) {
+      res += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const input = document.getElementById('resetUserNewPasswordInput');
+    if (input) {
+      input.value = res;
+      input.focus();
+    }
+  }
+
+  function togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  function getCredentialsMessage(fullName, username, password, tenantSlug) {
+    const host = window.location.origin;
+    const t = (tenantSlug || window.CURRENT_TENANT || '').toLowerCase();
+    const loginUrl = t ? `${host}/login?tenant=${t}` : `${host}/login`;
+    return `*🇮🇳 Smart Booth — अधिकृत लॉगिन क्रेडेंशियल्स*\n\n` +
+           `👤 *नाम:* ${fullName}\n` +
+           `🔑 *यूज़रनेम:* ${username}\n` +
+           `🔒 *पासवर्ड:* ${password}\n` +
+           `🌐 *लॉगिन लिंक:* ${loginUrl}\n\n` +
+           `कृपया लॉगिन करके अपने नियत बूथ/वार्ड का कार्य शुरू करें।`;
+  }
+
+  function copyUserCredentials() {
+    const pwd = document.getElementById('resetUserNewPasswordInput').value.trim();
+    if (!pwd) {
+      showSubNotice('कृपया पहले पासवर्ड दर्ज या जनरेट करें', 'warning');
+      return;
+    }
+    const username = document.getElementById('resetUsernameDisplayModal').textContent.trim();
+    const fullName = document.getElementById('resetUserFullNameDisplay').textContent.trim();
+    const tenantSlug = document.getElementById('resetUserTargetTenant').value.trim();
+
+    const msg = getCredentialsMessage(fullName, username, pwd, tenantSlug);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(msg).then(() => {
+        showSubNotice('📋 लॉगिन विवरण क्लिपबोर्ड में कॉपी हो गया!', 'success');
+      }).catch(() => {
+        showSubNotice(msg, 'info');
+      });
+    } else {
+      showSubNotice(msg, 'info');
+    }
+  }
+
+  function shareUserCredentialsWhatsApp() {
+    const pwd = document.getElementById('resetUserNewPasswordInput').value.trim();
+    if (!pwd) {
+      showSubNotice('कृपया पहले पासवर्ड दर्ज या जनरेट करें', 'warning');
+      return;
+    }
+    const username = document.getElementById('resetUsernameDisplayModal').textContent.trim();
+    const fullName = document.getElementById('resetUserFullNameDisplay').textContent.trim();
+    const phone = document.getElementById('resetUserPhoneInput').value.replace(/\D/g, '');
+    const tenantSlug = document.getElementById('resetUserTargetTenant').value.trim();
+
+    const msg = getCredentialsMessage(fullName, username, pwd, tenantSlug);
+    const encodedMsg = encodeURIComponent(msg);
+
+    let waUrl = `https://wa.me/?text=${encodedMsg}`;
+    if (phone && phone.length === 10) {
+      waUrl = `https://wa.me/91${phone}?text=${encodedMsg}`;
+    } else if (phone && phone.length > 10) {
+      waUrl = `https://wa.me/${phone}?text=${encodedMsg}`;
+    }
+    window.open(waUrl, '_blank');
+  }
+
+  function openUserPasswordResetModal(userId, username, fullName, phone, tenantSlug) {
+    document.getElementById('resetUserTargetId').value = userId;
+    document.getElementById('resetUsernameDisplayModal').textContent = username;
+    document.getElementById('resetUserFullNameDisplay').textContent = fullName || username;
+    document.getElementById('resetUserPhoneInput').value = phone || '';
+    document.getElementById('resetUserTargetTenant').value = tenantSlug || (window.CURRENT_TENANT || '');
+
+    generateUserResetPassword();
+    document.getElementById('userPasswordResetModal').classList.remove('hidden');
+  }
+
+  function closeUserPasswordResetModal() {
+    document.getElementById('userPasswordResetModal').classList.add('hidden');
+  }
+
+  async function executeUserPasswordReset() {
+    const userId = document.getElementById('resetUserTargetId').value;
+    const newPassword = document.getElementById('resetUserNewPasswordInput').value.trim();
+    const btn = document.getElementById('btnSubmitResetPassword');
+
+    if (!newPassword) {
+      showSubNotice('कृपया नया पासवर्ड दर्ज करें या जनरेट करें', 'warning');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span><span>सुरक्षित हो रहा है...</span>';
+
+    try {
+      const res = await fetch('/api/users/reset_password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: parseInt(userId), password: newPassword })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showSubNotice('✅ पासवर्ड सफलतापूर्वक बदल दिया गया!', 'success');
+        if (typeof loadUsers === 'function') loadUsers();
+        if (typeof loadSubAccountsList === 'function') loadSubAccountsList();
+        closeUserPasswordResetModal();
+      } else {
+        showSubNotice(data.error || 'पासवर्ड बदलने में त्रुटि', 'error');
+      }
+    } catch(e) {
+      showSubNotice('नेटवर्क त्रुटि: पासवर्ड नहीं बदला जा सका', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span>💾</span><span>पासवर्ड बदलें (Save)</span>';
+    }
+  }
+
+  // Backward-compatibility aliases
+  window.openEditModulesModal = openEditModulesModal;
+  window.closeEditModulesModal = closeEditModulesModal;
+  window.saveUserModules = saveUserModules;
+  window.openUserPasswordResetModal = openUserPasswordResetModal;
+  window.closeUserPasswordResetModal = closeUserPasswordResetModal;
+  window.editSubUserModulesPrompt = function(id, username, mods) { openEditModulesModal(id, username, username, mods); };
+  window.resetSubPasswordPrompt = function(id, username) { openUserPasswordResetModal(id, username, username, '', ''); };
+  window.editUserModulesPrompt = function(id, username, mods) { openEditModulesModal(id, username, username, mods); };
+  window.resetPasswordPrompt = function(id, username) { openUserPasswordResetModal(id, username, username, '', ''); };
+
+  async function toggleSubUserStatus(id) {
+    try {
+      const res = await fetch('/api/users/toggle_status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: id })
+      });
+      const data = await res.json();
+      if (data.success) loadSubAccountsList();
+    } catch(e) {}
+  }
+
+  async function deleteSubUserAccount(id, username) {
+    if (!confirm(`क्या आप उपयोगकर्ता '${username}' को हटाना चाहते हैं?`)) return;
+    const backupList = [..._subAccountsList];
+    _subAccountsList = _subAccountsList.filter(u => (u.id || u.user_id) !== id);
+    renderSubAccountsTable();
+    const cntBadge = document.getElementById('subAccCountBadge');
+    if (cntBadge) cntBadge.textContent = _subAccountsList.length;
+
+    try {
+      const res = await fetch(`/api/users/${id}/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`उपयोगकर्ता '${username}' हटा दिया गया`, 'info');
+        }
+        loadSubAccountsList();
+      } else {
+        _subAccountsList = backupList;
+        renderSubAccountsTable();
+        showSubNotice(data.error || 'हटाने में त्रुटि', 'error');
+      }
+    } catch(e) {
+      _subAccountsList = backupList;
+      renderSubAccountsTable();
+    }
+  }
+
+  function handleEditSubScopeTypeChange(type) {
+    const bWrap = document.getElementById('editSubBoothsWrapper');
+    const gWrap = document.getElementById('editSubGpsWrapper');
+    const wWrap = document.getElementById('editSubWardsWrapper');
+    const vWrap = document.getElementById('editSubVillagesWrapper');
+    if (bWrap) bWrap.classList.toggle('hidden', type !== 'booth');
+    if (gWrap) gWrap.classList.toggle('hidden', type !== 'gp');
+    if (wWrap) wWrap.classList.toggle('hidden', type !== 'ward');
+    if (vWrap) vWrap.classList.toggle('hidden', type !== 'village');
+  }
+
+  function renderEditSubModulesCheckboxes(selectedList) {
+    const container = document.getElementById('editSubModulesContainer');
+    if (!container) return;
+    const isAll = !selectedList || !selectedList.length || selectedList.includes('all');
+
+    container.innerHTML = EDITABLE_MODULES_LIST.map(m => {
+      const isChecked = isAll || selectedList.includes(m.key);
+      return `
+        <label class="flex items-center gap-2 p-1.5 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400 select-none">
+          <input type="checkbox" name="editSubAllowedModuleCheck" value="${m.key}" ${isChecked ? 'checked' : ''} onchange="updateEditSubActiveModulesCount()" class="text-indigo-600 rounded border-slate-300">
+          <span class="font-bold text-slate-800 text-[11px]">${m.icon} ${m.label}</span>
+        </label>
+      `;
+    }).join('');
+    updateEditSubActiveModulesCount();
+  }
+
+  function updateEditSubActiveModulesCount() {
+    const checked = document.querySelectorAll('input[name="editSubAllowedModuleCheck"]:checked');
+    const countEl = document.getElementById('editSubActiveModulesCount');
+    if (countEl) countEl.textContent = checked.length;
+  }
+
+  function applyEditSubPreset(preset) {
+    const mods = MODULE_PRESETS[preset] || MODULE_PRESETS['all'];
+    document.querySelectorAll('input[name="editSubAllowedModuleCheck"]').forEach(cb => {
+      cb.checked = mods.includes(cb.value);
+    });
+    updateEditSubActiveModulesCount();
+  }
+
+  function handleEditSubRoleChange(role) {
+    if (role === 'booth_agent') applyEditSubPreset('booth_agent');
+    else if (role === 'karyakarta') applyEditSubPreset('karyakarta');
+    else if (role === 'viewer') applyEditSubPreset('viewer');
+    else if (role === 'operator' || role === 'admin') applyEditSubPreset('all');
+  }
+
+  function generateEditSubPassword() {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
+    let res = '';
+    for (let i = 0; i < 8; i++) {
+      res += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const input = document.getElementById('editSubNewPassword');
+    if (input) {
+      input.value = res;
+      input.focus();
+    }
+  }
+
+  async function sendUnifiedEditUserWhatsApp() {
+    const userId = document.getElementById('editSubUserId')?.value;
+    if (!userId) return;
+    const pwd = document.getElementById('editSubNewPassword')?.value.trim();
+    const phone = (document.getElementById('editSubPhone')?.value || '').replace(/\D/g, '');
+    if (phone.length < 10) {
+      showSubNotice('कृपया पहले वैध 10-अंकों का मोबाइल नंबर दर्ज करें (Valid 10-digit phone required)', 'warning');
+      return;
+    }
+
+    const btn = document.getElementById('btnSendEditWhatsApp');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span><span>भेजा जा रहा है...</span>';
+    }
+
+    try {
+      const res = await fetch(`/api/users/${userId}/send_credentials_whatsapp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pwd })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showSubNotice(`✅ क्रेडेंशियल्स सफलतापूर्वक WhatsApp (${data.phone}) पर भेज दिए गए!`, 'success');
+      } else {
+        showSubNotice(data.error || 'WhatsApp संदेश भेजने में विफलता', 'error');
+      }
+    } catch (err) {
+      showSubNotice('नेटवर्क त्रुटि: संदेश नहीं भेजा जा सका', 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>📲</span><span>WhatsApp API से भेजें</span>';
+      }
+    }
+  }
+
+  function copyUnifiedEditCredentials() {
+    const fullName = document.getElementById('editSubFullName')?.value.trim();
+    const pwd = document.getElementById('editSubNewPassword')?.value.trim() || '(पूर्ववत सुरक्षित / Unchanged)';
+    const subtitle = document.getElementById('editSubUserSubtitle')?.textContent || '';
+    const username = subtitle.replace(/^@/, '').split(' ')[0] || '';
+    const tenantSlug = window.CURRENT_TENANT || '';
+
+    const msg = getCredentialsMessage(fullName, username, pwd, tenantSlug);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(msg).then(() => {
+        showSubNotice('📋 लॉगिन विवरण क्लिपबोर्ड में कॉपी हो गया!', 'success');
+      }).catch(() => {
+        showSubNotice(msg, 'info');
+      });
+    } else {
+      showSubNotice(msg, 'info');
+    }
+  }
+
+  function shareUnifiedEditWhatsAppWeb() {
+    const fullName = document.getElementById('editSubFullName')?.value.trim();
+    const phone = (document.getElementById('editSubPhone')?.value || '').replace(/\D/g, '');
+    const pwd = document.getElementById('editSubNewPassword')?.value.trim() || '(पूर्ववत सुरक्षित / Unchanged)';
+    const subtitle = document.getElementById('editSubUserSubtitle')?.textContent || '';
+    const username = subtitle.replace(/^@/, '').split(' ')[0] || '';
+    const tenantSlug = window.CURRENT_TENANT || '';
+
+    const msg = getCredentialsMessage(fullName, username, pwd, tenantSlug);
+    const encodedMsg = encodeURIComponent(msg);
+    let waUrl = `https://wa.me/?text=${encodedMsg}`;
+    if (phone && phone.length === 10) {
+      waUrl = `https://wa.me/91${phone}?text=${encodedMsg}`;
+    } else if (phone && phone.length > 10) {
+      waUrl = `https://wa.me/${phone}?text=${encodedMsg}`;
+    }
+    window.open(waUrl, '_blank');
+  }
+
+  function openEditSubUserModal(userId) {
+    const modal = document.getElementById('editSubUserModal');
+    if (!modal) return;
+
+    let user = _subAccountsList.find(u => (u.id || u.user_id) == userId);
+    if (!user && typeof loadedUsers !== 'undefined' && Array.isArray(loadedUsers)) {
+      user = loadedUsers.find(u => (u.id || u.user_id) == userId);
+    }
+
+    if (!user) {
+      showSubNotice('उपयोगकर्ता डेटा नहीं मिला', 'error');
+      return;
+    }
+
+    document.getElementById('editSubUserId').value = userId;
+    document.getElementById('editSubUserSubtitle').textContent = `@${user.username || '-'} (${user.full_name || ''})`;
+    document.getElementById('editSubFullName').value = user.full_name || '';
+    document.getElementById('editSubPhone').value = user.phone || '';
+    document.getElementById('editSubNewPassword').value = '';
+
+    const roleSelect = document.getElementById('editSubRole');
+    if (roleSelect) {
+      roleSelect.value = user.role || 'operator';
+    }
+
+    const scopeTypeSelect = document.getElementById('editSubScopeType');
+    let scopeType = user.scope_type || 'all';
+    if (!user.scope_type || user.scope_type === 'all') {
+      if (user.assigned_gps && user.assigned_gps.length) scopeType = 'gp';
+      else if (user.assigned_booths && user.assigned_booths.length) scopeType = 'booth';
+      else if (user.assigned_wards && user.assigned_wards.length) scopeType = 'ward';
+      else if (user.assigned_villages && user.assigned_villages.length) scopeType = 'village';
+    }
+    if (scopeTypeSelect) scopeTypeSelect.value = scopeType;
+    handleEditSubScopeTypeChange(scopeType);
+
+    const bInput = document.getElementById('editSubAssignedBooths');
+    if (bInput) bInput.value = (user.assigned_booths && user.assigned_booths.length) ? user.assigned_booths.join(', ') : '';
+
+    const gInput = document.getElementById('editSubAssignedGps');
+    if (gInput) gInput.value = (user.assigned_gps && user.assigned_gps.length) ? user.assigned_gps.join(', ') : '';
+
+    const wInput = document.getElementById('editSubAssignedWards');
+    if (wInput) wInput.value = (user.assigned_wards && user.assigned_wards.length) ? user.assigned_wards.join(', ') : '';
+
+    const vInput = document.getElementById('editSubAssignedVillages');
+    if (vInput) vInput.value = (user.assigned_villages && user.assigned_villages.length) ? user.assigned_villages.join(', ') : '';
+
+    const currentMods = user.allowed_modules || ['all'];
+    renderEditSubModulesCheckboxes(currentMods);
+
+    const isActive = user.is_active !== undefined ? Boolean(user.is_active) : true;
+    if (document.getElementById('editSubStatusActive')) document.getElementById('editSubStatusActive').checked = isActive;
+    if (document.getElementById('editSubStatusInactive')) document.getElementById('editSubStatusInactive').checked = !isActive;
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeEditSubUserModal() {
+    const modal = document.getElementById('editSubUserModal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  async function handleEditSubUserSubmit(event) {
+    if (event) event.preventDefault();
+    const userId = document.getElementById('editSubUserId')?.value;
+    const btn = document.getElementById('btnSaveEditSubUser');
+    if (!userId) return;
+
+    const checkedBoxes = Array.from(document.querySelectorAll('input[name="editSubAllowedModuleCheck"]:checked'));
+    if (!checkedBoxes.length) {
+      showSubNotice('कम से कम एक मॉड्यूल चुनना अनिवार्य है (Please select at least one module)', 'warning');
+      return;
+    }
+    let allowedModules = checkedBoxes.map(cb => cb.value);
+    if (allowedModules.length === EDITABLE_MODULES_LIST.length) {
+      allowedModules = ['all'];
+    }
+
+    const fullName = document.getElementById('editSubFullName')?.value.trim();
+    const phone = document.getElementById('editSubPhone')?.value.trim();
+    const role = document.getElementById('editSubRole')?.value;
+    const scopeType = document.getElementById('editSubScopeType')?.value || 'all';
+    const password = document.getElementById('editSubNewPassword')?.value.trim();
+    const is_active = document.getElementById('editSubStatusActive')?.checked ? true : false;
+
+    let assigned_booths = null;
+    let assigned_gps = null;
+    let assigned_wards = null;
+    let assigned_villages = null;
+
+    if (scopeType === 'booth') {
+      const raw = document.getElementById('editSubAssignedBooths')?.value || '';
+      assigned_booths = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+    } else if (scopeType === 'gp') {
+      const raw = document.getElementById('editSubAssignedGps')?.value || '';
+      assigned_gps = raw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    } else if (scopeType === 'ward') {
+      const raw = document.getElementById('editSubAssignedWards')?.value || '';
+      assigned_wards = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+    } else if (scopeType === 'village') {
+      const raw = document.getElementById('editSubAssignedVillages')?.value || '';
+      assigned_villages = raw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    }
+
+    const payload = {
+      full_name: fullName,
+      phone: phone,
+      role: role,
+      scope_type: scopeType,
+      allowed_modules: allowedModules,
+      is_active: is_active
+    };
+
+    if (password) payload.password = password;
+    if (assigned_booths !== null) payload.assigned_booths = assigned_booths;
+    if (assigned_gps !== null) payload.assigned_gps = assigned_gps;
+    if (assigned_wards !== null) payload.assigned_wards = assigned_wards;
+    if (assigned_villages !== null) payload.assigned_villages = assigned_villages;
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "सहेजा जा रहा है...";
+    }
+
+    try {
+      const res = await fetch(`/api/users/${userId}/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        showSubNotice("✅ उप-खाता विवरण व अनुमतियाँ सफलतापूर्वक अपडेट हुईं!", "success");
+        closeEditSubUserModal();
+        if (typeof loadSubAccountsList === 'function') loadSubAccountsList();
+        if (typeof loadUsers === 'function') loadUsers();
+      } else {
+        showSubNotice(data.error || 'उप-खाता अपडेट करने में विफलता', 'error');
+      }
+    } catch(e) {
+      showSubNotice(`त्रुटि: ${e.message}`, 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "सुरक्षित करें (Save)";
+      }
+    }
+  }
+
+  // ==========================================
+  // ACCOUNT CREATED READY MODAL LOGIC
+  // ==========================================
+  let _readyAccountData = null;
+
+  function openAccountCreatedReadyModal(fullName, username, password, phone, tenantSlug, waStatus) {
+    const modal = document.getElementById('accountCreatedReadyModal');
+    if (!modal) return;
+
+    _readyAccountData = { fullName, username, password, phone, tenantSlug };
+
+    const nameEl = document.getElementById('readyFullName');
+    if (nameEl) nameEl.textContent = fullName || '-';
+
+    const unameEl = document.getElementById('readyUsername');
+    if (unameEl) unameEl.textContent = username || '-';
+
+    const pwdEl = document.getElementById('readyPassword');
+    if (pwdEl) pwdEl.value = password || '';
+
+    const host = window.location.origin;
+    const t = (tenantSlug || window.CURRENT_TENANT || '').toLowerCase();
+    const loginUrl = t ? `${host}/login?tenant=${t}` : `${host}/login`;
+    const linkEl = document.getElementById('readyLoginLink');
+    if (linkEl) {
+      linkEl.href = loginUrl;
+      linkEl.textContent = loginUrl;
+    }
+
+    const bannerSuccess = document.getElementById('readyWaBannerSuccess');
+    const bannerFail = document.getElementById('readyWaBannerFail');
+    const successText = document.getElementById('readyWaSuccessPhoneText');
+    const failReason = document.getElementById('readyWaFailReason');
+
+    const cleanPhone = (phone || '').replace(/\D/g, '');
+
+    if (waStatus && waStatus.sent) {
+      if (bannerSuccess) bannerSuccess.classList.remove('hidden');
+      if (bannerFail) bannerFail.classList.add('hidden');
+      if (successText) {
+        successText.textContent = `लॉगिन क्रेडेंशियल्स (+91 ${cleanPhone.slice(-10)}) पर Meta WhatsApp API से भेज दिए गए हैं।`;
+      }
+    } else {
+      if (bannerSuccess) bannerSuccess.classList.add('hidden');
+      if (bannerFail) {
+        bannerFail.classList.remove('hidden');
+        if (failReason) {
+          failReason.textContent = waStatus && waStatus.error 
+            ? `(${waStatus.error}) — आप 1-क्लिक में नीचे WhatsApp Web से भेज सकते हैं:` 
+            : 'आप 1-क्लिक में नीचे दिए गए बटन से WhatsApp Web पर भेज सकते हैं:';
+        }
+      }
+    }
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeAccountCreatedReadyModal() {
+    const modal = document.getElementById('accountCreatedReadyModal');
+    if (modal) modal.classList.add('hidden');
+    _readyAccountData = null;
+    if (typeof loadUsers === 'function') loadUsers();
+    if (typeof loadSubAccountsList === 'function') loadSubAccountsList();
+  }
+
+  function copyCreatedAccountCredentials() {
+    if (!_readyAccountData) return;
+    const { fullName, username, password, tenantSlug } = _readyAccountData;
+    const msg = getCredentialsMessage(fullName, username, password, tenantSlug);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(msg).then(() => {
+        showSubNotice('📋 लॉगिन विवरण क्लिपबोर्ड में कॉपी हो गया!', 'success');
+      }).catch(() => {
+        showSubNotice(msg, 'info');
+      });
+    } else {
+      showSubNotice(msg, 'info');
+    }
+  }
+
+  function shareCreatedAccountWhatsApp() {
+    if (!_readyAccountData) return;
+    const { fullName, username, password, phone, tenantSlug } = _readyAccountData;
+    const msg = getCredentialsMessage(fullName, username, password, tenantSlug);
+    const encoded = encodeURIComponent(msg);
+    const cleanPhone = (phone || '').replace(/\D/g, '');
+    let url = `https://wa.me/?text=${encoded}`;
+    if (cleanPhone.length === 10) {
+      url = `https://wa.me/91${cleanPhone}?text=${encoded}`;
+    } else if (cleanPhone.length > 10) {
+      url = `https://wa.me/${cleanPhone}?text=${encoded}`;
+    }
+    window.open(url, '_blank');
+  }
+
+  window.openEditSubUserModal = openEditSubUserModal;
+  window.openUnifiedEditUserModal = openEditSubUserModal;
+  window.closeEditSubUserModal = closeEditSubUserModal;
+  window.handleEditSubScopeTypeChange = handleEditSubScopeTypeChange;
+  window.handleEditSubUserSubmit = handleEditSubUserSubmit;
+  window.renderEditSubModulesCheckboxes = renderEditSubModulesCheckboxes;
+  window.updateEditSubActiveModulesCount = updateEditSubActiveModulesCount;
+  window.applyEditSubPreset = applyEditSubPreset;
+  window.handleEditSubRoleChange = handleEditSubRoleChange;
+  window.generateEditSubPassword = generateEditSubPassword;
+  window.sendUnifiedEditUserWhatsApp = sendUnifiedEditUserWhatsApp;
+  window.copyUnifiedEditCredentials = copyUnifiedEditCredentials;
+  window.shareUnifiedEditWhatsAppWeb = shareUnifiedEditWhatsAppWeb;
+  window.openAccountCreatedReadyModal = openAccountCreatedReadyModal;
+  window.closeAccountCreatedReadyModal = closeAccountCreatedReadyModal;
+  window.copyCreatedAccountCredentials = copyCreatedAccountCredentials;
+  window.shareCreatedAccountWhatsApp = shareCreatedAccountWhatsApp;
+</script>

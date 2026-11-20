@@ -1,0 +1,70 @@
+<!-- MODAL: EDIT FAMILY ID -->
+  <div id="editFamilyIdModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full border border-slate-300 overflow-hidden animate-in fade-in duration-200">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">👨‍👩‍👧‍👦</span>
+          <div>
+            <h3 class="font-bold text-sm text-white">परिवार ID बदलें (Edit Family ID)</h3>
+            <p class="text-[11px] text-slate-300">Assign or update family grouping</p>
+          </div>
+        </div>
+        <button onclick="closeEditFamilyIdModal()" class="text-white/70 hover:text-white text-xl font-bold leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <div class="p-5 space-y-4 text-xs">
+        <input type="hidden" id="editFamVoterId">
+        <div id="editFamVoterSummary" class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 space-y-1">
+          <!-- Filled dynamically -->
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-800 mb-1">
+            नई परिवार ID (New Family ID):
+          </label>
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              id="inputNewFamilyId" 
+              placeholder="e.g. 21357"
+              class="flex-1 px-3 py-2 text-sm font-mono font-bold rounded-md border border-slate-300 focus:outline-none focus:border-blue-600 text-slate-900"
+            >
+            <button 
+              type="button" 
+              onclick="generateNewFamilyIdInput()" 
+              class="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-300 rounded-md font-bold text-xs whitespace-nowrap cursor-pointer"
+              title="नई यूनिक फैमिली ID बनाएं"
+            >
+              + नई ID
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">किसी अन्य रिश्तेदार की Family ID दर्ज करने पर यह मतदाता उस परिवार में शामिल हो जाएंगे।</p>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
+          <label class="flex items-start gap-2 cursor-pointer">
+            <input type="checkbox" id="chkApplyHouseholdFamily" class="mt-0.5 rounded text-blue-600">
+            <span class="text-xs text-amber-950 font-semibold leading-tight">
+              इस मकान (House) के सभी सदस्यों पर भी यह Family ID लागू करें (Apply to whole house)
+            </span>
+          </label>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-200">
+          <button 
+            type="button" 
+            onclick="clearVoterFamilyId()" 
+            class="px-3 py-1.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold border border-rose-200 text-xs transition cursor-pointer"
+          >
+            ✕ परिवार से अलग करें
+          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="closeEditFamilyIdModal()" class="px-3.5 py-1.5 rounded border border-slate-300 text-slate-700 font-semibold hover:bg-slate-100 transition cursor-pointer">Cancel</button>
+            <button onclick="submitEditFamilyId()" class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-xs cursor-pointer">
+              💾 सेव करें (Save)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

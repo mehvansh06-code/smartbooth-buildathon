@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>अभियान अस्थायी रूप से स्थगित (Campaign Paused) — Smart Booth</title>
+  
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="stylesheet" href="/static/css/pwa_mobile.css?v={{ APP_VERSION }}">
+  <link rel="icon" type="image/png" href="/static/icons/logo.png">
+  <meta name="theme-color" content="#f59e0b">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', 'Mukta', sans-serif; }
+    .tricolor-stripe {
+      background: linear-gradient(90deg, #f97316 0%, #fb923c 33%, #ffffff 50%, #22c55e 66%, #16a34a 100%);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-amber-50/20 to-slate-100 text-slate-800 min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 antialiased selection:bg-amber-500 selection:text-white">
+
+  <!-- Top Subtle Brand Bar -->
+  <div class="fixed top-0 left-0 right-0 h-1.5 tricolor-stripe shadow-xs"></div>
+
+  <!-- Main Card Container -->
+  <div class="max-w-md w-full bg-white border border-slate-200/90 rounded-3xl p-7 sm:p-9 shadow-2xl shadow-amber-950/5 space-y-6 relative overflow-hidden text-center">
+    
+    <!-- Decorative Blurs -->
+    <div class="absolute -top-16 -right-16 w-36 h-36 rounded-full bg-amber-100/60 pointer-events-none blur-2xl"></div>
+    <div class="absolute -bottom-16 -left-16 w-36 h-36 rounded-full bg-indigo-50/60 pointer-events-none blur-2xl"></div>
+
+    <!-- Candidate Photo & Symbol Header -->
+    <div class="relative z-10 flex flex-col items-center space-y-3">
+      
+      <div class="relative inline-block">
+        {% if branding and branding.candidate_photo_url %}
+          <div class="w-24 h-24 rounded-2xl overflow-hidden border-2 border-amber-300 shadow-md mx-auto bg-slate-100">
+            <img src="{{ branding.candidate_photo_url }}" alt="प्रत्याशी" class="w-full h-full object-cover">
+          </div>
+        {% else %}
+          <div class="w-20 h-20 rounded-2xl bg-amber-50 border border-amber-200 p-3 shadow-md mx-auto flex items-center justify-center">
+            <img src="/static/icons/logo.png" alt="Smart Booth" class="w-full h-full object-contain">
+          </div>
+        {% endif %}
+
+        {% if branding and branding.symbol_url %}
+          <div class="absolute -bottom-2 -right-2 w-9 h-9 rounded-xl bg-white border border-slate-200 p-1 shadow-md flex items-center justify-center">
+            <img src="{{ branding.symbol_url }}" alt="चुनाव चिह्न" class="w-full h-full object-contain">
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Candidate & Area Title -->
+      <div>
+        <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          {{ (branding and (branding.candidate_name_hi or branding.candidate_name_en)) or tenant_slug }}
+        </h1>
+        {% if branding and (branding.ward_name_hi or branding.ward_no or branding.district) %}
+          <p class="text-xs font-bold text-slate-500 mt-0.5">
+            {{ branding.ward_name_hi or ('वार्ड ' ~ branding.ward_no) }}{% if branding.district %} • {{ branding.district }}{% endif %}
+          </p>
+        {% endif %}
+      </div>
+
+      <!-- Status Badge -->
+      {% if status == 'ARCHIVED' %}
+        <div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-300 text-slate-700 text-xs font-black tracking-wide uppercase shadow-2xs">
+          <span>📦</span>
+          <span>अभियान पुरालेख में है (Campaign Archived)</span>
+        </div>
+      {% elif status == 'CONCLUDED' %}
+        <div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-black tracking-wide uppercase shadow-2xs">
+          <span>🏁</span>
+          <span>अभियान संपन्न (Election Concluded)</span>
+        </div>
+      {% else %}
+        <div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-black tracking-wide uppercase shadow-2xs animate-pulse">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          <span>⏸️ अभियान अस्थायी रूप से स्थगित (Paused)</span>
+        </div>
+      {% endif %}
+
+    </div>
+
+    <!-- Message Details Card -->
+    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:p-5 text-left space-y-2.5 relative z-10">
+      <div class="flex items-start gap-2.5">
+        <span class="text-lg shrink-0 mt-0.5">ℹ️</span>
+        <div>
+          <h2 class="text-xs font-bold text-slate-800">
+            {% if status == 'ARCHIVED' %}
+              यह अभियान पुरालेख (Archive) में स्थानांतरित किया गया है।
+            {% elif status == 'CONCLUDED' %}
+              इस चुनाव अभियान की प्रक्रिया पूर्ण हो चुकी है।
+            {% else %}
+              यह चुनाव अभियान अस्थायी रूप से रोक दिया गया है।
+            {% endif %}
+          </h2>
+          <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
+            मतदाता सूची खोज, पर्ची प्रेषण, और चुनाव प्रबंधन मॉड्यूल वर्तमान में निष्क्रिय हैं। चुनाव संचालन पुनः सक्रिय होने पर सेवा स्वतः उपलब्ध हो जाएगी।
+          </p>
+          <p class="text-[10px] text-slate-400 mt-1.5 italic">
+            (Voter search, slips, and campaign modules are currently inactive for this campaign.)
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="space-y-3 pt-1 relative z-10">
+      {% if user and user.role == 'super_admin' %}
+        <a 
+          href="/admin" 
+          class="block w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-sm text-center"
+        >
+          🛠️ सुपर एडमिन: अभियान प्रबंधित करें (Manage / Resume Campaign)
+        </a>
+      {% endif %}
+
+      <a 
+        href="/logout" 
+        class="block w-full py-2.5 px-4 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900 text-xs font-bold transition shadow-2xs text-center"
+      >
+        🚪 लॉगआउट करें (Sign Out / Switch Account)
+      </a>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="text-[10px] text-slate-400 font-medium">
+      Smart Booth डिजिटल चुनाव प्रबंधन प्रणाली
+    </div>
+
+  </div>
+
+</body>
+</html>

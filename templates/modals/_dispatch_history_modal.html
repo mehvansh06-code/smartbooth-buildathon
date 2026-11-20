@@ -1,0 +1,52 @@
+<!-- MODAL: EDIT DISPATCH HISTORY (SUPER ADMIN ONLY) -->
+  <div id="editHistoryModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full border border-slate-300 overflow-hidden animate-in fade-in duration-200">
+      <div class="bg-indigo-950 text-white px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">✏️</span>
+          <div>
+            <h3 class="font-bold text-sm text-white">डिस्पैच रिकॉर्ड एडिट करें (Edit Dispatch)</h3>
+            <p class="text-[11px] text-indigo-200">Super Admin Access Only</p>
+          </div>
+        </div>
+        <button onclick="closeEditHistoryModal()" class="text-white/70 hover:text-white text-xl font-bold leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <div class="p-5 space-y-3.5 text-xs">
+        <input type="hidden" id="editHistoryRecordId">
+        
+        <div>
+          <label class="block font-bold text-slate-800 mb-1">Mobile Number (मोबाइल नंबर):</label>
+          <input type="tel" inputmode="tel" id="editHistoryPhone" class="w-full px-3 py-2 border border-slate-300 rounded-md font-mono font-bold text-slate-900">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-800 mb-1">Voter Name (मतदाता नाम):</label>
+          <input type="text" id="editHistoryName" class="w-full px-3 py-2 border border-slate-300 rounded-md font-semibold text-slate-900">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-800 mb-1">Slip Type:</label>
+            <input type="text" id="editHistorySlipType" class="w-full px-3 py-1.5 border border-slate-300 rounded-md text-slate-900">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-800 mb-1">Channel:</label>
+            <input type="text" id="editHistoryChannel" class="w-full px-3 py-1.5 border border-slate-300 rounded-md text-slate-900">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-800 mb-1">Message Preview:</label>
+          <textarea id="editHistoryMessage" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-md text-slate-800 text-[11px]"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+          <button onclick="closeEditHistoryModal()" class="px-3.5 py-1.5 rounded border border-slate-300 text-slate-700 font-semibold hover:bg-slate-100 transition cursor-pointer">Cancel</button>
+          <button onclick="submitEditHistory()" class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-xs cursor-pointer">
+            💾 Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>

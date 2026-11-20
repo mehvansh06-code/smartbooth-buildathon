@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}डिस्पैच ऑडिट लॉग (Dispatch History) — {{ CAMPAIGN.election.app_title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6 safe-bottom-padding">
+
+  <!-- Page Header & Action Bar -->
+  <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3.5">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center text-2xl shadow-md">
+        📜
+      </div>
+      <h1 class="text-lg sm:text-xl font-black text-slate-900 leading-tight">
+        पर्ची डिस्पैच रिकॉर्ड (Dispatch History)
+      </h1>
+    </div>
+
+    <div class="flex items-center gap-2.5 ml-auto sm:ml-0">
+      <button
+        type="button"
+        onclick="loadHistoryPageData()"
+        class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-bold text-xs px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs"
+        title="ताज़ा करें (Refresh List)"
+      >
+        <span>🔄</span><span>रिफ्रेश (Refresh)</span>
+      </button>
+
+      <a
+        href="/api/history/export{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}"
+        class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+        title="एक्सेल रिपोर्ट डाउनलोड करें (Download Excel)"
+      >
+        <span>📊</span><span>Excel Export (.xlsx)</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Search Filter & Ledger Container -->
+  <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+    
+    <!-- Filter Toolbar -->
+    <div class="p-4 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+      <div class="relative flex-1 min-w-[240px] max-w-md">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">🔍</span>
+        <input 
+          type="text" 
+          id="pageHistorySearchInput" 
+          oninput="filterPageHistory(this.value)" 
+          placeholder="मोबाइल नंबर या मतदाता नाम से खोजें..."
+          class="w-full bg-white border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs"
+        >
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="pageHistoryCountBadge" class="text-xs font-bold text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs">
+          लोड हो रहा है...
+        </span>
+      </div>
+    </div>
+
+    <!-- Ledger Table List -->
+    <div id="historyPageListArea" class="divide-y divide-slate-100 min-h-[350px]">
+      <div class="py-20 text-center text-slate-400">
+        <div class="text-3xl mb-2 animate-bounce">📜</div>
+        <p class="text-xs font-bold">डिस्पैच ऑडिट रिकॉर्ड लोड हो रहा है...</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/history_intel.js?v={{ APP_VERSION }}"></script>
+<script>
+  let fullPageHistoryBatches = [];
+
+  async function loadHistoryPageData() {
+    const container = document.getElementById('historyPageListArea');
+    if (!container) return;
+    container.innerHTML = '<div class="py-20 text-center text-slate-400"><div class="text-3xl mb-2 animate-bounce">📜</div><p class="text-xs font-bold">डिस्पैच ऑडिट रिकॉर्ड लोड हो रहा है...</p></div>';
+
+    try {
+      const res = await fetch('/api/history{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}');
+      const data = await res.json();
+      fullPageHistoryBatches = data.batches || [];
+
+      renderHistoryPageRows(fullPageHistoryBatches);
+    } catch (e) {
+      console.error(e);
+      container.innerHTML = '<div class="py-20 text-center text-rose-500 font-bold text-xs">ऑडिट रिकॉर्ड लोड करने में त्रुटि हुई</div>';
+    }
+  }
+
+  function filterPageHistory(query) {
+    const q = (query || '').trim().toLowerCase();
+    if (!q) {
+      renderHistoryPageRows(fullPageHistoryBatches);
+      return;
+    }
+    const filtered = fullPageHistoryBatches.filter(b => {
+      const phone = String(b.phone || '').toLowerCase();
+      const names = (b.voters || []).map(v => `${v.name || ''} ${v.name_hi || ''}`).join(' ').toLowerCase();
+      return phone.includes(q) || names.includes(q);
+    });
+    renderHistoryPageRows(filtered);
+  }
+
+  function renderHistoryPageRows(batches) {
+    const container = document.getElementById('historyPageListArea');
+    const badge = document.getElementById('pageHistoryCountBadge');
+    if (!container) return;
+
+    if (badge) {
+      const vCount = batches.reduce((acc, cur) => acc + (cur.voter_count || 1), 0);
+      badge.textContent = `प्रदर्शित: ${batches.length} बैच (${vCount} मतदाता)`;
+    }
+
+    if (!batches || batches.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-20 px-4">
+          <div class="text-4xl mb-3">📜</div>
+          <h3 class="text-sm font-bold text-slate-700 mb-1">कोई डिस्पैच रिकॉर्ड नहीं मिला</h3>
+          <p class="text-xs text-slate-400">खोज शब्द बदलें अथवा नया संदेश भेजें।</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = batches.map((b, idx) => {
+      const names = (b.voters || [])
+        .map(v => `${v.sl_no ? `#${v.sl_no} ` : ''}${v.name || v.name_hi || ''}`.trim())
+        .filter(Boolean)
+        .join(', ');
+
+      return `
+        <div class="p-4 hover:bg-slate-50 transition flex items-start gap-3 text-xs">
+          <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
+            ${idx + 1}
+          </span>
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <span class="font-mono font-black text-slate-900 text-sm tracking-wide">${b.phone || 'उपलब्ध नहीं'}</span>
+              <span class="text-slate-400 font-semibold text-[11px]">${b.sent_at || ''}</span>
+            </div>
+            ${names ? `<p class="text-slate-600 font-medium">${names}</p>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadHistoryPageData();
+  });
+</script>
+{% endblock %}

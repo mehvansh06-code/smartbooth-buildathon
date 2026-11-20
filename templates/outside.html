@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}प्रवासी मतदाता (Outside Voters) — {{ CAMPAIGN.election.app_title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-3 sm:px-4 py-4 space-y-4 safe-bottom-padding">
+
+  <!-- Header -->
+  <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex items-center justify-between flex-wrap gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center text-xl">
+        ✈️
+      </div>
+      <div>
+        <h2 class="text-base font-black text-slate-900 leading-tight">
+          प्रवासी मतदाता प्रबंधन (Outside & Migrant Voters)
+        </h2>
+        <p class="text-xs text-slate-500 font-medium">क्षेत्र से बाहर रहने वाले मतदाताओं की सूची, यात्रा योजना व कॉलिंग ट्रैकिंग</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <button onclick="loadOutsideVotersData()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200">
+        <span>🔄</span><span>रिफ्रेश</span>
+      </button>
+      <a href="/api/outside_voters/export{% if current_tenant %}?tenant={{ current_tenant }}{% endif %}" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+        <span>📊</span><span>Excel Export</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Content Container -->
+  <div id="outsideVotersContentArea">
+    <!-- Populated dynamically via history_intel.js -->
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/history_intel.js?v={{ APP_VERSION }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof window.loadOutsideVotersData === 'function') {
+      window.loadOutsideVotersData();
+    }
+  });
+</script>
+{% endblock %}

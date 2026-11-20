@@ -1,0 +1,716 @@
+{% extends "base.html" %}
+
+{% block title %}My Assigned Voters — Karyakarta Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-3 sm:px-4 py-4 space-y-4">
+  
+  <!-- PWA Install Quick Action Banner -->
+  <div id="karyaPwaBanner" class="hidden bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 rounded-2xl p-3.5 shadow-md border border-amber-400 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2.5 text-xs">
+      <span class="text-2xl">📲</span>
+      <div>
+        <strong class="font-black text-sm block leading-tight">होम स्क्रीन पर जोड़ें (Add to Home Screen)</strong>
+        <p class="text-[11px] font-semibold text-slate-950/90 mt-0.5">बिना लिंक ढूंढे 1-क्लिक में ऐप की तरह खोलें (ऑफ़लाइन भी काम करेगा)</p>
+      </div>
+    </div>
+    <button type="button" onclick="triggerKaryaPwaInstall()" class="bg-slate-950 hover:bg-slate-900 active:bg-slate-800 text-amber-400 font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer whitespace-nowrap shadow-sm">
+      ➕ ऐप बनाएं
+    </button>
+  </div>
+
+  <!-- Offline Cache Notice Banner -->
+  <div id="karyaOfflineBanner" class="hidden bg-amber-50 border border-amber-300 text-amber-900 rounded-xl px-3.5 py-2.5 text-xs font-bold flex items-center justify-between shadow-xs">
+    <span class="flex items-center gap-2">
+      <span class="text-base">📶</span>
+      <span>ऑफ़लाइन मोड: सुरक्षित कैश से डेटा दिखाया जा रहा है।</span>
+    </span>
+  </div>
+
+  <!-- Karyakarta Header & Booth Info Card -->
+  <div class="bg-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-lg border border-slate-800 space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🚩</span>
+          <h2 class="text-lg sm:text-xl font-black text-white">{{ current_user.full_name }}</h2>
+          <span class="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold uppercase">Karyakarta</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-0.5">
+          {% if current_user.assigned_booth %}
+            बूथ क्रमांक: <strong>Booth #{{ current_user.assigned_booth }}</strong>
+          {% else %}
+            समस्त आवंटित क्षेत्र / Assigned Voters Only
+          {% endif %}
+        </p>
+      </div>
+      
+      <!-- Quick Refresh -->
+      <button onclick="refreshKaryaVoters()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1 cursor-pointer">
+        <span>🔄</span>
+        <span>Refresh</span>
+      </button>
+    </div>
+
+    <!-- Voter Metrics Bar (Total, Phone Count, Sentiment Tagged) -->
+    <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800 text-center">
+      <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/50">
+        <div class="text-[10px] font-extrabold text-slate-400 uppercase">कुल आवंटित (Total)</div>
+        <div id="statTotalAssigned" class="text-lg sm:text-2xl font-black text-white">0</div>
+      </div>
+      <div class="bg-blue-950/40 p-2.5 rounded-xl border border-blue-800/40">
+        <div class="text-[10px] font-extrabold text-blue-400 uppercase">फ़ोन दर्ज (With Phone)</div>
+        <div id="statTotalWithPhone" class="text-lg sm:text-2xl font-black text-blue-400">0</div>
+        <div id="statPhonePercent" class="text-[10px] font-bold text-blue-500">0%</div>
+      </div>
+      <div class="bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-800/40">
+        <div class="text-[10px] font-extrabold text-emerald-400 uppercase">रुझान टैग (Tagged)</div>
+        <div id="statTotalTagged" class="text-lg sm:text-2xl font-black text-emerald-400">0</div>
+        <div id="statTaggedPercent" class="text-[10px] font-bold text-emerald-500">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Controls -->
+  <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-xs space-y-3">
+    <div class="flex items-center gap-2">
+      <div class="relative flex-1">
+        <input 
+          type="text" 
+          id="karyaSearchInput" 
+          placeholder="नाम, पिता/पति, क्रम संख्या या फ़ोन से खोजें..."
+          class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-3 pr-8 py-2 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-blue-600"
+          oninput="renderVoterCards()"
+        >
+        <button onclick="document.getElementById('karyaSearchInput').value=''; renderVoterCards();" class="absolute right-2.5 top-2 text-slate-400 font-bold text-xs">✕</button>
+      </div>
+    </div>
+
+    <!-- Status Tabs -->
+    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold scrollbar-none">
+      <button id="tabAll" onclick="setKaryaFilter('all')" class="px-3 py-1.5 rounded-lg transition bg-blue-600 text-white shadow-xs whitespace-nowrap">
+        सभी (All) <span id="badgeTabAll" class="ml-1 text-[10px] opacity-80">(0)</span>
+      </button>
+      <button id="tabMissingPhone" onclick="setKaryaFilter('missing_phone')" class="px-3 py-1.5 rounded-lg transition bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">
+        📞 फ़ोन जोड़ें <span id="badgeTabMissingPhone" class="ml-1 text-[10px] opacity-80">(0)</span>
+      </button>
+      <button id="tabSure" onclick="setKaryaFilter('sure')" class="px-3 py-1.5 rounded-lg transition bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">
+        🟢 पक्का <span id="badgeTabSure" class="ml-1 text-[10px] opacity-80">(0)</span>
+      </button>
+      <button id="tabFifty" onclick="setKaryaFilter('fifty')" class="px-3 py-1.5 rounded-lg transition bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">
+        🟡 50-50 <span id="badgeTabFifty" class="ml-1 text-[10px] opacity-80">(0)</span>
+      </button>
+      <button id="tabOpposed" onclick="setKaryaFilter('opposed')" class="px-3 py-1.5 rounded-lg transition bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">
+        🔴 विरोधी <span id="badgeTabOpposed" class="ml-1 text-[10px] opacity-80">(0)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Dynamic Voter Cards Container -->
+  <div id="karyaVoterCardsList" class="space-y-3">
+    <div class="text-center py-12 text-slate-400 font-bold text-sm">
+      लोड हो रहा है (Loading assigned voters)...
+    </div>
+  </div>
+
+</div>
+
+<!-- DEDICATED KARYAKARTA VOTER EDIT MODAL -->
+<div id="karyaEditModal" class="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in duration-200">
+    
+    <!-- Modal Header -->
+    <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+      <div class="min-w-0">
+        <h3 class="font-black text-sm text-white leading-tight flex items-center gap-1.5">
+          <span>✏️</span>
+          <span id="kEditModalVoterName" class="truncate">मतदाता विवरण बदलें</span>
+        </h3>
+        <p class="text-[11px] text-slate-400 mt-0.5" id="kEditModalMeta">भाग # · क्र. # · EPIC #</p>
+      </div>
+      <button type="button" onclick="closeKaryaEditModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1 cursor-pointer">✕</button>
+    </div>
+
+    <!-- Modal Form Body -->
+    <div class="p-4 space-y-4 text-xs overflow-y-auto flex-1">
+      <input type="hidden" id="kEditVoterId" value="">
+
+      <!-- 1. Mobile Phone Input -->
+      <div>
+        <label class="block text-[11px] font-black text-slate-800 mb-1">
+          📱 मोबाइल नंबर (Mobile Number)
+          <span class="text-[10px] font-semibold text-slate-400 ml-1">कॉल हेतु</span>
+        </label>
+        <div class="flex gap-2">
+          <span class="flex items-center bg-slate-100 border border-slate-300 rounded-lg px-2.5 font-bold text-slate-600 text-xs shrink-0">+91</span>
+          <input 
+            type="tel" 
+            inputmode="numeric" 
+            id="kEditPhone" 
+            maxlength="10" 
+            placeholder="10 अंकों का मोबाइल नंबर"
+            class="flex-1 px-3 py-2 text-sm font-mono font-bold rounded-lg border border-slate-300 focus:outline-none focus:border-blue-600 bg-white"
+          >
+        </div>
+      </div>
+
+      <!-- 2. Political Sentiment (Hero Select Buttons) -->
+      <div>
+        <label class="block text-[11px] font-black text-slate-800 mb-1.5">
+          🎯 राजनीतिक रुझान (Political Sentiment)
+        </label>
+        <input type="hidden" id="kEditCategory" value="0">
+        <div class="grid grid-cols-4 gap-2" id="kEditSentimentGroup">
+          <button type="button" onclick="setKEditSentiment(100)" class="k-sent-btn flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl border-2 border-slate-200 bg-slate-50 hover:bg-emerald-50 text-slate-600 font-bold transition cursor-pointer" data-val="100">
+            <span class="text-lg">🟢</span>
+            <span class="text-[11px] font-black text-emerald-800">पक्का</span>
+            <span class="text-[9px] text-slate-400">Sure</span>
+          </button>
+          <button type="button" onclick="setKEditSentiment(50)" class="k-sent-btn flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl border-2 border-slate-200 bg-slate-50 hover:bg-amber-50 text-slate-600 font-bold transition cursor-pointer" data-val="50">
+            <span class="text-lg">🟡</span>
+            <span class="text-[11px] font-black text-amber-800">50-50</span>
+            <span class="text-[9px] text-slate-400">Leaning</span>
+          </button>
+          <button type="button" onclick="setKEditSentiment(-1)" class="k-sent-btn flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl border-2 border-slate-200 bg-slate-50 hover:bg-rose-50 text-slate-600 font-bold transition cursor-pointer" data-val="-1">
+            <span class="text-lg">🔴</span>
+            <span class="text-[11px] font-black text-rose-800">विरोधी</span>
+            <span class="text-[9px] text-slate-400">Opposed</span>
+          </button>
+          <button type="button" onclick="setKEditSentiment(0)" class="k-sent-btn flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl border-2 border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold transition cursor-pointer" data-val="0">
+            <span class="text-lg">⚪</span>
+            <span class="text-[11px] font-black text-slate-700">सामान्य</span>
+            <span class="text-[9px] text-slate-400">Neutral</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Caste / Community Tag -->
+      <div>
+        <label class="block text-[11px] font-black text-slate-800 mb-1">
+          🏷️ जाति / समुदाय टैग (Caste Tag)
+        </label>
+        <input 
+          type="text" 
+          id="kEditCaste" 
+          placeholder="जाति / उपनाम लिखें या नीचे से चुनें..."
+          class="w-full px-3 py-2 text-xs font-bold rounded-lg border border-slate-300 focus:outline-none focus:border-blue-600"
+        >
+        <!-- Quick Community Chips -->
+        <div class="flex flex-wrap gap-1.5 mt-2" id="kEditCasteChips"></div>
+      </div>
+
+      <!-- 4. Notes / Comment -->
+      <div>
+        <label class="block text-[11px] font-black text-slate-800 mb-1">
+          📝 टिप्पणी / विवरण (Notes)
+        </label>
+        <input 
+          type="text" 
+          id="kEditNotes" 
+          placeholder="जैसे: बाहर रहते हैं, गाड़ी चाहिए, आदि..."
+          class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-none focus:border-blue-600 text-slate-800"
+        >
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+      <button type="button" onclick="closeKaryaEditModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">
+        रद्द करें (Cancel)
+      </button>
+      <button type="button" id="kEditSaveBtn" onclick="saveKaryaVoterEdit()" class="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-black px-5 py-2.5 text-xs rounded-lg shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+        <span>💾</span>
+        <span>सुरक्षित करें (Save)</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/app_state.js?v={{ APP_VERSION }}"></script>
+<script>
+  window.escapeHtml = window.escapeHtml || function (str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
+  let allAssignedVoters = [];
+  let availableCommunityTags = [];
+  let currentFilter = 'all';
+  let deferredKaryaPrompt = null;
+  const KARYA_CACHE_KEY = 'sb_cached_my_voters';
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredKaryaPrompt = e;
+    const banner = document.getElementById('karyaPwaBanner');
+    if (banner) banner.classList.remove('hidden');
+  });
+
+  window.triggerKaryaPwaInstall = async function () {
+    if (deferredKaryaPrompt) {
+      deferredKaryaPrompt.prompt();
+      const choice = await deferredKaryaPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        const banner = document.getElementById('karyaPwaBanner');
+        if (banner) banner.classList.add('hidden');
+      }
+      deferredKaryaPrompt = null;
+    } else {
+      alert('अपने ब्राउज़र मेनू (⋮) में जाकर "Add to Home Screen" या "ऐप इंस्टॉल करें" चुनें।');
+    }
+  };
+
+  function updateOfflineStatus() {
+    const banner = document.getElementById('karyaOfflineBanner');
+    if (banner) {
+      if (!navigator.onLine) {
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+  }
+
+  window.addEventListener('online', () => {
+    updateOfflineStatus();
+    loadMyVoters();
+  });
+  window.addEventListener('offline', updateOfflineStatus);
+
+  window.refreshKaryaVoters = async function () {
+    const listEl = document.getElementById('karyaVoterCardsList');
+    if (listEl) {
+      listEl.innerHTML = `
+        <div class="text-center py-12 text-slate-400 font-bold text-sm">
+          रिफ्रेश हो रहा है (Refreshing assigned voters)...
+        </div>
+      `;
+    }
+    try {
+      localStorage.removeItem(KARYA_CACHE_KEY);
+    } catch (_) {}
+    await loadMyVoters(true);
+  };
+
+  async function loadMyVoters(forceRefresh = false) {
+    try {
+      const curTenant = window.CURRENT_TENANT || new URLSearchParams(window.location.search).get('tenant') || '';
+      const sep = curTenant ? `?tenant=${encodeURIComponent(curTenant)}` : '';
+      const bust = forceRefresh ? `${sep ? '&' : '?'}_t=${Date.now()}` : '';
+      const res = await fetch(`/api/karyakarta/my_voters${sep}${bust}`);
+      const data = await res.json();
+      if (data.success) {
+        allAssignedVoters = data.voters || [];
+        availableCommunityTags = data.community_tags || [];
+        try {
+          localStorage.setItem(KARYA_CACHE_KEY, JSON.stringify(allAssignedVoters));
+        } catch (storageErr) {
+          console.warn('LocalStorage save failed:', storageErr);
+        }
+        updateMetrics();
+        renderVoterCards();
+        updateOfflineStatus();
+      } else {
+        throw new Error(data.error || 'असाइन मतदाता लोड नहीं हो सके');
+      }
+    } catch (e) {
+      console.warn('Network error, attempting offline cache:', e);
+      const cached = localStorage.getItem(KARYA_CACHE_KEY);
+      if (cached && !forceRefresh) {
+        try {
+          allAssignedVoters = JSON.parse(cached);
+          updateMetrics();
+          renderVoterCards();
+          updateOfflineStatus();
+          return;
+        } catch (cacheErr) {
+          console.warn('Offline cache render error:', cacheErr);
+        }
+      }
+      const errMsg = e && e.message ? e.message : 'डेटा लोड करने में त्रुटि आई। कृपया रिफ्रेश करें।';
+      document.getElementById('karyaVoterCardsList').innerHTML = `
+        <div class="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-center text-xs font-bold space-y-1">
+          <div>डेटा लोड करने में त्रुटि आई। कृपया रिफ्रेश करें।</div>
+          <div class="text-[10px] text-rose-600 font-normal font-mono">${window.escapeHtml(errMsg)}</div>
+        </div>
+      `;
+      updateOfflineStatus();
+    }
+  }
+
+  function updateMetrics() {
+    const total = allAssignedVoters.length;
+    const withPhone = allAssignedVoters.filter(v => (v.phone || v.contact_phone || '').replace(/\D/g, '').length >= 10).length;
+    const tagged = allAssignedVoters.filter(v => v.voter_category && parseInt(v.voter_category) !== 0).length;
+
+    const phonePct = total > 0 ? Math.round((withPhone / total) * 100) : 0;
+    const tagPct = total > 0 ? Math.round((tagged / total) * 100) : 0;
+
+    const sureCount = allAssignedVoters.filter(v => String(v.voter_category) === '100').length;
+    const fiftyCount = allAssignedVoters.filter(v => String(v.voter_category) === '50').length;
+    const opposedCount = allAssignedVoters.filter(v => String(v.voter_category) === '-1').length;
+    const missingPhoneCount = total - withPhone;
+
+    const elTotal = document.getElementById('statTotalAssigned');
+    const elPhone = document.getElementById('statTotalWithPhone');
+    const elPhonePct = document.getElementById('statPhonePercent');
+    const elTagged = document.getElementById('statTotalTagged');
+    const elTagPct = document.getElementById('statTaggedPercent');
+
+    if (elTotal) elTotal.textContent = total;
+    if (elPhone) elPhone.textContent = withPhone;
+    if (elPhonePct) elPhonePct.textContent = `${phonePct}%`;
+    if (elTagged) elTagged.textContent = tagged;
+    if (elTagPct) elTagPct.textContent = `${tagPct}%`;
+
+    const bAll = document.getElementById('badgeTabAll');
+    const bMissing = document.getElementById('badgeTabMissingPhone');
+    const bSure = document.getElementById('badgeTabSure');
+    const bFifty = document.getElementById('badgeTabFifty');
+    const bOpposed = document.getElementById('badgeTabOpposed');
+
+    if (bAll) bAll.textContent = `(${total})`;
+    if (bMissing) bMissing.textContent = `(${missingPhoneCount})`;
+    if (bSure) bSure.textContent = `(${sureCount})`;
+    if (bFifty) bFifty.textContent = `(${fiftyCount})`;
+    if (bOpposed) bOpposed.textContent = `(${opposedCount})`;
+  }
+
+  function setKaryaFilter(filter) {
+    currentFilter = filter;
+    ['tabAll', 'tabMissingPhone', 'tabSure', 'tabFifty', 'tabOpposed'].forEach(t => {
+      const el = document.getElementById(t);
+      if (el) {
+        el.className = 'px-3 py-1.5 rounded-lg transition bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap';
+      }
+    });
+
+    const activeMap = {
+      'all': 'tabAll',
+      'missing_phone': 'tabMissingPhone',
+      'sure': 'tabSure',
+      'fifty': 'tabFifty',
+      'opposed': 'tabOpposed'
+    };
+
+    const activeEl = document.getElementById(activeMap[filter] || 'tabAll');
+    if (activeEl) {
+      activeEl.className = 'px-3 py-1.5 rounded-lg transition bg-blue-600 text-white shadow-xs whitespace-nowrap';
+    }
+
+    renderVoterCards();
+  }
+
+  function renderVoterCards() {
+    const searchQ = (document.getElementById('karyaSearchInput').value || '').trim().toLowerCase();
+    const container = document.getElementById('karyaVoterCardsList');
+
+    let filtered = allAssignedVoters.filter(v => {
+      const ph = (v.phone || v.contact_phone || '').replace(/\D/g, '');
+      const hasPh = ph.length >= 10;
+      const cat = String(v.voter_category || '0');
+
+      if (currentFilter === 'missing_phone' && hasPh) return false;
+      if (currentFilter === 'sure' && cat !== '100') return false;
+      if (currentFilter === 'fifty' && cat !== '50') return false;
+      if (currentFilter === 'opposed' && cat !== '-1') return false;
+
+      if (searchQ) {
+        const matchesName = (v.name_en || '').toLowerCase().includes(searchQ) || (v.name_hi || '').toLowerCase().includes(searchQ);
+        const matchesRel = (v.relative_name_en || '').toLowerCase().includes(searchQ) || (v.relative_name_hi || '').toLowerCase().includes(searchQ);
+        const matchesSerial = String(v.serial_no || v.sl_no || '') === searchQ;
+        const matchesEpic = (v.epic_no || '').toLowerCase().includes(searchQ);
+        const matchesPhone = ph.includes(searchQ);
+        const matchesCaste = (v.caste_tag || '').toLowerCase().includes(searchQ);
+        return matchesName || matchesRel || matchesSerial || matchesEpic || matchesPhone || matchesCaste;
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-500 text-xs font-bold space-y-1">
+          <p class="text-2xl">🔍</p>
+          <p>कोई मतदाता नहीं मिला।</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(v => {
+      const ph = (v.phone || v.contact_phone || '').replace(/\D/g, '');
+      const hasPhone = ph.length >= 10;
+      const cat = String(v.voter_category || '0');
+      const caste = v.caste_tag || '';
+      const notes = v.notes || '';
+      const isVoted = Boolean(v.is_voted);
+
+      let sentBadge = '';
+      if (cat === '100') {
+        sentBadge = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full">🟢 पक्का (Sure)</span>';
+      } else if (cat === '50') {
+        sentBadge = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-amber-800 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-full">🟡 50-50</span>';
+      } else if (cat === '-1') {
+        sentBadge = '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-800 bg-rose-50 border border-rose-300 px-2 py-0.5 rounded-full">🔴 विरोधी (Opposed)</span>';
+      } else {
+        sentBadge = '<span class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">⚪ सामान्य (Neutral)</span>';
+      }
+
+      const nameHi = v.name_hi ? window.escapeHtml(v.name_hi) : '';
+      const nameEn = v.name_en ? window.escapeHtml(v.name_en) : '';
+      const displayName = nameHi || nameEn || 'मतदाता';
+      const relHi = v.relative_name_hi ? window.escapeHtml(v.relative_name_hi) : '';
+      const relEn = v.relative_name_en ? window.escapeHtml(v.relative_name_en) : '';
+      const displayRel = relHi || relEn || '-';
+      const serialDisplay = window.escapeHtml(v.serial_no || v.sl_no || '-');
+      const epicDisplay = window.escapeHtml(v.epic_no || 'NO EPIC');
+      const partDisplay = window.escapeHtml(v.part_no || '-');
+      const ageDisplay = window.escapeHtml(v.age || '-');
+      const genderDisplay = window.escapeHtml(v.gender || '-');
+      const houseDisplay = window.escapeHtml(v.house_no || '-');
+
+      return `
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3 transition hover:border-slate-300" id="voterCard_${v.id}">
+          
+          <!-- Top Row: Serial, EPIC & Sentiment Badge -->
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="bg-slate-900 text-white text-xs font-black px-2 py-0.5 rounded-md">
+                #${serialDisplay}
+              </span>
+              <span class="text-[11px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">
+                ${epicDisplay}
+              </span>
+              <span class="text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
+                भाग #${partDisplay}
+              </span>
+              ${isVoted ? '<span class="text-[10px] font-black text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">✓ Voted</span>' : ''}
+            </div>
+
+            <!-- Sentiment Badge -->
+            <div>
+              ${sentBadge}
+            </div>
+          </div>
+
+          <!-- Voter Details -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div>
+              <div class="font-extrabold text-slate-900 text-sm sm:text-base leading-snug">
+                ${displayName} 
+                ${nameEn && nameHi ? `<span class="text-xs text-slate-500 font-normal">(${nameEn})</span>` : ''}
+              </div>
+              <div class="text-slate-600 font-semibold mt-0.5">
+                पिता/पति: ${displayRel}
+              </div>
+            </div>
+            
+            <div class="text-slate-600 space-y-1 text-[11px] sm:text-xs">
+              <div>उम्र: <strong>${ageDisplay}</strong> वर्ष • लिंग: <strong>${genderDisplay}</strong> • म.नं.: <strong>${houseDisplay}</strong></div>
+              
+              <!-- Phone Display -->
+              <div class="flex items-center gap-1.5">
+                ${hasPhone 
+                  ? `<span class="font-mono font-bold text-slate-800">📱 +91 ${ph}</span>` 
+                  : `<span class="text-amber-700 font-bold bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-[10px]">⚠️ फ़ोन नंबर नहीं</span>`}
+              </div>
+            </div>
+          </div>
+
+          <!-- Tags Bar: Caste & Notes -->
+          ${(caste || notes) ? `
+            <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
+              ${caste ? `<span class="text-[11px] font-bold text-purple-800 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md">🏷️ ${window.escapeHtml(caste)}</span>` : ''}
+              ${notes ? `<span class="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md truncate max-w-xs">📝 ${window.escapeHtml(notes)}</span>` : ''}
+            </div>
+          ` : ''}
+
+          <!-- Action Buttons Bar: Call (if phone) + Edit Voter (Single Purpose) -->
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+            <div>
+              ${hasPhone ? `
+                <a href="tel:${ph}" class="min-h-[38px] bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-900 border border-blue-300 text-xs font-black px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5 transition">
+                  <span>📞 Call</span>
+                  <span class="font-mono text-[11px] font-bold">(${ph})</span>
+                </a>
+              ` : `
+                <span class="text-[11px] text-slate-400 font-medium">फ़ोन जोड़ने हेतु एडिट करें</span>
+              `}
+            </div>
+
+            <button 
+              type="button" 
+              onclick="openKaryaEditModal(${v.id})" 
+              class="min-h-[38px] bg-slate-900 hover:bg-slate-800 active:bg-slate-700 text-white font-black px-4 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <span>✏️</span>
+              <span>विवरण बदलें (Edit Voter)</span>
+            </button>
+          </div>
+
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Dedicated Karyakarta Edit Modal Handlers
+  let currentEditingVoter = null;
+
+  window.openKaryaEditModal = function (voterId) {
+    const v = allAssignedVoters.find(x => x.id == voterId);
+    if (!v) return;
+    currentEditingVoter = v;
+
+    const modal = document.getElementById('karyaEditModal');
+    const idEl = document.getElementById('kEditVoterId');
+    const nameEl = document.getElementById('kEditModalVoterName');
+    const metaEl = document.getElementById('kEditModalMeta');
+    const phoneEl = document.getElementById('kEditPhone');
+    const casteEl = document.getElementById('kEditCaste');
+    const notesEl = document.getElementById('kEditNotes');
+
+    idEl.value = v.id;
+    nameEl.textContent = `${v.name_hi || v.name_en || 'मतदाता'} (संपादित करें)`;
+    metaEl.textContent = `भाग #${v.part_no || '-'} · क्र. #${v.serial_no || v.sl_no || '-'} · EPIC: ${v.epic_no || '-'}`;
+
+    const cleanPh = (v.phone || v.contact_phone || '').replace(/\D/g, '');
+    phoneEl.value = cleanPh.length >= 10 ? cleanPh.slice(-10) : '';
+
+    setKEditSentiment(parseInt(v.voter_category || 0));
+
+    casteEl.value = v.caste_tag || '';
+    notesEl.value = v.notes || '';
+
+    // Render Quick Community Chips
+    const chipsContainer = document.getElementById('kEditCasteChips');
+    if (chipsContainer) {
+      if (availableCommunityTags && availableCommunityTags.length > 0) {
+        chipsContainer.innerHTML = availableCommunityTags.map(t => {
+          const tagLabel = typeof t === 'string' ? t : (t.label || t.tag || '');
+          const tagVal = typeof t === 'string' ? t : (t.tag || t.label || '');
+          const escVal = (window.escapeHtml ? window.escapeHtml(tagVal) : tagVal).replace(/"/g, '&quot;');
+          const escLabel = window.escapeHtml ? window.escapeHtml(tagLabel) : tagLabel;
+          return `
+            <button type="button" onclick="selectKEditCaste(this.dataset.caste)" data-caste="${escVal}" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-900 border border-slate-200 text-[10px] font-bold cursor-pointer transition">
+              + ${escLabel}
+            </button>
+          `;
+        }).join('');
+      } else {
+        chipsContainer.innerHTML = '';
+      }
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => phoneEl.focus(), 60);
+  };
+
+  window.closeKaryaEditModal = function () {
+    const modal = document.getElementById('karyaEditModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    currentEditingVoter = null;
+  };
+
+  window.setKEditSentiment = function (val) {
+    document.getElementById('kEditCategory').value = String(val);
+    document.querySelectorAll('.k-sent-btn').forEach(btn => {
+      const bVal = parseInt(btn.getAttribute('data-val'));
+      if (bVal === val) {
+        btn.classList.add('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-400');
+        btn.classList.remove('border-slate-200', 'bg-slate-50');
+      } else {
+        btn.classList.remove('border-blue-600', 'bg-blue-50', 'ring-2', 'ring-blue-400');
+        btn.classList.add('border-slate-200', 'bg-slate-50');
+      }
+    });
+  };
+
+  window.selectKEditCaste = function (casteVal) {
+    const el = document.getElementById('kEditCaste');
+    if (el) el.value = casteVal;
+  };
+
+  window.saveKaryaVoterEdit = async function () {
+    const voterId = document.getElementById('kEditVoterId').value;
+    if (!voterId) return;
+
+    const phone = (document.getElementById('kEditPhone').value || '').trim();
+    const category = parseInt(document.getElementById('kEditCategory').value || 0);
+    const caste = (document.getElementById('kEditCaste').value || '').trim();
+    const notes = (document.getElementById('kEditNotes').value || '').trim();
+
+    if (phone && phone.replace(/\D/g, '').length !== 10) {
+      alert('कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें');
+      document.getElementById('kEditPhone').focus();
+      return;
+    }
+
+    const saveBtn = document.getElementById('kEditSaveBtn');
+    const origHtml = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span>⏳ सुरक्षित हो रहा है...</span>';
+    }
+
+    try {
+      const curTenant = window.CURRENT_TENANT || new URLSearchParams(window.location.search).get('tenant') || '';
+      const sep = curTenant ? `?tenant=${encodeURIComponent(curTenant)}` : '';
+
+      const res = await fetch(`/api/voter/profile/update${sep}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          voter_id: parseInt(voterId, 10),
+          contact_phone: phone,
+          voter_category: category,
+          caste_tag: caste,
+          notes: notes
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        // Update in-memory voter
+        const target = allAssignedVoters.find(x => x.id == voterId);
+        if (target) {
+          target.phone = phone;
+          target.contact_phone = phone;
+          target.voter_category = category;
+          target.caste_tag = caste;
+          target.notes = notes;
+        }
+
+        localStorage.setItem(KARYA_CACHE_KEY, JSON.stringify(allAssignedVoters));
+        updateMetrics();
+        renderVoterCards();
+        closeKaryaEditModal();
+      } else {
+        alert(data.error || 'विवरण सुरक्षित करने में विफल');
+      }
+    } catch (e) {
+      console.error('saveKaryaVoterEdit error:', e);
+      alert('सर्वर से संपर्क करने में समस्या आई');
+    } finally {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = origHtml;
+      }
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', loadMyVoters);
+</script>
+{% endblock %}

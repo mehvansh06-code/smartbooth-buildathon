@@ -1,0 +1,235 @@
+<!-- =========================================================================== -->
+<!-- CAMPAIGN-WIDE BULK VOTER SLIP BROADCAST MODAL -->
+<!-- =========================================================================== -->
+<div id="bulkSlipDispatchModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-150">
+  <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[92vh] overflow-hidden flex flex-col shadow-2xl border border-slate-200">
+
+    <!-- Modal Header -->
+    <div class="bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl p-1.5 bg-white/10 rounded-xl">📢</span>
+        <div>
+          <h3 class="font-black text-sm sm:text-base leading-tight tracking-wide text-white">अभियान मतदाता पर्ची प्रसारण (Bulk Slip Broadcast)</h3>
+          <p class="text-[11px] text-teal-200">Meta WhatsApp Cloud API · स्वचालित व्यक्तिगत पर्ची वितरण</p>
+        </div>
+      </div>
+      <button type="button" onclick="closeBulkSlipModal()" class="text-teal-200 hover:text-white font-black text-2xl p-1 leading-none cursor-pointer">✕</button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs flex-1" id="bulkSlipModalBody">
+
+      <!-- STEP 1: CONFIGURATION & FILTERS -->
+      <div id="bulkStepConfig" class="space-y-4">
+        
+        <!-- Strategy / Grouping Mode Selection -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+          <label class="block font-black text-xs text-slate-900">
+            👥 पर्ची वितरण रणनीति (Delivery Strategy):
+          </label>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Mode 1: Smart Family (Recommended) -->
+            <label class="relative flex flex-col p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50/60 cursor-pointer transition shadow-2xs hover:bg-emerald-50">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-black text-emerald-950 text-xs flex items-center gap-1.5">
+                  <input type="radio" name="bulkMode" value="SMART_FAMILY" checked class="text-emerald-600 focus:ring-emerald-500">
+                  <span>🏠 स्मार्ट परिवार समूह</span>
+                </span>
+                <span class="bg-emerald-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">अनुशंसित (Saves 50%+)</span>
+              </div>
+              <p class="text-[10px] text-emerald-800 leading-snug pl-5">
+                साझा फोन नंबर वाले परिवार के सदस्यों को 1 संयुक्त पर्ची (अधिकतम 8 सदस्य) पर भेजा जाएगा। WhatsApp क्रेडिट की बचत एवं स्पैम से सुरक्षा।
+              </p>
+            </label>
+
+            <!-- Mode 2: Strictly Individual -->
+            <label class="relative flex flex-col p-3 rounded-xl border border-slate-200 bg-white cursor-pointer transition shadow-2xs hover:bg-slate-50">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-black text-slate-800 text-xs flex items-center gap-1.5">
+                  <input type="radio" name="bulkMode" value="STRICT_INDIVIDUAL" class="text-emerald-600 focus:ring-emerald-500">
+                  <span>👤 कड़ाई से व्यक्तिगत</span>
+                </span>
+              </div>
+              <p class="text-[10px] text-slate-500 leading-snug pl-5">
+                प्रत्येक मतदाता की अलग डिजिटल पर्ची कार्ड बनेगी। साझा फोन नंबर पर अलग-अलग संदेश पहुंचेंगे।
+              </p>
+            </label>
+          </div>
+        </div>
+
+        <!-- Audience Filters -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+          <label class="block font-black text-xs text-slate-900">
+            🎯 लक्षित मतदाता दायरा (Audience Scope):
+          </label>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="bulkWardFilter" class="block text-[11px] font-bold text-slate-700 mb-1">वार्ड / मतदान भाग:</label>
+              <select id="bulkWardFilter" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <option value="all">🌐 संपूर्ण अभियान (All Wards / Booths)</option>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div>
+              <label for="bulkCategoryFilter" class="block text-[11px] font-bold text-slate-700 mb-1">राजनीतिक रुझान श्रेणी:</label>
+              <select id="bulkCategoryFilter" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <option value="all">सभी मतदाता (All Categories)</option>
+                <option value="100">🟢 100% पक्के समर्थक (Confirmed Supporters)</option>
+                <option value="50">🟡 50/50 संशयवादी (Swing / Neutral)</option>
+                <option value="0">⚪ अनिर्धारित (Unmarked)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pt-1">
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="bulkSkipRecentCheck" checked class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+              <span class="text-xs font-bold text-slate-700">पिछले 48 घंटों में जिन नंबरों पर पर्ची जा चुकी है उन्हें छोड़ें (Prevent duplicate messages)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Action Button to Estimate -->
+        <div class="flex justify-end gap-2 pt-1">
+          <button type="button" onclick="calculateBulkEstimate()" id="btnCalculateEstimate" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-black px-5 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-2 shadow-sm active:scale-95">
+            <span>🔍</span>
+            <span>मतदाता एवं कोटा गणना करें (Check Reach & Quota)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: PRE-FLIGHT ESTIMATE & QUOTA VERIFICATION -->
+      <div id="bulkStepEstimate" class="hidden space-y-4">
+        
+        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 space-y-3">
+          <h4 class="font-black text-xs text-slate-900 flex items-center justify-between">
+            <span>📊 प्रसारण पूर्व-निरीक्षण सारांश (Pre-Flight Summary):</span>
+            <span id="bulkEstModeBadge" class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full"></span>
+          </h4>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+            <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs">
+              <p class="text-[10px] font-bold text-slate-500">कुल मतदाता</p>
+              <p id="estTotalElectors" class="text-base font-black text-slate-900 mt-0.5">0</p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs">
+              <p class="text-[10px] font-bold text-slate-500">मोबाइल उपलब्ध</p>
+              <p id="estPhoneReach" class="text-base font-black text-emerald-700 mt-0.5">0</p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs">
+              <p class="text-[10px] font-bold text-slate-500">हाल ही में भेजे गए (48h)</p>
+              <p id="estSkippedRecent" class="text-base font-black text-amber-600 mt-0.5">0</p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs">
+              <p class="text-[10px] font-bold text-slate-500">आवश्यक संदेश पर्चियां</p>
+              <p id="estTargetMessages" class="text-base font-black text-blue-700 mt-0.5">0</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quota Status Banner -->
+        <div id="bulkQuotaStatusCard" class="rounded-2xl p-4 border flex items-center justify-between gap-3">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center justify-between gap-2 pt-1 flex-wrap">
+          <button type="button" onclick="backToBulkStepConfig()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer">
+            ← सेटिंग्स बदलें
+          </button>
+          
+          <button type="button" id="btnLaunchBulkBroadcast" onclick="startBulkBroadcast()" class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black px-6 py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer flex items-center gap-2 active:scale-95">
+            <span>🚀</span>
+            <span>प्रसारण तुरंत शुरू करें (Start Broadcast)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: LIVE BROADCAST PROGRESS & CONTROLS -->
+      <div id="bulkStepMonitor" class="hidden space-y-4">
+        
+        <!-- Live Status Bar -->
+        <div class="bg-slate-900 text-white rounded-2xl p-4 space-y-3 shadow-md">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="bulkJobStatusPulse" class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
+              <span id="bulkJobStatusText" class="font-black text-xs uppercase tracking-wider text-emerald-300">चल रहा है (RUNNING)</span>
+            </div>
+            <span id="bulkJobIdBadge" class="text-[10px] font-mono text-slate-400"></span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="space-y-1">
+            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+              <div id="bulkProgressBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] font-mono font-bold text-slate-300">
+              <span id="bulkProgressPercent">0% पूर्ण</span>
+              <span id="bulkProgressCounts">0 / 0</span>
+            </div>
+          </div>
+
+          <!-- Metrics Breakdown -->
+          <div class="grid grid-cols-4 gap-2 pt-1 border-t border-slate-800 text-center text-[10px]">
+            <div>
+              <span class="text-slate-400 block">सफलतापूर्वक भेजे</span>
+              <span id="bulkCountSent" class="font-black text-emerald-400 text-sm">0</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block">कार्ड रेंडर हुए</span>
+              <span id="bulkCountRendered" class="font-black text-teal-300 text-sm">0</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block">विफल (Failed)</span>
+              <span id="bulkCountFailed" class="font-black text-rose-400 text-sm">0</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block">शेष (Pending)</span>
+              <span id="bulkCountPending" class="font-black text-slate-300 text-sm">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert or Error Banner if Paused -->
+        <div id="bulkMonitorAlert" class="hidden p-3 rounded-xl border text-xs"></div>
+
+        <!-- Recent Dispatches Live Feed -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs font-black text-slate-900">
+            <span>⚡ हाल ही में भेजी गई पर्चियां (Live Dispatch Feed):</span>
+            <span class="text-[10px] font-normal text-slate-500">प्रत्येक 2 सेकंड में स्वतः अपडेट</span>
+          </div>
+          <div id="bulkLiveFeedList" class="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100 max-h-48 overflow-y-auto bg-white text-[11px]">
+            <div class="p-3 text-center text-slate-400">प्रसारण आरंभ हो रहा है...</div>
+          </div>
+        </div>
+
+        <!-- Real-Time Emergency Controls -->
+        <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-200 flex-wrap">
+          <div class="flex items-center gap-2">
+            <button type="button" id="btnPauseBulkJob" onclick="pauseBulkJob()" class="bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-xs">
+              <span>⏸️</span>
+              <span>रोकें (Pause)</span>
+            </button>
+            <button type="button" id="btnResumeBulkJob" onclick="resumeBulkJob()" class="hidden bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-xs">
+              <span>▶️</span>
+              <span>पुनः शुरू करें (Resume)</span>
+            </button>
+            <button type="button" id="btnCancelBulkJob" onclick="cancelBulkJob()" class="bg-rose-700 hover:bg-rose-600 active:bg-rose-800 text-white font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-xs">
+              <span>🛑</span>
+              <span>रद्द करें (Cancel)</span>
+            </button>
+          </div>
+
+          <button type="button" onclick="closeBulkSlipModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer">
+            पृष्ठभूमि में जारी रखें (Close)
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

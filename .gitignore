@@ -1,0 +1,58 @@
+# Environments & Secrets
+.env
+.secrets/
+*.pem
+*.key
+google_compute_engine*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Media & Temp Render Artifacts
+static/videos/personalized_sample*.mp4
+static/videos/temp_*
+static/videos/test_*
+static/videos/greeting_temp.mp3
+static/videos/temp_greeting_audio.mp3
+static/videos/temp_intro_frame.png
+static/videos/temp_overlay.png
+generated_cards/
+reports/*.pdf
+reports/*.xlsx
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

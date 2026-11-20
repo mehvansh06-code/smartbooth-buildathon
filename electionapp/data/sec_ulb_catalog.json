@@ -1,0 +1,2165 @@
+[
+  {
+    "district": "AJMER",
+    "district_id": "1",
+    "body_id": "11401",
+    "body_name": "AJMER NAGAR NIGAM",
+    "type": "NAGAR NIGAM"
+  },
+  {
+    "district": "AJMER",
+    "district_id": "1",
+    "body_id": "11403",
+    "body_name": "KEKRI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "AJMER",
+    "district_id": "1",
+    "body_id": "11402",
+    "body_name": "KISHANGARH  NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "AJMER",
+    "district_id": "1",
+    "body_id": "10047",
+    "body_name": "NASIRABAD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "AJMER",
+    "district_id": "1",
+    "body_id": "12003",
+    "body_name": "PEESANGAN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "AJMER",
+    "district_id": "1",
+    "body_id": "10002",
+    "body_name": "PUSHKAR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "AJMER",
+    "district_id": "1",
+    "body_id": "11404",
+    "body_name": "SARWAD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "AJMER",
+    "district_id": "1",
+    "body_id": "12001",
+    "body_name": "SAWAR  NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "AJMER",
+    "district_id": "1",
+    "body_id": "12002",
+    "body_name": "TANTOTI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "10003",
+    "body_name": "ALWAR NAGAR NIGAM",
+    "type": "NAGAR NIGAM"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "12008",
+    "body_name": "BAHADURPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "12005",
+    "body_name": "BARODAMEV NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "12004",
+    "body_name": "GOVINDGARH-RAMBAS NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "12009",
+    "body_name": "KATHUMAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "11408",
+    "body_name": "KHERLI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "11543",
+    "body_name": "LAXMANGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "12007",
+    "body_name": "MALAKHEDA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "12006",
+    "body_name": "NAU GAON NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "11409",
+    "body_name": "RAJGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "11544",
+    "body_name": "RAMGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "ALWAR",
+    "district_id": "2",
+    "body_id": "10048",
+    "body_name": "THANAGAZI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BALOTRA",
+    "district_id": "34",
+    "body_id": "10009",
+    "body_name": "BALOTRA NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "BALOTRA",
+    "district_id": "34",
+    "body_id": "12012",
+    "body_name": "DHORIMANNA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BALOTRA",
+    "district_id": "34",
+    "body_id": "12011",
+    "body_name": "GUDAMALANI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BALOTRA",
+    "district_id": "34",
+    "body_id": "12086",
+    "body_name": "JASOL NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BALOTRA",
+    "district_id": "34",
+    "body_id": "12085",
+    "body_name": "SAMDARI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BALOTRA",
+    "district_id": "34",
+    "body_id": "12087",
+    "body_name": "SINDHARI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BALOTRA",
+    "district_id": "34",
+    "body_id": "12088",
+    "body_name": "SIWANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BANSWARA",
+    "district_id": "3",
+    "body_id": "10005",
+    "body_name": "BANSWARA NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "BANSWARA",
+    "district_id": "3",
+    "body_id": "11412",
+    "body_name": "KUSHALGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BANSWARA",
+    "district_id": "3",
+    "body_id": "10049",
+    "body_name": "PARTAPPUR GADHI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BARAN",
+    "district_id": "4",
+    "body_id": "11413",
+    "body_name": "ANTA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BARAN",
+    "district_id": "4",
+    "body_id": "11546",
+    "body_name": "ATRU NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BARAN",
+    "district_id": "4",
+    "body_id": "11414",
+    "body_name": "BARAN NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "BARAN",
+    "district_id": "4",
+    "body_id": "10006",
+    "body_name": "CHHABRA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BARAN",
+    "district_id": "4",
+    "body_id": "10007",
+    "body_name": "MANGROL NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BARAN",
+    "district_id": "4",
+    "body_id": "12010",
+    "body_name": "SISWALI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BARMER",
+    "district_id": "5",
+    "body_id": "10008",
+    "body_name": "BARMER NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "BARMER",
+    "district_id": "5",
+    "body_id": "12013",
+    "body_name": "CHOHTAN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BEAWAR",
+    "district_id": "35",
+    "body_id": "10001",
+    "body_name": "BEAWAR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "BEAWAR",
+    "district_id": "35",
+    "body_id": "11515",
+    "body_name": "JAITARAN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BEAWAR",
+    "district_id": "35",
+    "body_id": "12089",
+    "body_name": "MASUDA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BEAWAR",
+    "district_id": "35",
+    "body_id": "12090",
+    "body_name": "RAIPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BEAWAR",
+    "district_id": "35",
+    "body_id": "11405",
+    "body_name": "VIJAYNAGAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHARATPUR",
+    "district_id": "6",
+    "body_id": "11419",
+    "body_name": "BAYANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHARATPUR",
+    "district_id": "6",
+    "body_id": "10010",
+    "body_name": "BHARATPUR NAGAR NIGAM",
+    "type": "NAGAR NIGAM"
+  },
+  {
+    "district": "BHARATPUR",
+    "district_id": "6",
+    "body_id": "11421",
+    "body_name": "BHUSAWAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHARATPUR",
+    "district_id": "6",
+    "body_id": "11422",
+    "body_name": "NADBAI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHARATPUR",
+    "district_id": "6",
+    "body_id": "10050",
+    "body_name": "ROOPWAS NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHARATPUR",
+    "district_id": "6",
+    "body_id": "11548",
+    "body_name": "UCHHAIN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHARATPUR",
+    "district_id": "6",
+    "body_id": "11420",
+    "body_name": "VEIR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "11424",
+    "body_name": "ASIND NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "12015",
+    "body_name": "BANERA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "11425",
+    "body_name": "BHILWARA NAGAR NIGAM",
+    "type": "NAGAR NIGAM"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "12014",
+    "body_name": "BIGOD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "12016",
+    "body_name": "BIJOLIYA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "11426",
+    "body_name": "GANGAPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "11427",
+    "body_name": "GULABPURA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "12017",
+    "body_name": "HAMIRGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "11428",
+    "body_name": "JAHAZPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "11429",
+    "body_name": "MANDALGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BHILWARA",
+    "district_id": "7",
+    "body_id": "11430",
+    "body_name": "SHAHPURA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BIKANER",
+    "district_id": "8",
+    "body_id": "10011",
+    "body_name": "BIKANER NAGAR NIGAM",
+    "type": "NAGAR NIGAM"
+  },
+  {
+    "district": "BIKANER",
+    "district_id": "8",
+    "body_id": "11431",
+    "body_name": "DESHNOK NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BIKANER",
+    "district_id": "8",
+    "body_id": "12019",
+    "body_name": "KHAJUWALA  NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BIKANER",
+    "district_id": "8",
+    "body_id": "12020",
+    "body_name": "LUNKARANSAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BIKANER",
+    "district_id": "8",
+    "body_id": "12018",
+    "body_name": "NAPASAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BIKANER",
+    "district_id": "8",
+    "body_id": "11432",
+    "body_name": "NOKHA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BIKANER",
+    "district_id": "8",
+    "body_id": "11433",
+    "body_name": "SHRIDUNGARGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BUNDI",
+    "district_id": "9",
+    "body_id": "11434",
+    "body_name": "BUNDI NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "BUNDI",
+    "district_id": "9",
+    "body_id": "12103",
+    "body_name": "DEI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BUNDI",
+    "district_id": "9",
+    "body_id": "12021",
+    "body_name": "HINDOLI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BUNDI",
+    "district_id": "9",
+    "body_id": "11435",
+    "body_name": "INDARGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BUNDI",
+    "district_id": "9",
+    "body_id": "11436",
+    "body_name": "KAPREN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BUNDI",
+    "district_id": "9",
+    "body_id": "11437",
+    "body_name": "KESHWARAIPATAN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BUNDI",
+    "district_id": "9",
+    "body_id": "11438",
+    "body_name": "LAKHERI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "BUNDI",
+    "district_id": "9",
+    "body_id": "12102",
+    "body_name": "NAINWA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHITTORGARH",
+    "district_id": "10",
+    "body_id": "12022",
+    "body_name": "AAKOLA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHITTORGARH",
+    "district_id": "10",
+    "body_id": "12105",
+    "body_name": "BADI SADRI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHITTORGARH",
+    "district_id": "10",
+    "body_id": "11441",
+    "body_name": "BEGUN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHITTORGARH",
+    "district_id": "10",
+    "body_id": "10012",
+    "body_name": "CHITTORGARH NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "CHITTORGARH",
+    "district_id": "10",
+    "body_id": "11442",
+    "body_name": "KAPASAN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHITTORGARH",
+    "district_id": "10",
+    "body_id": "10013",
+    "body_name": "NIMBAHERA NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "CHITTORGARH",
+    "district_id": "10",
+    "body_id": "10014",
+    "body_name": "RAWATBHATA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "11443",
+    "body_name": "BIDASAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "11444",
+    "body_name": "CHHAPAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "10015",
+    "body_name": "CHURU NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "11445",
+    "body_name": "RAJALDESAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "10016",
+    "body_name": "RAJGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "11447",
+    "body_name": "RATAN NAGAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "11446",
+    "body_name": "RATANGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "12023",
+    "body_name": "SAHAWA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "11448",
+    "body_name": "SARDARSHAHAR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "11449",
+    "body_name": "SUJANGARH NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "CHURU",
+    "district_id": "11",
+    "body_id": "12104",
+    "body_name": "TARANAGAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "11451",
+    "body_name": "BANDIKUI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "12028",
+    "body_name": "BASWA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "12024",
+    "body_name": "BHANDAREJ NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "11452",
+    "body_name": "DAUSA NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "11453",
+    "body_name": "LALSOT NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "12029",
+    "body_name": "LAWAN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "10051",
+    "body_name": "MAHWA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "12026",
+    "body_name": "MANDAWAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "11549",
+    "body_name": "MANDAWARI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "12027",
+    "body_name": "RAMGARH PANCHWARA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DAUSA",
+    "district_id": "12",
+    "body_id": "12025",
+    "body_name": "SIKRAY NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DEEDWANA-KUCHAMAN",
+    "district_id": "36",
+    "body_id": "12092",
+    "body_name": "BORAWAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DEEDWANA-KUCHAMAN",
+    "district_id": "36",
+    "body_id": "10032",
+    "body_name": "DIDWANA NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "DEEDWANA-KUCHAMAN",
+    "district_id": "36",
+    "body_id": "12091",
+    "body_name": "KHATU KHURD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DEEDWANA-KUCHAMAN",
+    "district_id": "36",
+    "body_id": "11505",
+    "body_name": "KUCHAMAN CITY NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "DEEDWANA-KUCHAMAN",
+    "district_id": "36",
+    "body_id": "11507",
+    "body_name": "LADNU NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DEEDWANA-KUCHAMAN",
+    "district_id": "36",
+    "body_id": "10033",
+    "body_name": "MAKRANA NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "DEEDWANA-KUCHAMAN",
+    "district_id": "36",
+    "body_id": "11511",
+    "body_name": "NAWA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DEEDWANA-KUCHAMAN",
+    "district_id": "36",
+    "body_id": "11512",
+    "body_name": "PARBATSAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DEEG",
+    "district_id": "37",
+    "body_id": "11417",
+    "body_name": "BRIJNAGAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DEEG",
+    "district_id": "37",
+    "body_id": "11416",
+    "body_name": "DEEG NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "DEEG",
+    "district_id": "37",
+    "body_id": "11418",
+    "body_name": "KAMAN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DEEG",
+    "district_id": "37",
+    "body_id": "11415",
+    "body_name": "KUMHER NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DEEG",
+    "district_id": "37",
+    "body_id": "12093",
+    "body_name": "PAHARI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DEEG",
+    "district_id": "37",
+    "body_id": "11547",
+    "body_name": "SIKRI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DHOLPUR",
+    "district_id": "13",
+    "body_id": "11454",
+    "body_name": "BARI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DHOLPUR",
+    "district_id": "13",
+    "body_id": "11551",
+    "body_name": "BASERI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DHOLPUR",
+    "district_id": "13",
+    "body_id": "11455",
+    "body_name": "DHOLPUR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "DHOLPUR",
+    "district_id": "13",
+    "body_id": "12030",
+    "body_name": "MANIYA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DHOLPUR",
+    "district_id": "13",
+    "body_id": "11456",
+    "body_name": "RAJAKHEDA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DHOLPUR",
+    "district_id": "13",
+    "body_id": "12031",
+    "body_name": "SAIPAU NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DHOLPUR",
+    "district_id": "13",
+    "body_id": "11550",
+    "body_name": "SARMATHURA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "DUNGARPUR",
+    "district_id": "14",
+    "body_id": "11457",
+    "body_name": "DUNGARPUR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "DUNGARPUR",
+    "district_id": "14",
+    "body_id": "11458",
+    "body_name": "SAGWARA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "11459",
+    "body_name": "ANOOPGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "11460",
+    "body_name": "GAJSINGHPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "10017",
+    "body_name": "GANGANAGAR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "12032",
+    "body_name": "GHARSANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "11462",
+    "body_name": "KESRISINGHPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "11463",
+    "body_name": "PADAMPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "11464",
+    "body_name": "RAISINGHNAGAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "11465",
+    "body_name": "SADULSHAHAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "11461",
+    "body_name": "SHRIKARANPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "11466",
+    "body_name": "SHRIVIJAYNAGAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "GANGANAGAR",
+    "district_id": "15",
+    "body_id": "10018",
+    "body_name": "SURATGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "HANUMANGARH",
+    "district_id": "16",
+    "body_id": "11467",
+    "body_name": "BHADRA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "HANUMANGARH",
+    "district_id": "16",
+    "body_id": "12034",
+    "body_name": "GOLUWALA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "HANUMANGARH",
+    "district_id": "16",
+    "body_id": "10020",
+    "body_name": "HANUMANGARH NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "HANUMANGARH",
+    "district_id": "16",
+    "body_id": "11468",
+    "body_name": "NOHAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "HANUMANGARH",
+    "district_id": "16",
+    "body_id": "11469",
+    "body_name": "PILIBANGA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "HANUMANGARH",
+    "district_id": "16",
+    "body_id": "11470",
+    "body_name": "RAWATSAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "HANUMANGARH",
+    "district_id": "16",
+    "body_id": "11471",
+    "body_name": "SANGARIYA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "HANUMANGARH",
+    "district_id": "16",
+    "body_id": "12033",
+    "body_name": "TIBBI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "11472",
+    "body_name": "BAGRU NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "11552",
+    "body_name": "BASSI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "11473",
+    "body_name": "CHAKSU NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "11474",
+    "body_name": "CHOMU NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "12042",
+    "body_name": "DUDU NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "10019",
+    "body_name": "JAIPUR NAGAR NIGAM",
+    "type": "NAGAR NIGAM"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "12041",
+    "body_name": "JAMWARAMGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "11475",
+    "body_name": "JOBNER NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "12038",
+    "body_name": "KALADERA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "12043",
+    "body_name": "KANOTA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "12036",
+    "body_name": "KHEJROLI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "11476",
+    "body_name": "KISHANGARH RENWAL NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "12039",
+    "body_name": "MANOHARPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "12035",
+    "body_name": "NARAYANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "12037",
+    "body_name": "PHAGI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "11478",
+    "body_name": "PHULERA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "11479",
+    "body_name": "SAMBHAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "11480",
+    "body_name": "SHAHPURA NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "JAIPUR",
+    "district_id": "17",
+    "body_id": "12040",
+    "body_name": "VATIKA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JAISALMER",
+    "district_id": "18",
+    "body_id": "10021",
+    "body_name": "JAISALMER NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "JAISALMER",
+    "district_id": "18",
+    "body_id": "11482",
+    "body_name": "POKARAN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JALORE",
+    "district_id": "19",
+    "body_id": "12045",
+    "body_name": "AAHOR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JALORE",
+    "district_id": "19",
+    "body_id": "10022",
+    "body_name": "BHINMAL NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JALORE",
+    "district_id": "19",
+    "body_id": "10023",
+    "body_name": "JALORE NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "JALORE",
+    "district_id": "19",
+    "body_id": "11483",
+    "body_name": "SANCHORE NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JALORE",
+    "district_id": "19",
+    "body_id": "12044",
+    "body_name": "SAYLA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHALAWAR",
+    "district_id": "20",
+    "body_id": "11484",
+    "body_name": "AKLERA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHALAWAR",
+    "district_id": "20",
+    "body_id": "11485",
+    "body_name": "BHAWANI MANDI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHALAWAR",
+    "district_id": "20",
+    "body_id": "12047",
+    "body_name": "DAG NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHALAWAR",
+    "district_id": "20",
+    "body_id": "11487",
+    "body_name": "JHALAWAR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "JHALAWAR",
+    "district_id": "20",
+    "body_id": "11486",
+    "body_name": "JHALRAPATAN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHALAWAR",
+    "district_id": "20",
+    "body_id": "12048",
+    "body_name": "KHANPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHALAWAR",
+    "district_id": "20",
+    "body_id": "12046",
+    "body_name": "MANOHARTHANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHALAWAR",
+    "district_id": "20",
+    "body_id": "11488",
+    "body_name": "PIRAWA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "11489",
+    "body_name": "BAGAD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "10024",
+    "body_name": "BISAU NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "12052",
+    "body_name": "BUHANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "11490",
+    "body_name": "CHIRAWA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "12055",
+    "body_name": "DUNDLOD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "12049",
+    "body_name": "JAKHAL NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "10025",
+    "body_name": "JHUNJHUNU NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "11491",
+    "body_name": "KHETDI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "12051",
+    "body_name": "MALSISAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "11492",
+    "body_name": "MANDAWA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "12050",
+    "body_name": "MANDRELA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "11493",
+    "body_name": "MUKUNDGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "11494",
+    "body_name": "NAWALGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "10026",
+    "body_name": "PILANI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "12054",
+    "body_name": "SINGHANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "12053",
+    "body_name": "SULTANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "11495",
+    "body_name": "SURAJGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "11496",
+    "body_name": "UDAIPURWATI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JHUNJHUNU",
+    "district_id": "21",
+    "body_id": "11497",
+    "body_name": "VIDYAVIHAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JODHPUR",
+    "district_id": "22",
+    "body_id": "12056",
+    "body_name": "BALESAR SATTAH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JODHPUR",
+    "district_id": "22",
+    "body_id": "11554",
+    "body_name": "BHOPALGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JODHPUR",
+    "district_id": "22",
+    "body_id": "11498",
+    "body_name": "BILADA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JODHPUR",
+    "district_id": "22",
+    "body_id": "10027",
+    "body_name": "JODHPUR NAGAR NIGAM",
+    "type": "NAGAR NIGAM"
+  },
+  {
+    "district": "JODHPUR",
+    "district_id": "22",
+    "body_id": "12058",
+    "body_name": "MATHANIYA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JODHPUR",
+    "district_id": "22",
+    "body_id": "11499",
+    "body_name": "PIPADCITY NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "JODHPUR",
+    "district_id": "22",
+    "body_id": "12057",
+    "body_name": "TIWARI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KARAULI",
+    "district_id": "23",
+    "body_id": "11501",
+    "body_name": "HINDAUNCITY NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "KARAULI",
+    "district_id": "23",
+    "body_id": "11500",
+    "body_name": "KARAULI NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "KARAULI",
+    "district_id": "23",
+    "body_id": "12060",
+    "body_name": "MANDRAYAL NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KARAULI",
+    "district_id": "23",
+    "body_id": "11555",
+    "body_name": "SAPOTRA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KARAULI",
+    "district_id": "23",
+    "body_id": "12059",
+    "body_name": "SUROTH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KARAULI",
+    "district_id": "23",
+    "body_id": "11502",
+    "body_name": "TODABHIM NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KHAIRTHAL-TIJARA",
+    "district_id": "38",
+    "body_id": "10004",
+    "body_name": "BHIWADI NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "KHAIRTHAL-TIJARA",
+    "district_id": "38",
+    "body_id": "11407",
+    "body_name": "KHAIRTHAL NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "KHAIRTHAL-TIJARA",
+    "district_id": "38",
+    "body_id": "11410",
+    "body_name": "KISHANGARHBAS NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KHAIRTHAL-TIJARA",
+    "district_id": "38",
+    "body_id": "12095",
+    "body_name": "KOTKASIM NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KHAIRTHAL-TIJARA",
+    "district_id": "38",
+    "body_id": "12094",
+    "body_name": "MUNDAWAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KHAIRTHAL-TIJARA",
+    "district_id": "38",
+    "body_id": "12096",
+    "body_name": "TAPUKADA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KHAIRTHAL-TIJARA",
+    "district_id": "38",
+    "body_id": "11411",
+    "body_name": "TIJARA NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "KOTA",
+    "district_id": "24",
+    "body_id": "11503",
+    "body_name": "ITAWA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTA",
+    "district_id": "24",
+    "body_id": "10030",
+    "body_name": "KOTA  NAGAR NIGAM",
+    "type": "NAGAR NIGAM"
+  },
+  {
+    "district": "KOTA",
+    "district_id": "24",
+    "body_id": "11504",
+    "body_name": "RAMGANJMANDI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTA",
+    "district_id": "24",
+    "body_id": "10031",
+    "body_name": "SANGOD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTA",
+    "district_id": "24",
+    "body_id": "12061",
+    "body_name": "SUKET NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTA",
+    "district_id": "24",
+    "body_id": "11556",
+    "body_name": "SULTANPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTPUTLI-BEHROR",
+    "district_id": "39",
+    "body_id": "11545",
+    "body_name": "BANSUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTPUTLI-BEHROR",
+    "district_id": "39",
+    "body_id": "12099",
+    "body_name": "BARDOD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTPUTLI-BEHROR",
+    "district_id": "39",
+    "body_id": "11406",
+    "body_name": "BEHROR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "KOTPUTLI-BEHROR",
+    "district_id": "39",
+    "body_id": "11477",
+    "body_name": "KOTPUTLI NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "KOTPUTLI-BEHROR",
+    "district_id": "39",
+    "body_id": "12098",
+    "body_name": "MANDHAN NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTPUTLI-BEHROR",
+    "district_id": "39",
+    "body_id": "12097",
+    "body_name": "NARAYANPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTPUTLI-BEHROR",
+    "district_id": "39",
+    "body_id": "12100",
+    "body_name": "NEEMRANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTPUTLI-BEHROR",
+    "district_id": "39",
+    "body_id": "11553",
+    "body_name": "PAWTA PRAGPURA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "KOTPUTLI-BEHROR",
+    "district_id": "39",
+    "body_id": "11481",
+    "body_name": "VIRATNAGAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "NAGAUR",
+    "district_id": "25",
+    "body_id": "12064",
+    "body_name": "BASNI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "NAGAUR",
+    "district_id": "25",
+    "body_id": "11513",
+    "body_name": "DEGANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "NAGAUR",
+    "district_id": "25",
+    "body_id": "12063",
+    "body_name": "JAYAL NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "NAGAUR",
+    "district_id": "25",
+    "body_id": "11506",
+    "body_name": "KUCHERA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "NAGAUR",
+    "district_id": "25",
+    "body_id": "11508",
+    "body_name": "MERTA CITY NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "NAGAUR",
+    "district_id": "25",
+    "body_id": "12062",
+    "body_name": "MERTAROAD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "NAGAUR",
+    "district_id": "25",
+    "body_id": "11509",
+    "body_name": "MUNDWA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "NAGAUR",
+    "district_id": "25",
+    "body_id": "11510",
+    "body_name": "NAGAUR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "NAGAUR",
+    "district_id": "25",
+    "body_id": "12065",
+    "body_name": "RIYANBARI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PALI",
+    "district_id": "26",
+    "body_id": "11514",
+    "body_name": "BALI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PALI",
+    "district_id": "26",
+    "body_id": "11516",
+    "body_name": "KHUDALA FALNA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PALI",
+    "district_id": "26",
+    "body_id": "12066",
+    "body_name": "MARWAD JUNCTION NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PALI",
+    "district_id": "26",
+    "body_id": "10034",
+    "body_name": "PALI NAGAR NIGAM",
+    "type": "NAGAR NIGAM"
+  },
+  {
+    "district": "PALI",
+    "district_id": "26",
+    "body_id": "11517",
+    "body_name": "RANIKHURD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PALI",
+    "district_id": "26",
+    "body_id": "11518",
+    "body_name": "SADRI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PALI",
+    "district_id": "26",
+    "body_id": "12067",
+    "body_name": "SOJAT ROAD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PALI",
+    "district_id": "26",
+    "body_id": "11519",
+    "body_name": "SOJATCITY NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PALI",
+    "district_id": "26",
+    "body_id": "10035",
+    "body_name": "SUMERPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PALI",
+    "district_id": "26",
+    "body_id": "11520",
+    "body_name": "TAKHATGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PHALODI",
+    "district_id": "40",
+    "body_id": "12101",
+    "body_name": "BAP NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PHALODI",
+    "district_id": "40",
+    "body_id": "10028",
+    "body_name": "PHALODI NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "PRATAPGARH",
+    "district_id": "27",
+    "body_id": "12068",
+    "body_name": "ARNOD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PRATAPGARH",
+    "district_id": "27",
+    "body_id": "11521",
+    "body_name": "CHOTI SADRI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PRATAPGARH",
+    "district_id": "27",
+    "body_id": "12069",
+    "body_name": "DHARIYAWAD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "PRATAPGARH",
+    "district_id": "27",
+    "body_id": "11522",
+    "body_name": "PRATAPGARH NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "RAJSAMAND",
+    "district_id": "28",
+    "body_id": "10042",
+    "body_name": "AMET NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "RAJSAMAND",
+    "district_id": "28",
+    "body_id": "12070",
+    "body_name": "BHIM NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "RAJSAMAND",
+    "district_id": "28",
+    "body_id": "11524",
+    "body_name": "DEOGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "RAJSAMAND",
+    "district_id": "28",
+    "body_id": "10043",
+    "body_name": "NATHDWARA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "RAJSAMAND",
+    "district_id": "28",
+    "body_id": "11523",
+    "body_name": "RAJSAMAND NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "S. MADHOPUR",
+    "district_id": "29",
+    "body_id": "11557",
+    "body_name": "BAMANWAS NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "S. MADHOPUR",
+    "district_id": "29",
+    "body_id": "12072",
+    "body_name": "BONLI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "S. MADHOPUR",
+    "district_id": "29",
+    "body_id": "11525",
+    "body_name": "GANGAPUR CITY NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "S. MADHOPUR",
+    "district_id": "29",
+    "body_id": "12071",
+    "body_name": "KHANDAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "S. MADHOPUR",
+    "district_id": "29",
+    "body_id": "11526",
+    "body_name": "SAWAI MADHOPUR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "S. MADHOPUR",
+    "district_id": "29",
+    "body_id": "12073",
+    "body_name": "WAZIRPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SALUMBER",
+    "district_id": "41",
+    "body_id": "11542",
+    "body_name": "SALUMBER NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "12075",
+    "body_name": "AJITGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "12074",
+    "body_name": "DANTA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "12077",
+    "body_name": "DHOD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "11527",
+    "body_name": "FATEHPUR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "11528",
+    "body_name": "KHANDELA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "10052",
+    "body_name": "KHATUSHYAMJI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "11529",
+    "body_name": "LAXMANGARH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "11530",
+    "body_name": "LOSAL NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "10036",
+    "body_name": "NEEMKATHANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "12076",
+    "body_name": "PALSANA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "11531",
+    "body_name": "RAMGARH SHEKHAWATI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "11532",
+    "body_name": "RINGUS NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "11533",
+    "body_name": "SHRIMADHOPUR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIKAR",
+    "district_id": "30",
+    "body_id": "10037",
+    "body_name": "SIKAR NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "SIROHI",
+    "district_id": "31",
+    "body_id": "11534",
+    "body_name": "ABUROAD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIROHI",
+    "district_id": "31",
+    "body_id": "12078",
+    "body_name": "MANDAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIROHI",
+    "district_id": "31",
+    "body_id": "10038",
+    "body_name": "MOUNT ABU NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIROHI",
+    "district_id": "31",
+    "body_id": "10039",
+    "body_name": "PINDWARA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIROHI",
+    "district_id": "31",
+    "body_id": "10040",
+    "body_name": "SHIVGANJ NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "SIROHI",
+    "district_id": "31",
+    "body_id": "10041",
+    "body_name": "SIROHI NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "TONK",
+    "district_id": "32",
+    "body_id": "11535",
+    "body_name": "DEOLI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "TONK",
+    "district_id": "32",
+    "body_id": "12080",
+    "body_name": "DIGGI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "TONK",
+    "district_id": "32",
+    "body_id": "12079",
+    "body_name": "DOONI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "TONK",
+    "district_id": "32",
+    "body_id": "12082",
+    "body_name": "LAMBAHARISINGH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "TONK",
+    "district_id": "32",
+    "body_id": "11537",
+    "body_name": "MALPURA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "TONK",
+    "district_id": "32",
+    "body_id": "11536",
+    "body_name": "NEWAI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "TONK",
+    "district_id": "32",
+    "body_id": "12081",
+    "body_name": "PEEPLU NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "TONK",
+    "district_id": "32",
+    "body_id": "11538",
+    "body_name": "TODARAISINGH NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "TONK",
+    "district_id": "32",
+    "body_id": "10044",
+    "body_name": "TONK NAGAR PARISHAD",
+    "type": "NAGAR PARISHAD"
+  },
+  {
+    "district": "TONK",
+    "district_id": "32",
+    "body_id": "11539",
+    "body_name": "UNIARA NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "UDAIPUR",
+    "district_id": "33",
+    "body_id": "11540",
+    "body_name": "BHINDER NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "UDAIPUR",
+    "district_id": "33",
+    "body_id": "11541",
+    "body_name": "FATEHNAGAR SANWAD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "UDAIPUR",
+    "district_id": "33",
+    "body_id": "10045",
+    "body_name": "KANOD NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "UDAIPUR",
+    "district_id": "33",
+    "body_id": "12083",
+    "body_name": "MAVLI NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  },
+  {
+    "district": "UDAIPUR",
+    "district_id": "33",
+    "body_id": "10046",
+    "body_name": "UDAIPUR NAGAR NIGAM",
+    "type": "NAGAR NIGAM"
+  },
+  {
+    "district": "UDAIPUR",
+    "district_id": "33",
+    "body_id": "12084",
+    "body_name": "VALLABHNAGAR NAGAR PALIKA",
+    "type": "NAGAR PALIKA"
+  }
+]

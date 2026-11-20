@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>मतदाता सूचना पर्ची (Voter Slips) - A4 10-Up</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 4mm 4mm 4mm 4mm;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Nirmala UI', 'Segoe UI', Roboto, 'Mukta', sans-serif;
+    background: #ffffff;
+    color: #0f172a;
+    line-height: 1.15;
+  }
+  .page-sheet {
+    width: 202mm;
+    height: 289mm;
+    max-height: 289mm;
+    padding: 2mm 2.5mm 1.5mm 2.5mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    page-break-inside: avoid;
+    background: #ffffff;
+  }
+  .page-sheet:last-child {
+    page-break-after: avoid;
+  }
+  .sheet-header-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1mm 1.2mm 1mm;
+    border-bottom: 0.8px solid #94a3b8;
+    font-size: 6.5pt;
+    color: #1e293b;
+    font-weight: 800;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .sheet-header-title {
+    font-size: 7.2pt;
+    font-weight: 900;
+    color: #0f172a;
+  }
+  .sheet-brand {
+    color: #1e3a8a;
+    font-weight: 800;
+  }
+  .cards-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(5, 1fr);
+    gap: 1.8mm 3mm;
+    padding: 1.5mm 0;
+    overflow: hidden;
+  }
+  .sheet-footer-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1mm 1mm 0 1mm;
+    border-top: 0.8px solid #94a3b8;
+    font-size: 5.6pt;
+    color: #64748b;
+    font-weight: 700;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .parchi-card {
+    border: 1.2px dashed #475569;
+    border-radius: 4px;
+    padding: 3px 5px;
+    background: #ffffff;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .cut-guide {
+    position: absolute;
+    top: -6px;
+    right: 12px;
+    font-size: 5.8pt;
+    color: #475569;
+    background: #ffffff;
+    padding: 0 3px;
+    font-weight: 700;
+  }
+  /* Neutral Official Header (NO candidate branding) */
+  .official-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f1f5f9;
+    border: 0.8px solid #cbd5e1;
+    border-radius: 3px;
+    padding: 1.5px 4px;
+    margin-bottom: 2px;
+  }
+  .official-title {
+    font-size: 7.4pt;
+    font-weight: 900;
+    color: #1e3a8a;
+    line-height: 1.1;
+  }
+  .official-badge {
+    font-size: 6pt;
+    font-weight: 800;
+    color: #047857;
+    background: #ecfdf5;
+    border: 0.5px solid #a7f3d0;
+    padding: 0.5px 3.5px;
+    border-radius: 2px;
+  }
+  /* Serial & EPIC Strip */
+  .serial-epic-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    border: 0.8px solid #cbd5e1;
+    border-radius: 2px;
+    padding: 1px 3px;
+    margin-bottom: 2px;
+  }
+  .sl-badge-wrap {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+  .sl-lbl {
+    background: #0f172a;
+    color: #f8fafc;
+    font-size: 6.2pt;
+    font-weight: 900;
+    padding: 1.5px 3.5px;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+  }
+  .sl-val {
+    background: #f59e0b;
+    color: #0f172a;
+    font-size: 10.5pt;
+    font-weight: 900;
+    padding: 0.5px 5.5px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    letter-spacing: 0.2px;
+    line-height: 1.1;
+  }
+  .ward-pill {
+    background: #eef2ff;
+    color: #3730a3;
+    font-weight: 900;
+    font-size: 7pt;
+    padding: 0.5px 4px;
+    border-radius: 2px;
+    border: 0.5px solid #c7d2fe;
+    white-space: nowrap;
+  }
+  .epic-pill {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-weight: 900;
+    font-size: 7.2pt;
+    color: #0f172a;
+    background: #e2e8f0;
+    padding: 0.5px 3.5px;
+    border-radius: 2px;
+    border: 0.5px solid #cbd5e1;
+    white-space: nowrap;
+  }
+  /* Voter Details Table */
+  .v-card {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2px;
+  }
+  .v-lbl {
+    width: 32pt;
+    font-size: 6.8pt;
+    font-weight: 800;
+    color: #475569;
+    vertical-align: middle;
+  }
+  .v-name {
+    font-size: 10.2pt;
+    font-weight: 900;
+    color: #090d16;
+    line-height: 1.15;
+    vertical-align: middle;
+  }
+  .v-rel {
+    font-size: 8.6pt;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.15;
+    vertical-align: middle;
+  }
+  /* Stats Pill (House, Age, Gender) */
+  .stat-pill {
+    width: 100%;
+    background: #f8fafc;
+    border: 0.6px solid #e2e8f0;
+    border-radius: 2px;
+    padding: 1px 3px;
+    font-size: 7pt;
+    margin-bottom: 2px;
+  }
+  /* Polling Booth Card */
+  .booth-card {
+    width: 100%;
+    background: #eff6ff;
+    border: 0.8px solid #bfdbfe;
+    border-left: 3.5px solid #2563eb;
+    border-radius: 2px;
+    padding: 1.2px 3.5px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .booth-lbl {
+    font-size: 6.8pt;
+    font-weight: 900;
+    color: #1e40af;
+  }
+  .booth-txt {
+    font-size: 8pt;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1.1;
+  }
+  /* Micro Footer */
+  .micro-ftr {
+    width: 100%;
+    border-top: 0.5px dashed #cbd5e1;
+    padding-top: 1px;
+    font-size: 4.8pt;
+    color: #475569;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .micro-time {
+    color: #b91c1c;
+    font-weight: 800;
+  }
+  .micro-appeal {
+    color: #1e3a8a;
+    font-weight: 800;
+  }
+  /* Print Controls (Hidden in Print) */
+  .no-print-bar {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 9999;
+    background: #0f172a;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 30px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .print-btn {
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .print-btn:hover {
+    background: #1d4ed8;
+  }
+  @media print {
+    .no-print-bar {
+      display: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="no-print-bar">
+  <span>🖨️ {{ total_voters }} मतदाता पर्ची तैयार ({{ total_pages }} पेज)</span>
+  <button type="button" class="print-btn" onclick="window.print()">अभी प्रिंट करें (Print)</button>
+</div>
+
+{% for page in voter_pages %}
+<div class="page-sheet">
+  <div class="sheet-header-strip">
+    <span class="sheet-header-title">🗳️ {{ area_name }} • मतदाता सूचना पर्ची (विधिमान्य प्रारूप)</span>
+    <span class="sheet-brand">A4 10-Up कट-शीट • 100% विधिमान्य प्रारूप</span>
+  </div>
+
+  <div class="cards-grid">
+    {% for v in page %}
+    <div class="parchi-card">
+      <div class="cut-guide">✂ कटिंग रेखा</div>
+
+      <!-- Neutral Official Header (NO candidate branding) -->
+      <div class="official-header">
+        <span class="official-title">🏛️ {{ v.area_display or area_name }}</span>
+        <span class="official-badge">मतदाता सूचना पर्ची 2026</span>
+      </div>
+
+      <!-- Serial & EPIC Strip -->
+      <div class="serial-epic-strip">
+        <div class="sl-badge-wrap">
+          <span class="sl-lbl">क्र.सं.</span>
+          <span class="sl-val">{{ v.sl_no }}</span>
+        </div>
+        <span class="ward-pill">{{ v.ward_display }}</span>
+        <span class="epic-pill">{{ v.epic_no or '—' }}</span>
+      </div>
+
+      <!-- Voter Details -->
+      <table class="v-card">
+        <tr>
+          <td class="v-lbl">मतदाता:</td>
+          <td class="v-name">{{ v.display_name }}</td>
+        </tr>
+        <tr>
+          <td class="v-lbl">{{ v.rel_type }}:</td>
+          <td class="v-rel">{{ v.rel_name }}</td>
+        </tr>
+      </table>
+
+      <!-- Demographic Stats: House, Age, Gender -->
+      <table class="stat-pill">
+        <tr>
+          <td style="width: 38%;"><span style="color:#64748b; font-size:6.6pt; font-weight:700;">म.सं.:</span> <b style="color:#090d16; font-size:7.8pt;">{{ v.house_no }}</b></td>
+          <td style="width: 34%; text-align:center;"><span style="color:#64748b; font-size:6.6pt; font-weight:700;">आयु:</span> <b style="color:#090d16; font-size:7.8pt;">{{ v.age }} वर्ष</b></td>
+          <td style="width: 28%; text-align:right;"><span style="color:#64748b; font-size:6.6pt; font-weight:700;">लिंग:</span> <b style="color:#090d16; font-size:7.8pt;">{{ v.gender }}</b></td>
+        </tr>
+      </table>
+
+      <!-- Polling Booth Box -->
+      <div class="booth-card">
+        <span class="booth-lbl">🏫 केंद्र:</span>
+        <b class="booth-txt">{{ v.booth_name }}</b>
+      </div>
+
+      <!-- Micro Footer -->
+      <div class="micro-ftr">
+        <span class="micro-time">⏰ 7:00 AM - 5:00 PM • मान्य पहचान पत्र साथ लाएं</span>
+        <span class="micro-appeal">मतदान अवश्य करें 🗳️</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="sheet-footer-strip">
+    <span>✂️ कटिंग रेखा से काटकर प्रत्येक मतदाता को पर्ची वितरित करें</span>
+    <span>पेज {{ loop.index }}/{{ total_pages }} • {{ area_name }}</span>
+  </div>
+</div>
+{% endfor %}
+
+<script>
+  window.addEventListener('load', function() {
+    // Auto-trigger print dialog after styles render
+    setTimeout(function() {
+      window.print();
+    }, 350);
+  });
+</script>
+</body>
+</html>

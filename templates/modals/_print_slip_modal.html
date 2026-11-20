@@ -1,0 +1,91 @@
+<!-- MODAL: PRINT SLIP & PHONE NUMBER LOGGING -->
+  <div id="printPhoneModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full flex flex-col border border-slate-300 overflow-hidden animate-in fade-in duration-200">
+      
+      <div class="bg-indigo-950 text-white px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🖨️</span>
+          <div>
+            <h3 class="font-black text-sm text-white leading-tight">Print Slip & Record Contact</h3>
+            <p class="text-[10px] text-indigo-200">पर्ची प्रिंट करें एवं मतदाता संपर्क नंबर सेव करें</p>
+          </div>
+        </div>
+        <button onclick="closePrintPhoneModal()" class="text-white/70 hover:text-white text-2xl font-bold leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <div class="p-5 space-y-4 text-xs">
+        
+        <!-- Voter Summary Pill -->
+        <div id="printModalVoterSummary" class="bg-indigo-50/70 border border-indigo-200 rounded-lg p-3 text-indigo-950">
+          <!-- Filled dynamically -->
+        </div>
+
+        <!-- Phone Input -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-black text-slate-800">
+            📞 Mobile Number (मोबाइल नंबर — कॉल रिकॉर्ड हेतु):
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">+91</span>
+            <input 
+              type="tel" 
+              inputmode="numeric"
+              id="printModalPhone" 
+              maxlength="10" 
+              placeholder="10-digit mobile number" 
+              class="w-full pl-12 pr-3 py-2 text-base font-mono font-bold text-slate-900 border-2 border-indigo-300 rounded-lg focus:outline-none focus:border-indigo-600 shadow-inner"
+              autocomplete="off"
+            >
+          </div>
+          <p class="text-[11px] text-slate-500 font-medium leading-relaxed">
+            💡 यह नंबर हिस्ट्री (Sent History) में दर्ज होगा, जिससे चुनाव के दिन स्वयंसेवक सीधे कॉल कर सकें।
+          </p>
+        </div>
+
+        <!-- Optional Note -->
+        <div class="space-y-1">
+          <label class="block text-[11px] font-bold text-slate-700">
+            📝 Optional Note / Calling Tag (वैकल्पिक टिप्पणी):
+          </label>
+          <input 
+            type="text" 
+            id="printModalNotes" 
+            placeholder="उदा. बाहर रहते हैं / सुबह 8 बजे कॉल करें / वाहन चाहिए" 
+            class="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded-md focus:outline-none focus:border-indigo-600"
+          >
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 space-y-2">
+          <button 
+            type="button" 
+            onclick="confirmSavePhoneAndPrint()" 
+            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-4 rounded-lg text-xs tracking-wide shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span>💾</span>
+            <span>Save Phone & Print Slip (नंबर सेव कर प्रिंट करें)</span>
+          </button>
+
+          <div class="flex items-center gap-2">
+            <button 
+              type="button" 
+              onclick="confirmPrintWithoutPhone()" 
+              class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-3 rounded-lg text-xs transition border border-slate-300 text-center cursor-pointer"
+              title="Print slip without saving phone number"
+            >
+              🖨️ Print Without Phone
+            </button>
+            <button 
+              type="button" 
+              onclick="closePrintPhoneModal()" 
+              class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>

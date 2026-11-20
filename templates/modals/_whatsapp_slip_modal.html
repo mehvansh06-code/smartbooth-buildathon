@@ -1,0 +1,114 @@
+<!-- MODAL: MOBILE DEDICATED WHATSAPP SLIP DISPATCH -->
+  <div id="mobileWhatsAppModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in slide-in-from-bottom duration-200 border border-slate-200">
+      
+      <!-- Modal Header -->
+      <div class="bg-emerald-700 text-white px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">📲</span>
+          <div>
+            <h3 class="font-black text-sm text-white leading-tight">WhatsApp पर पर्ची भेजें</h3>
+            <p class="text-[10px] text-emerald-100">Send Voter Slip on WhatsApp</p>
+          </div>
+        </div>
+        <button onclick="closeMobileWhatsAppModal()" class="text-white/80 hover:text-white text-2xl font-black p-1 leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 space-y-4 text-xs">
+        
+        <!-- Recipient Voter Summary Card -->
+        <div id="mobileWaVoterSummary" class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3 text-slate-800 space-y-1">
+          <!-- Filled dynamically -->
+        </div>
+
+        <!-- Mode Toggle: Individual vs Family (shown if multiple members in house) -->
+        <div id="mobileWaModeContainer" class="hidden space-y-1.5">
+          <label class="block text-xs font-bold text-slate-700">पर्ची का प्रकार (Slip Type):</label>
+          <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+            <button type="button" id="mobileWaBtnSingle" onclick="setMobileWaMode('single')" class="py-2 px-2.5 rounded-lg text-xs font-black bg-white text-slate-900 shadow-xs transition cursor-pointer">
+              👤 केवल इनकी पर्ची
+            </button>
+            <button type="button" id="mobileWaBtnFamily" onclick="setMobileWaMode('family')" class="py-2 px-2.5 rounded-lg text-xs font-bold text-slate-600 transition cursor-pointer">
+              🏠 पूरे परिवार की (<span id="mobileWaFamilyCount">0</span>)
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Phone Number Input -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-black text-slate-800">
+            📱 मतदाता का मोबाइल नंबर (Single or Multiple Numbers):
+          </label>
+          <div class="flex gap-2">
+            <span class="flex items-center bg-slate-100 border-2 border-slate-300 rounded-xl px-3.5 text-base font-bold text-slate-700">
+              +91
+            </span>
+            <input 
+              type="tel" 
+              inputmode="tel" 
+              id="mobileWaPhoneInput" 
+              placeholder="उदा: 9829012345, 9414056789"
+              class="flex-1 px-3.5 py-2.5 text-base font-mono font-bold rounded-xl border-2 border-slate-300 focus:outline-none focus:border-emerald-600 text-slate-900 shadow-inner"
+              oninput="handleMobilePhoneInput(this.value)"
+              onkeydown="if(event.key === 'Enter') { event.preventDefault(); executeMobileWhatsAppSend(); }"
+            >
+          </div>
+          <div id="mobileWaPhoneStatus" class="text-[11px] font-bold text-slate-500">
+            💡 नंबर दर्ज करें और नीचे हरा बटन दबाएं (एक से अधिक नंबर भी लिख सकते हैं)
+          </div>
+
+          <!-- Mobile Family Phone Numbers Chips -->
+          <div id="mobileFamilyPhoneChipsContainer" class="pt-1 hidden">
+            <span class="text-[10px] font-bold text-slate-500 block mb-1">
+              📞 परिवार के उपलब्ध नंबर (टैप करके जोड़ें):
+            </span>
+            <div id="mobileFamilyPhoneChipsList" class="flex flex-wrap gap-1.5"></div>
+          </div>
+        </div>
+
+        <!-- 1-Tap Option: Mark as Outside Voter with this phone number -->
+        <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-200 cursor-pointer select-none hover:bg-indigo-100/70 transition">
+          <input type="checkbox" id="mobileWaMarkOutsideCb" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+          <div class="flex-1 min-w-0">
+            <span class="text-xs font-black text-indigo-950 block">✈️ यह मतदाता शहर से बाहर रहते हैं (Mark Outside)</span>
+            <span class="text-[10px] text-indigo-700 block">प्रवासी मतदाता सूची में नाम और यह कॉलिंग नंबर दर्ज होगा</span>
+          </div>
+        </label>
+
+        <!-- Send Buttons -->
+        <div class="pt-2 space-y-2">
+          <button 
+            type="button" 
+            id="btnMobileSendWhatsApp"
+            onclick="executeMobileWhatsAppSend()" 
+            class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black py-3 px-4 rounded-xl text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition"
+          >
+            <span>🗳️</span>
+            <span id="btnMobileSendWhatsAppText">WhatsApp पर तुरंत भेजें (Auto Card)</span>
+          </button>
+
+          <button 
+            type="button" 
+            id="btnModalWhatsAppWeb" 
+            onclick="executeDirectWhatsAppWebFromModal()" 
+            class="w-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition border border-slate-300"
+            title="Open WhatsApp Web in new tab with slip text"
+          >
+            <span>🚀</span>
+            <span>Open in WhatsApp Web (Direct Fallback)</span>
+          </button>
+
+          <button 
+            type="button" 
+            onclick="closeMobileWhatsAppModal()" 
+            class="w-full py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 text-center transition cursor-pointer"
+          >
+            ✕ बंद करें (Cancel)
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>

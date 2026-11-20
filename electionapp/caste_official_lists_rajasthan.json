@@ -1,0 +1,66 @@
+{
+  "_provenance": {
+    "description": "Official Rajasthan Social Justice & Empowerment Department (SJED) caste/community lists, fetched verbatim for cross-referencing against BASE_GOTRA_REGISTRY in caste_auto_tagger.py. Reference/audit artifact only — not loaded at runtime.",
+    "retrieved": "2026-10-14",
+    "sources": {
+      "SC": "https://sje.rajasthan.gov.in/Default.aspx?PageID=65",
+      "ST": "https://sje.rajasthan.gov.in/Default.aspx?PageID=66",
+      "OBC": "https://sje.rajasthan.gov.in/Default.aspx?PageID=67",
+      "OBC_central_list_cross_check": "https://ncbc.nic.in/Writereaddata/cl/rajasthan.pdf"
+    }
+  },
+  "SC": [
+    "Adi Dharmi", "Aheri", "Badi", "Bagri, Bagdi", "Bairwa, Berwa", "Bajgar", "Balai",
+    "Bansphor, Bansphod", "Baori", "Bargi, Vargi, Birgi", "Bawaria", "Bedia, Baria", "Bhand",
+    "Bhangi, Chura, Mehtar, Olgana, Rukhi, Malkana, Halalkhor, Lalbegi, Balmiki, Valmiki, Korar, Zadmalli",
+    "Bidakia", "Bola",
+    "Chamar, Bhambhi, Bambhi, Jatia, Jatava, Mochi, Raidas, Rohidas, Regar, Raigar, Ramdasia, Asadaru, Asodi, Chamadia, Chambhar, Chamgar, Haralavya, Harali, Khalpa, Machigar, Mochigar, Madar, Madig, Telegu Mochi, Kamati Mochi, Ranigar, Rohit, Samgar",
+    "Chandal", "Dabgar", "Dhanak, Dhanuk", "Dhankia", "Dhobi", "Dholi", "Dome, Dom", "Gandia",
+    "Garancha, Gancha", "Garo, Garura, Gurda, Garoda", "Gavaria", "Godhi", "Jingar",
+    "Kalbelia, Sapera", "Kamad, Kamadia", "Kanjar, Kunjar", "Kapadia, Sansi", "Khangar", "Khatik",
+    "Koli, Kori", "Kooch Band, Kuchband", "Koria", "Madari, Bazigar", "Mahar, Taral, Dhegumegu",
+    "Mahyavanshi, Dhed, Dheda, Vankar, Maru Vankar", "Majhabi", "Mang, Matang, Minimadig",
+    "Mang Garodi, Mang Garudi", "Megh, Meghval, Meghwal, Menghvar", "Mehar", "Nat, Nut", "Pasi",
+    "Rawal", "Salvi", "Sansi", "Santia, Satia", "Sarbhangi", "Sargara", "Singiwala",
+    "Thori, Nayak", "Tirgar, Tirbanda", "Turi"
+  ],
+  "ST": [
+    "Bhil, Bhil Garasia, Dholi Bhil, Dungri Bhil, Dungri Garasia, Mewasi Bhil, Rawal Bhil, Tadvi Bhil, Bhagalia, Bhilala, Pawra, Vasava",
+    "Bhil Mina",
+    "Damor, Damaria",
+    "Dhanka, Tadvi, Tetaria, Valvi",
+    "Garasia (excluding Rajput Garasia)",
+    "Kathodi, Katkari, Dhor Kathodi, Dhor Katkari, Son Kathodi, Son Katkari",
+    "Kokna, Kokni, Kukna",
+    "Koli Dhor, Tokre Koli, Kolcha, Kolgha",
+    "Mina",
+    "Naikda, Nayaka, Cholivala Nayaka, Kapadia Nayaka, Mota Nayaka, Nana Nayaka",
+    "Patelia",
+    "Seharia, Sehria, Sahariya"
+  ],
+  "OBC": [
+    "Ahir (Yadav)", "Badwa, Jachak, Bhat, Jaga, Rao", "Charan", "Bagaria",
+    "Banjara, Baladia, Labana", "Badhai, Jangid, Khati, Suthar, Tarkhan", "Bharbhuja",
+    "Chippa (Chhipi), Bhavsar, Nama, Khatti Chippa, Rangrej, Neelgar",
+    "Dakot, Deshantri, Rangasami (Adbhopa)", "Nagarchi-Damami, Rana, Baiti (Barot)",
+    "Daroga, Ravana-Rajput, Hazuri Wazir", "Darzi", "Dhakad",
+    "Dhiver, Kahar, Bhoi, Sagarvansi-Mali, Keer, Mehra, Mallah (Nisad), Bari, Bhisti, Machhuara",
+    "Gadaria (Gadri), Gayri, Ghosi (Gvala)", "Gadia-Lohar, Gadolia", "Ghanchi", "Teli",
+    "Giri, Gosain (Gushain)", "Gujar, Gurjar", "Hela", "Janwa, Khardiya (Sirvi)", "Julaha",
+    "Jogi, Nath, Sidh", "Kachhi (Kushwaha), Shakya", "Kelal (Tak)", "Kandera, Pinijara",
+    "Kanbi, Kalbi, Patel, Patidar Anjana, Dangi Patel, Kulmi", "Kharol (Kharwal)",
+    "Kirar (Kirad)", "Kumhar (Prajapati), Kumawat, Suara", "Lakhera (Lakhara), Kachera, Manihar",
+    "Lodhi (Lodha)", "Lohar, Panchal", "Mahabrahiman (Acharaj), Fakir (working in Kabristan)",
+    "Mali, Saini, Bagwan", "Mer, (Mehrat-Kathat, Mehrat, Ghodat, Cheeta)",
+    "Mirasi, Dhadi, Langa/Mangniyar", "Mogia (Mogya)", "Nai, Sen, Vednai", "Nyaria (Nyargar)",
+    "Odd", "Patwa (Phadal)", "Raika, Rebari (Debasi)", "Rawat", "Sad, Swami, Bairagi, Jangam",
+    "Satiya-Sindhi", "Sikligar, Bandooksaz (Usta)", "Sirkiwal", "Swarankar, Sunar, Soni, Jadia",
+    "Thathera, Kansara (Bharava)", "Tamoli (Tamboli)", "Jagri", "Jat", "Raisikh",
+    "Halali, Kasai", "Dangi", "Lodhe-Tanwar", "Sondhia", "Vishnoi", "Mev", "Gaddee",
+    "Farooki Bhatiyara", "Silawat (other than Sompura and Murtikaar)", "Kherwa",
+    "Dhobi (Muslim)", "Kayamkhani", "Kunjada, Raen", "Sapera (Non Hindu Caste)",
+    "Madari, Bazigar (Non Hindu Caste)", "Nut (Non Hindu Caste)", "Gadeet Nagauri",
+    "Sindhi Musalman", "Kheldar", "Chungar", "Ratth", "Multanies", "Orphan Children",
+    "Mochi (Non Hindu Caste)", "Deshwali", "Kotwal", "Chobdaar"
+  ]
+}
