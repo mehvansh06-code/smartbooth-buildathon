@@ -19,16 +19,7 @@ Environment="PGDATABASE=voter_platform"
 Environment="PGUSER=postgres"
 Environment="PGPASSWORD=postgres"
 Environment="PRIMARY_WA_GATEWAY=aoc"
-Environment="AOC_API_KEY=cc3uNWmCxr9utFa2V716rBYarq8IPd"
-Environment="AOC_SENDER_NUMBER=919351147539"
-Environment="AOC_TEMPLATE_NAME=info_update_short"
-Environment="META_WA_PHONE_NUMBER_ID=1435580822961907"
-Environment="META_WA_WABA_ID=948940291139396"
-Environment="META_WA_TEMPLATE_NAME=info_update_short"
-Environment="META_WA_TEMPLATE_LANG=en"
-Environment="META_WA_API_VERSION=v22.0"
-Environment="META_WA_SENDER_DISPLAY=+91 93511 47539"
-ExecStart=/home/ubuntu/smartbooth/venv/bin/gunicorn --bind 127.0.0.1:5030 --workers 4 --threads 8 --timeout 60 --access-logfile /home/ubuntu/smartbooth/logs/access.log --error-logfile /home/ubuntu/smartbooth/logs/error.log electionapp.wsgi:app
+ExecStart=/home/mehva/smartbooth/venv/bin/gunicorn --bind 127.0.0.1:5030 --workers 1 --threads 8 --timeout 60 --access-logfile /home/mehva/smartbooth/logs/access.log --error-logfile /home/mehva/smartbooth/logs/error.log electionapp.wsgi:app
 
 Restart=always
 RestartSec=5
