@@ -295,7 +295,7 @@ def create_app(tenant_slug: str = "ward82", storage_backend: Optional[str] = Non
         )
 
         if (
-            path in ['/login', '/logout', '/free-slips', '/parchi', '/photoparchi', '/terms', '/privacy', '/refund', '/shipping', '/delivery', '/about', '/pricing', '/contact', '/demo', '/demo/sarana']
+            path in ['/favicon.ico', '/login', '/logout', '/free-slips', '/parchi', '/photoparchi', '/terms', '/privacy', '/refund', '/shipping', '/delivery', '/about', '/pricing', '/contact', '/demo', '/demo/sarana']
             or path.startswith('/demo')
             or path.startswith('/logout/')
             or path.startswith('/login/')
