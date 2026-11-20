@@ -86,6 +86,17 @@ def live_election_search():
     res = buildathon_agent.search_live_election_info(query)
     return jsonify(res)
 
+@agent_bp.route("/qa", methods=["POST"])
+def db_qa():
+    data = request.get_json() or {}
+    question = data.get("question") or data.get("query", "")
+    if not question:
+        return jsonify({"status": "ERROR", "error": "No question provided"}), 400
+    gp = data.get("gram_panchayat", "Sarana")
+    tenant_id = int(data.get("tenant_id", 5))
+    res = buildathon_agent.answer_database_question(question, gp, tenant_id)
+    return jsonify(res)
+
 @agent_bp.route("/command", methods=["POST"])
 def execute_command():
     data = request.get_json() or {}
@@ -101,7 +112,9 @@ def execute_command():
         buildathon_agent.create_campaign_and_send_link,
         buildathon_agent.lookup_household_votes,
         buildathon_agent.send_family_voter_slips,
-        buildathon_agent.trigger_candidate_outreach_call
+        buildathon_agent.trigger_candidate_outreach_call,
+        buildathon_agent.answer_database_question,
+        buildathon_agent.search_live_election_info
     ]
     
     system_instruction = (
@@ -111,6 +124,8 @@ def execute_command():
         "When the user asks about a voter or household or family votes, call `lookup_household_votes`. "
         "When the user confirms sending slips, call `send_family_voter_slips`. "
         "When the user asks to call a candidate or trigger sales outreach, call `trigger_candidate_outreach_call`. "
+        "When the user asks statistical, demographic, or general questions about voters, wards, booths, castes, or age in the database (e.g. 'how many', 'kitne', 'female voters in ward 7'), call `answer_database_question`. "
+        "When the user asks for live web election news, dates, or guidelines, call `search_live_election_info`. "
         "Reply in warm, concise Hindi or English summarizing the completed tool action."
     )
     
@@ -134,7 +149,15 @@ def execute_command():
         logger.error(f"Agent execution error: {e}")
         # Fallback heuristic parser if tool execution encounters prompt format edge case
         prompt_lower = user_prompt.lower()
-        if "sarana" in prompt_lower or "neelu" in prompt_lower or "campaign" in prompt_lower:
+        if any(term in prompt_lower or term in user_prompt for term in ["kitne", "कितने", "count", "कुल", "महिला", "पुरुष", "senior", "बुजुर्ग", "जाति", "caste"]):
+            res = buildathon_agent.answer_database_question(user_prompt, "Sarana", 5)
+            return jsonify({
+                "status": "SUCCESS",
+                "reply": res["answer"],
+                "data": res,
+                "traces": buildathon_agent.get_recent_traces()
+            })
+        elif "sarana" in prompt_lower or "neelu" in prompt_lower or "campaign" in prompt_lower:
             res = buildathon_agent.create_campaign_and_send_link(
                 candidate_name="Neelu Dhoniwal",
                 gram_panchayat="Sarana",

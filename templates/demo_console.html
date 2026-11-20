@@ -330,6 +330,7 @@
                         <button onclick="sendVoiceMessage('नीलू दुनीवाल के घर में कितने वोट हैं?')" class="text-xs px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold border border-indigo-200">नीलू दुनीवाल परिवार</button>
                         <button onclick="sendVoiceMessage('पर्ची व्हाट्सएप पर भेज दो')" class="text-xs px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 font-bold border border-purple-200">पर्ची भेज दो</button>
                     </div>
+                    </div>
                 </div>
 
                 <!-- Real-Time Dialogue Stream -->
@@ -674,6 +675,7 @@
             }
         }
 
+<<<<<<< HEAD
         // ==========================================
         // 2. Gemini Live Conversational Voice Agent
         // ==========================================
@@ -820,6 +822,104 @@
                 const thinkEl = document.getElementById(thinkingId);
                 if (thinkEl) thinkEl.remove();
                 appendGeminiBubble("माफ़ कीजिए, संपर्क में कुछ रुकावट आई। कृपया पुनः प्रयास करें।", null, 0);
+            }
+        }
+
+        // 3. Zero-Search Voter Voice Agent & Database Q&A
+        async function executeVoterLookup() {
+            const q = document.getElementById('voice-query-input') ? document.getElementById('voice-query-input').value.trim() : '';
+            const btn = document.getElementById('btn-voice-search');
+            if (!q) return;
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<span class="animate-spin">⏳</span> <span>खोज रहे हैं...</span>`;
+            }
+
+            // Detect if this is an analytical question vs a single voter/household name
+            const isDbQuestion = /[?？]|कितने|कुल|how many|count|वार्ड 7 में महिला|वरिष्ठ|बुजुर्ग|60 वर्ष|जाति|caste/i.test(q) && !/नीलो|नीलू|रेखा/i.test(q);
+
+            try {
+                if (isDbQuestion) {
+                    const res = await fetch('/api/agent/qa', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({question: q, gram_panchayat: "Sarana", tenant_id: 5})
+                    });
+                    const data = await res.json();
+                    
+                    if (document.getElementById('voter-results-wrapper')) document.getElementById('voter-results-wrapper').classList.remove('hidden');
+                    if (document.getElementById('res-norm-raw')) document.getElementById('res-norm-raw').innerText = `"${q}"`;
+                    if (document.getElementById('res-norm-clean')) document.getElementById('res-norm-clean').innerHTML = `<span class="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">PostgreSQL 17: ${data.sql_executed || 'SELECT COUNT(*)'}</span>`;
+                    if (document.getElementById('res-spoken-hindi')) document.getElementById('res-spoken-hindi').innerText = data.answer || "डेटाबेस से उत्तर प्राप्त हुआ।";
+                    if (document.getElementById('res-vote-count-badge')) document.getElementById('res-vote-count-badge').innerText = `${data.row_count || data.results?.length || 0} परिणाम`;
+                    if (document.getElementById('voter-latency-badge')) document.getElementById('voter-latency-badge').innerText = `${data.latency_ms || 280}ms`;
+
+                    const grid = document.getElementById('family-cards-grid');
+                    if (grid) {
+                        grid.innerHTML = '';
+                        if (data.results && data.results.length > 0 && data.results[0].name_hi) {
+                            data.results.slice(0, 12).forEach(m => {
+                                const card = document.createElement('div');
+                                card.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between";
+                                card.innerHTML = `
+                                    <div>
+                                        <div class="text-xs font-extrabold text-slate-900">${m.name_hi || m.name_en}</div>
+                                        <div class="text-[11px] text-slate-500">पिता/पति: ${m.rel_name_hi || m.rel_name_en || '—'}</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-[10px] px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-700">वार्ड #${m.ward_no || '—'}</span>
+                                        <div class="text-[10px] text-slate-400 mt-0.5">${m.age || '—'} वर्ष • ${m.gender || '—'}</div>
+                                    </div>
+                                `;
+                                grid.appendChild(card);
+                            });
+                        }
+                    }
+                } else {
+                    const res = await fetch('/api/agent/lookup', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({query: q, gram_panchayat: "Sarana"})
+                    });
+                    const data = await res.json();
+                    
+                    if (document.getElementById('voter-results-wrapper')) document.getElementById('voter-results-wrapper').classList.remove('hidden');
+                    if (document.getElementById('res-norm-raw')) document.getElementById('res-norm-raw').innerText = `"${data.phonetic_normalization?.raw_input || q}"`;
+                    if (document.getElementById('res-norm-clean')) document.getElementById('res-norm-clean').innerText = `"${data.phonetic_normalization?.resolved_name_hi || ''}" (${data.phonetic_normalization?.resolved_name_en || ''})`;
+                    if (document.getElementById('res-spoken-hindi')) document.getElementById('res-spoken-hindi').innerText = `"${data.spoken_hindi_response || ''}"`;
+                    if (document.getElementById('res-vote-count-badge')) document.getElementById('res-vote-count-badge').innerText = `${data.total_household_votes || 0} वोट`;
+
+                    const grid = document.getElementById('family-cards-grid');
+                    if (grid) {
+                        grid.innerHTML = '';
+                        (data.family_members || []).forEach(m => {
+                            const card = document.createElement('div');
+                            card.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between";
+                            card.innerHTML = `
+                                <div>
+                                    <div class="text-xs font-extrabold text-slate-900">${m.name}</div>
+                                    <div class="text-[11px] text-slate-500">पिता/पति: ${m.guardian || '—'}</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-700">क्रम #${m.sl_no}</span>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">${m.age} वर्ष • ${m.gender}</div>
+                                </div>
+                            `;
+                            grid.appendChild(card);
+                        });
+                    }
+                }
+
+                fetchTraces();
+            } catch (err) {
+                alert("खोज में त्रुटि: " + err.message);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>🔍 खोजें</span>`;
+                }
+            }
+        }
             }
         }
 

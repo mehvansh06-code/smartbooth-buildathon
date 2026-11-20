@@ -176,3 +176,38 @@ def api_search():
         'ward_no': ward_no,
         'filters': filters
     }), 200
+
+
+@search_bp.route('/api/search/ask', methods=['GET', 'POST'])
+def api_search_ask():
+    """
+    Natural Language Database Q&A Endpoint for Search.
+    Answers natural language queries from the voter database using Google Gemini 2.5 Flash and PostgreSQL.
+    """
+    if request.method == 'POST':
+        data = request.get_json() or {}
+        q = data.get('question') or data.get('q', '').strip()
+    else:
+        q = request.args.get('q', '').strip() or request.args.get('question', '').strip()
+
+    if not q:
+        return jsonify({'success': False, 'error': 'No question provided'}), 400
+
+    from electionapp.tenancy import resolve_tenant
+    tenant_slug, repo = resolve_tenant()
+    tenant_id = getattr(repo, 'tenant_id', 5) if repo else 5
+
+    from electionapp.services import db_qa_service
+    res = db_qa_service.ask_database_question(q, tenant_id=tenant_id, campaign_slug=tenant_slug or 'sarana')
+
+    return jsonify({
+        'success': res.get('status') == 'SUCCESS',
+        'question': q,
+        'answer': res.get('answer'),
+        'sql': res.get('sql_executed'),
+        'query_type': res.get('query_type'),
+        'results': res.get('results', []),
+        'count': res.get('row_count', 0),
+        'latency_ms': res.get('latency_ms', 0),
+        'tenant_id': tenant_id
+    }), 200
