@@ -11,7 +11,7 @@ import datetime
 import uuid
 import logging
 from typing import Optional, Dict, Tuple, Any
-from flask import Flask, send_from_directory, request, g, session, redirect, jsonify, make_response
+from flask import Flask, send_from_directory, request, g, session, redirect, jsonify, make_response, render_template
 import user_manager
 
 logger = logging.getLogger("smartbooth")
