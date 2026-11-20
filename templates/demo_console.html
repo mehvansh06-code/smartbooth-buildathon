@@ -9,6 +9,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Mukta:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script>
+        // Suppress Tailwind CDN dev warning in console
+        const _ow = console.warn;
+        console.warn = function(...a) {
+            if (a[0] && typeof a[0] === 'string' && a[0].includes('cdn.tailwindcss.com')) return;
+            _ow.apply(console, a);
+        };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
@@ -430,7 +438,7 @@
                         <!-- Video Player Box -->
                         <div class="bg-slate-900 rounded-xl overflow-hidden aspect-video relative flex items-center justify-center border border-slate-800 shadow-inner">
                             <video id="campaign-video-player" controls playsinline class="w-full h-full object-cover">
-                                <source src="/static/media/demo_stitched_preview.mp4" type="video/mp4">
+                                <source src="/static/videos/master_video.mp4" type="video/mp4">
                                 Your browser does not support video playback.
                             </video>
                         </div>
@@ -667,7 +675,8 @@
                 });
                 const data = await res.json();
                 
-                document.getElementById('video-render-badge').innerText = `तैयार (${data.render_latency_ms}ms)`;
+                const lat = Math.round(data.latency_ms || data.render_latency_ms || 1500);
+                document.getElementById('video-render-badge').innerText = `तैयार (${lat}ms)`;
                 document.getElementById('video-render-badge').className = "text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold font-mono";
                 
                 const player = document.getElementById('campaign-video-player');

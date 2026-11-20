@@ -361,7 +361,7 @@ def trigger_candidate_outreach_call(candidate_id: int = 5, target_phone: str = "
             cs = CloudShopeClient()
             ok, msg, camp_id = cs.dispatch_campaign(
                 campaign_name=f"SmartBooth AI Candidate Call {clean_phone}",
-                voice_file_id="4",  # WelcomeClip.wav (duration: 7s, approved sound)
+                voice_file_id="129143",  # Sarana_Candidate_Speech.wav (duration: 18s, 8kHz 16-bit mono PCM WAV)
                 numbers=[clean_phone],
                 caller_id="6746782484",
                 max_retry=1,
