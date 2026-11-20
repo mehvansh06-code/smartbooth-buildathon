@@ -827,6 +827,10 @@ def create_app(tenant_slug: str = "ward82", storage_backend: Optional[str] = Non
     def public_buildathon_demo():
         return render_template('demo_console.html')
 
+    @app.route('/favicon.ico')
+    def favicon():
+        return ('', 204)
+
     @app.context_processor
     def inject_symbol_catalog():
         from electionapp.symbol_catalog import (
