@@ -38,13 +38,15 @@ htmlcov/
 .nox/
 
 # Media & Temp Render Artifacts
-static/videos/personalized_sample*.mp4
+static/videos/*.mp4
+static/videos/*.wav
 static/videos/temp_*
 static/videos/test_*
 static/videos/greeting_temp.mp3
 static/videos/temp_greeting_audio.mp3
 static/videos/temp_intro_frame.png
 static/videos/temp_overlay.png
+static/videos/audio_samples/
 generated_cards/
 reports/*.pdf
 reports/*.xlsx
@@ -56,3 +58,4 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+*.pem

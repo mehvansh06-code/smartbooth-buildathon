@@ -118,8 +118,8 @@
                 <span>1. प्रत्याशी आउटरीच व ऑनबोर्डिंग</span>
             </button>
             <button onclick="switchTab('tab-voter')" id="btn-tab-voter" class="tab-btn px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition flex items-center space-x-2 bg-white text-slate-600 hover:bg-slate-50 border border-transparent">
-                <span>🗣️</span>
-                <span>2. बोलकर मतदाता खोज (Zero-Search Voice)</span>
+                <span>🎙️</span>
+                <span>2. Gemini Live वॉयस एजेंट (लाइव चुनावी बातचीत)</span>
             </button>
             <button onclick="switchTab('tab-video')" id="btn-tab-video" class="tab-btn px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition flex items-center space-x-2 bg-white text-slate-600 hover:bg-slate-50 border border-transparent">
                 <span>🎬</span>
@@ -291,97 +291,113 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- TAB 2: Zero-Search Hindi Voter Voice Agent -->
+        <!-- TAB 2: Gemini Live Conversational Voice Agent -->
         <!-- ========================================== -->
         <div id="tab-voter" class="tab-pane hidden space-y-6">
             
-            <div class="bg-gradient-to-r from-blue-900 to-indigo-950 text-white rounded-2xl p-6 shadow-md border border-blue-800/40 relative overflow-hidden">
-                <div class="absolute -right-8 -bottom-8 opacity-10 text-9xl">🗣️</div>
+            <div class="bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-blue-800/40 relative overflow-hidden">
+                <div class="absolute -right-8 -bottom-8 opacity-10 text-9xl">🎙️</div>
                 <div class="relative z-10 max-w-3xl">
                     <div class="flex items-center space-x-2 text-xs uppercase font-mono tracking-wider text-blue-400 font-semibold mb-2">
                         <span class="w-2 h-2 rounded-full bg-blue-400 pulse-live"></span>
-                        <span>Zero-Search Dialect Engine</span>
+                        <span>Gemini 2.5 Flash Live Voice Engine · Startup Buildathon India 2026</span>
                     </div>
-                    <h2 class="text-xl sm:text-2xl font-black text-white">ग्रामीण बोलचाल व ध्वन्यात्मक (Phonetic) मतदाता खोज</h2>
+                    <h2 class="text-xl sm:text-2xl font-black text-white">🎙️ Gemini Live वॉयस एजेंट (लाइव चुनावी बातचीत)</h2>
                     <p class="text-xs sm:text-sm text-slate-300 mt-1">
-                        आम नागरिक या कार्यकर्ता बोलकर पूछते हैं—जैसे <i>"नीलो धोनीवाल के घर में कितने वोट हैं?"</i>। जेमिनी 2.5 फ्लैश राजस्थानी उच्चारण अशुद्धियों को सुधारकर एक साथ पूरे परिवार के वोट निकालता है।
+                        उम्मीदवार या नागरिक आम बोलचाल में बात करते हैं। जेमिनी 2.5 फ्लैश बात को समझकर लाइव डेटाबेस टूल्स चलाता है और तुरंत स्वाभाविक हिंदी में उत्तर देता है।
                     </p>
                 </div>
             </div>
 
-            <!-- Voice Query Card -->
+            <!-- Voice Conversation Console Card -->
             <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+                
+                <!-- Quick Trigger Bar -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900">मतदाता व परिवार आवाज खोज</h3>
-                        <p class="text-xs text-slate-500">Gemini 2.5 Flash Rajasthani Phonetic Correction $\to$ Family Household Aggregation</p>
+                    <div class="flex items-center gap-3">
+                        <button onclick="startGeminiDialogue()" id="btn-start-dialogue" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs sm:text-sm font-black shadow-md shadow-emerald-700/20 transition flex items-center space-x-2">
+                            <span>🎙️ बातचीत शुरू करें</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/20 font-mono">1-TAP</span>
+                        </button>
+                        <div class="hidden sm:flex items-center space-x-1.5 text-xs text-slate-500 font-medium">
+                            <span>आरंभ: <i>"अच्छा, आप चुनाव लड़ रहे हैं?"</i></span>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-xs text-slate-500">क्विक उदाहरण:</span>
-                        <button onclick="setVoiceQuery('नीलो धोनीवाल के घर में कितने वोट हैं?')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium">नीलो धोनीवाल</button>
-                        <button onclick="setVoiceQuery('रेखा देवी वार्ड 7')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium">रेखा देवी</button>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-xs text-slate-500 font-medium">क्विक प्रॉम्प्ट:</span>
+                        <button onclick="sendVoiceMessage('हाँ, मैं सराना से चुनाव लड़ रहा हूँ')" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">हाँ, मैं सराना से लड़ रहा हूँ</button>
+                        <button onclick="sendVoiceMessage('मेरे वार्ड 5 में कितने वोट हैं?')" class="text-xs px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold border border-blue-200">वार्ड 5 वोट?</button>
+                        <button onclick="sendVoiceMessage('नीलू दुनीवाल के घर में कितने वोट हैं?')" class="text-xs px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold border border-indigo-200">नीलू दुनीवाल परिवार</button>
+                        <button onclick="sendVoiceMessage('पर्ची व्हाट्सएप पर भेज दो')" class="text-xs px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 font-bold border border-purple-200">पर्ची भेज दो</button>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <button onclick="toggleVoiceRecording()" id="btn-mic" class="w-12 h-12 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 flex items-center justify-center text-xl transition shadow-xs flex-shrink-0">
-                        🎙️
-                    </button>
-                    <input type="text" id="voice-query-input" value="नीलो धोनीवाल के घर में कितने वोट हैं?" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:outline-none focus:border-blue-600" placeholder="बोलें या लिखें...">
-                    <button onclick="executeVoterLookup()" id="btn-voice-search" class="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm shadow-md shadow-blue-700/20 transition flex items-center space-x-1.5 flex-shrink-0">
-                        <span>🔍 खोजें</span>
-                    </button>
-                </div>
-
-                <!-- Live Results Container -->
-                <div id="voter-results-wrapper" class="hidden space-y-5 pt-3">
-                    
-                    <!-- Phonetic Normalization Pill & Spoken Response -->
-                    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-3">
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs px-2 py-0.5 rounded bg-indigo-200/80 text-indigo-900 font-bold font-mono">ध्वन्यात्मक सुधार</span>
-                                <span class="text-xs text-slate-600 font-medium">इनपुट: <span id="res-norm-raw" class="line-through text-red-600">"नीलो धोनीवाल"</span> $\to$</span>
-                                <span id="res-norm-clean" class="text-xs font-extrabold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-300">"नीलू धोनीवाल" (Neelu Dhoniwal)</span>
+                <!-- Real-Time Dialogue Stream -->
+                <div id="live-conversation-stream" class="flex flex-col space-y-3 p-4 bg-slate-900/5 rounded-2xl border border-slate-200/80 min-h-[300px] max-h-[440px] overflow-y-auto">
+                    <!-- Default initial bubble -->
+                    <div class="flex items-start gap-3 max-w-[85%]">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-sm shadow-xs flex-shrink-0">
+                            ✨
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none p-3.5 shadow-xs text-xs sm:text-sm text-slate-800 space-y-1">
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="font-bold text-indigo-700 text-[11px] uppercase tracking-wide">Gemini Live Voice</span>
+                                <span class="text-[10px] text-slate-400 font-mono">तैयार</span>
                             </div>
-                            <span id="voter-latency-badge" class="text-[11px] font-mono text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded font-semibold">245ms</span>
-                        </div>
-                        <div class="bg-white rounded-lg p-3 border border-indigo-100 text-xs sm:text-sm text-slate-800 flex items-start gap-2.5">
-                            <span class="text-lg">📢</span>
-                            <div>
-                                <span class="font-bold text-slate-900">स्मार्टबूथ वॉइस असिस्टेंट उत्तर:</span>
-                                <p id="res-spoken-hindi" class="mt-0.5 text-slate-700 font-medium leading-relaxed">
-                                    "नीलू धोनीवाल जी के परिवार में कुल 10 वोट हैं। आपका मतदान केंद्र बूथ संख्या 14, राजकीय उच्च माध्यमिक विद्यालय सराना, कमरा नं 1 है।"
-                                </p>
-                            </div>
+                            <p class="font-medium text-slate-900 leading-relaxed">
+                                नमस्ते! "बातचीत शुरू करें" बटन दबाएं या माइक से बोलें—जैसे <i>"हाँ, मैं सराना से चुनाव लड़ रहा हूँ"</i> या <i>"मेरे वार्ड 5 में कितने वोट हैं?"</i>
+                            </p>
                         </div>
                     </div>
-
-                    <!-- Family Household Voter Cards Grid (Native SmartBooth Card Style) -->
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                                <span>परिवार के मतदाता सदस्य</span>
-                                <span id="res-vote-count-badge" class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-bold">10 वोट</span>
-                            </h4>
-                            <button onclick="dispatchFamilySlips()" id="btn-dispatch-family" class="text-xs px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition shadow-xs flex items-center space-x-1">
-                                <span>📲 परिवार को व्हाट्सएप पर्ची भेजें</span>
-                            </button>
-                        </div>
-
-                        <!-- Card Grid -->
-                        <div id="family-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                            <!-- Populated via JS -->
-                        </div>
-                    </div>
-
-                    <!-- Dispatch Feedback -->
-                    <div id="slip-dispatch-feedback" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-bold flex items-center justify-between">
-                        <span>✅ 10 मतदाता पर्चियां प्रत्याशी नीलू धोनीवाल (चिन्ह: ट्रैक्टर) के साथ व्हाट्सएप पर भेज दी गई हैं।</span>
-                        <span class="font-mono text-[11px] text-emerald-600">AOC_GT_SENT</span>
-                    </div>
-
                 </div>
+
+                <!-- Microphone & Continuous Listening Status Bar -->
+                <div class="space-y-3 pt-1">
+                    <div class="flex items-center justify-between text-xs px-1">
+                        <div class="flex items-center space-x-2">
+                            <span id="voice-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                            <span id="voice-status-text" class="text-slate-600 font-medium">माइक बंद (बोलने के लिए माइक दबाएं)</span>
+                        </div>
+                        <!-- Live Visual Soundwave Visualizer -->
+                        <div id="voice-soundwave" class="flex items-end gap-1 h-5 opacity-40">
+                            <span class="w-1 bg-indigo-600 rounded-full h-2 transition-all duration-150"></span>
+                            <span class="w-1 bg-indigo-600 rounded-full h-4 transition-all duration-150"></span>
+                            <span class="w-1 bg-indigo-600 rounded-full h-5 transition-all duration-150"></span>
+                            <span class="w-1 bg-indigo-600 rounded-full h-3 transition-all duration-150"></span>
+                            <span class="w-1 bg-indigo-600 rounded-full h-2 transition-all duration-150"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleContinuousListening()" id="btn-voice-mic" class="w-12 h-12 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 flex items-center justify-center text-xl transition shadow-xs flex-shrink-0 cursor-pointer">
+                            🎙️
+                        </button>
+                        <input type="text" id="gemini-voice-input" onkeydown="if(event.key==='Enter') submitVoiceText()" value="हाँ, मैं सराना से चुनाव लड़ रहा हूँ" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:outline-none focus:border-indigo-600" placeholder="बोलें या लिखें...">
+                        <button onclick="submitVoiceText()" id="btn-voice-send" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-md shadow-indigo-700/20 transition flex items-center space-x-1.5 flex-shrink-0">
+                            <span>बोलें / भेजें ➔</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Database Query Execution Badge -->
+                <div id="live-sql-badge" class="hidden bg-slate-950 text-slate-200 rounded-xl p-4 border border-slate-800 font-mono text-xs space-y-2 shadow-inner">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span class="text-emerald-400 font-bold uppercase tracking-wider text-[11px]">Live Database Query Executed</span>
+                            <span class="text-slate-500">•</span>
+                            <span class="text-slate-400 text-[11px]">voter_platform (voters_t5)</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span id="sql-tool-badge" class="bg-indigo-900/60 text-indigo-300 border border-indigo-700/40 px-2 py-0.5 rounded text-[10px] font-bold">TOOL: query_electoral_stats</span>
+                            <span id="sql-latency-badge" class="bg-emerald-900/50 text-emerald-300 border border-emerald-700/40 px-2 py-0.5 rounded text-[10px] font-bold">18.4ms</span>
+                        </div>
+                    </div>
+                    <div class="text-slate-300 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 text-[11px] overflow-x-auto">
+                        <code id="sql-code-display" class="text-emerald-300">SELECT count(*), count(CASE WHEN age >= 60 THEN 1 END), booth_name FROM voters_t5 WHERE ward_no = 5 GROUP BY booth_name;</code>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -399,7 +415,7 @@
                     </div>
                     <h2 class="text-xl sm:text-2xl font-black text-white">प्रत्येक मतदाता के नाम से व्यक्तिगत प्रचार वीडियो</h2>
                     <p class="text-xs sm:text-sm text-slate-300 mt-1">
-                        प्रत्याशी का एक वीडियो क्लिप $\to$ मतदाता के नाम का व्यक्तिगत संबोधन (जैसे <i>"नमस्ते रेखा जी!"</i>) $\to$ ट्रैक्टर चुनाव चिन्ह बैज और चुनाव आयोग प्राधिकार वॉटरमार्क के साथ 60fps में 1.2 सेकंड में तैयार।
+                        प्रत्याशी का एक वीडियो क्लिप $\to$ मतदाता के नाम का व्यक्तिगत संबोधन (जैसे <i>"राम राम सीता जी!"</i>) $\to$ केतली चुनाव चिन्ह (बैलेट सं. 5) व मतदाता बैज के साथ 30fps में 1.2 सेकंड में तैयार।
                     </p>
                 </div>
             </div>
@@ -407,22 +423,28 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Controls -->
                 <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
-                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">वीडियो पैरामीटर्स</h3>
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">वीडियो पैरामीटर्स (Option C Engine)</h3>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">मतदाता का नाम (Salutation Target)</label>
-                        <div class="flex gap-2 mb-2">
-                            <button onclick="setVideoVoter('Rekha Devi')" class="text-xs px-2.5 py-1 rounded bg-purple-50 text-purple-800 border border-purple-200 font-bold">रेखा देवी (Rekha Devi)</button>
-                            <button onclick="setVideoVoter('Mahendra Kumar')" class="text-xs px-2.5 py-1 rounded bg-slate-50 text-slate-700 border border-slate-200 font-medium">महेन्द्र कुमार</button>
+                        <div class="flex flex-wrap gap-1.5 mb-2">
+                            <button onclick="setVideoVoter('सीता')" class="text-xs px-2.5 py-1 rounded bg-purple-50 text-purple-800 border border-purple-200 font-bold hover:bg-purple-100">सीता (Sita)</button>
+                            <button onclick="setVideoVoter('सुरेश')" class="text-xs px-2.5 py-1 rounded bg-slate-50 text-slate-700 border border-slate-200 font-medium hover:bg-slate-100">सुरेश (Suresh)</button>
+                            <button onclick="setVideoVoter('रामदेव')" class="text-xs px-2.5 py-1 rounded bg-slate-50 text-slate-700 border border-slate-200 font-medium hover:bg-slate-100">रामदेव (Ramdev)</button>
+                            <button onclick="setVideoVoter('चेतन')" class="text-xs px-2.5 py-1 rounded bg-slate-50 text-slate-700 border border-slate-200 font-medium hover:bg-slate-100">चेतन (Chetan)</button>
+                            <button onclick="setVideoVoter('मीरा')" class="text-xs px-2.5 py-1 rounded bg-slate-50 text-slate-700 border border-slate-200 font-medium hover:bg-slate-100">मीरा (Mira)</button>
                         </div>
-                        <input type="text" id="video-voter-input" value="Rekha Devi" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-purple-600">
+                        <input type="text" id="video-voter-input" value="सीता" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-purple-600">
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">प्रत्याशी व चुनाव चिन्ह</label>
                         <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between text-xs font-medium">
-                            <span>नीलू धोनीवाल (सराना)</span>
-                            <span class="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">चिन्ह: ट्रैक्टर 🚜</span>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-slate-900">नीलू दुनीवाल (सराना)</span>
+                                <span class="text-slate-500 font-mono text-[11px] bg-slate-200 px-1.5 py-0.5 rounded">बैलेट सं. 5</span>
+                            </div>
+                            <span class="font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded">चिन्ह: केतली ☕</span>
                         </div>
                     </div>
 
@@ -652,86 +674,303 @@
             }
         }
 
-        // 3. Zero-Search Voter Voice Agent
-        async function executeVoterLookup() {
-            const q = document.getElementById('voice-query-input').value.trim();
-            const btn = document.getElementById('btn-voice-search');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="animate-spin">⏳</span> <span>खोज रहे हैं...</span>`;
+        // ==========================================
+        // 2. Gemini Live Conversational Voice Agent
+        // ==========================================
+        let geminiDialogueHistory = [];
+        let speechRecognizer = null;
+        let isListening = false;
+        let soundwaveInterval = null;
+
+        function setVoiceStatus(statusText, dotColor = 'bg-slate-400', isWaveActive = false) {
+            const dot = document.getElementById('voice-status-dot');
+            const txt = document.getElementById('voice-status-text');
+            const wave = document.getElementById('voice-soundwave');
+            if (dot) dot.className = `w-2.5 h-2.5 rounded-full ${dotColor}`;
+            if (txt) txt.innerText = statusText;
+            if (wave) {
+                if (isWaveActive) {
+                    wave.classList.remove('opacity-40');
+                    wave.classList.add('opacity-100');
+                    if (!soundwaveInterval) {
+                        const bars = wave.querySelectorAll('span');
+                        soundwaveInterval = setInterval(() => {
+                            bars.forEach(b => {
+                                const h = Math.floor(Math.random() * 16) + 4;
+                                b.style.height = `${h}px`;
+                            });
+                        }, 120);
+                    }
+                } else {
+                    wave.classList.remove('opacity-100');
+                    wave.classList.add('opacity-40');
+                    if (soundwaveInterval) {
+                        clearInterval(soundwaveInterval);
+                        soundwaveInterval = null;
+                    }
+                }
+            }
+        }
+
+        function speakHindiText(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'hi-IN';
+            utterance.rate = 1.02;
+            utterance.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            const hindiVoice = voices.find(v => v.lang && (v.lang.includes('hi') || v.name.includes('Hindi') || v.name.includes('India')));
+            if (hindiVoice) utterance.voice = hindiVoice;
+
+            utterance.onstart = () => {
+                setVoiceStatus('● जेमिनी बोल रहा है (Live Audio Output)...', 'bg-emerald-500 animate-pulse', true);
+            };
+            utterance.onend = () => {
+                setVoiceStatus('● सुनने के लिए तैयार (माइक चालू)', 'bg-emerald-400', false);
+            };
+            utterance.onerror = () => {
+                setVoiceStatus('● सुनने के लिए तैयार', 'bg-slate-400', false);
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        async function startGeminiDialogue() {
+            geminiDialogueHistory = [];
+            const stream = document.getElementById('live-conversation-stream');
+            stream.innerHTML = '';
+            setVoiceStatus('● जेमिनी लाइव आरंभ हो रहा है...', 'bg-blue-500 animate-pulse', true);
 
             try {
-                const res = await fetch('/api/agent/lookup', {
+                const res = await fetch('/api/agent/converse_voice', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({query: q, gram_panchayat: "Sarana"})
+                    body: JSON.stringify({utterance: "", history: [], phone: "9828579249", constituency: "Sarana"})
+                });
+                const data = await res.json();
+                geminiDialogueHistory = data.history || [];
+                
+                appendGeminiBubble(data.reply_text, data.tool_called, data.latency_ms);
+                speakHindiText(data.reply_text);
+                fetchTraces();
+            } catch (err) {
+                console.error("Gemini live start error:", err);
+            }
+        }
+
+        function submitVoiceText() {
+            const input = document.getElementById('gemini-voice-input');
+            const val = input.value.trim();
+            if (val) {
+                sendVoiceMessage(val);
+            }
+        }
+
+        async function sendVoiceMessage(utteranceText) {
+            if (!utteranceText) return;
+            
+            // Set input value
+            document.getElementById('gemini-voice-input').value = utteranceText;
+            
+            // 1. Append Candidate Bubble
+            appendCandidateBubble(utteranceText);
+            
+            // 2. Show thinking indicator
+            const thinkingId = appendThinkingBubble();
+            setVoiceStatus('● जेमिनी 2.5 फ्लैश डेटाबेस क्वेरी कर रहा है...', 'bg-indigo-500 animate-pulse', true);
+            
+            try {
+                const res = await fetch('/api/agent/converse_voice', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        utterance: utteranceText,
+                        history: geminiDialogueHistory,
+                        phone: "9828579249",
+                        constituency: "Sarana"
+                    })
                 });
                 const data = await res.json();
                 
-                document.getElementById('voter-results-wrapper').classList.remove('hidden');
-                document.getElementById('res-norm-raw').innerText = `"${data.phonetic_normalization.raw_input}"`;
-                document.getElementById('res-norm-clean').innerText = `"${data.phonetic_normalization.resolved_name_hi}" (${data.phonetic_normalization.resolved_name_en})`;
-                document.getElementById('res-spoken-hindi').innerText = `"${data.spoken_hindi_response}"`;
-                document.getElementById('res-vote-count-badge').innerText = `${data.total_household_votes} वोट`;
-
-                const grid = document.getElementById('family-cards-grid');
-                grid.innerHTML = '';
-                (data.family_members || []).forEach(m => {
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between";
-                    card.innerHTML = `
-                        <div>
-                            <div class="text-xs font-extrabold text-slate-900">${m.name}</div>
-                            <div class="text-[11px] text-slate-500">पिता/पति: ${m.guardian || '—'}</div>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-700">क्रम #${m.sl_no}</span>
-                            <div class="text-[10px] text-slate-400 mt-0.5">${m.age} वर्ष • ${m.gender}</div>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
-
+                // Remove thinking indicator
+                const thinkEl = document.getElementById(thinkingId);
+                if (thinkEl) thinkEl.remove();
+                
+                geminiDialogueHistory = data.history || [];
+                
+                // 3. Append Gemini Bubble
+                appendGeminiBubble(data.reply_text, data.tool_called, data.latency_ms);
+                
+                // 4. Update Database Query Execution Badge
+                if (data.sql_query) {
+                    const badge = document.getElementById('live-sql-badge');
+                    badge.classList.remove('hidden');
+                    document.getElementById('sql-code-display').innerText = data.sql_query;
+                    document.getElementById('sql-tool-badge').innerText = `TOOL: ${data.tool_called || 'query_electoral_stats'}`;
+                    document.getElementById('sql-latency-badge').innerText = `${Math.round(data.latency_ms || 18)}ms`;
+                }
+                
+                // 5. Play Voice Audio
+                speakHindiText(data.reply_text);
                 fetchTraces();
             } catch (err) {
-                alert("मतदाता खोज में त्रुटि: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<span>🔍 खोजें</span>`;
+                console.error("Converse voice error:", err);
+                const thinkEl = document.getElementById(thinkingId);
+                if (thinkEl) thinkEl.remove();
+                appendGeminiBubble("माफ़ कीजिए, संपर्क में कुछ रुकावट आई। कृपया पुनः प्रयास करें।", null, 0);
             }
         }
 
-        async function dispatchFamilySlips() {
-            const btn = document.getElementById('btn-dispatch-family');
-            btn.disabled = true;
-            btn.innerHTML = `<span>व्हाट्सएप भेजा जा रहा है...</span>`;
+        function appendCandidateBubble(text) {
+            const stream = document.getElementById('live-conversation-stream');
+            const bubble = document.createElement('div');
+            bubble.className = "flex items-start gap-3 justify-end self-end max-w-[85%]";
+            bubble.innerHTML = `
+                <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl rounded-tr-none p-3.5 shadow-xs text-xs sm:text-sm space-y-1">
+                    <div class="flex items-center justify-between gap-4">
+                        <span class="text-[10px] text-emerald-200 font-mono">अभ्यर्थी (Candidate)</span>
+                        <span class="font-bold text-[11px] uppercase tracking-wide">👤 आप</span>
+                    </div>
+                    <p class="font-bold leading-relaxed">${escapeHtml(text)}</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center text-sm shadow-xs flex-shrink-0">
+                    👤
+                </div>
+            `;
+            stream.appendChild(bubble);
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function appendThinkingBubble() {
+            const stream = document.getElementById('live-conversation-stream');
+            const id = 'thinking-' + Date.now();
+            const bubble = document.createElement('div');
+            bubble.id = id;
+            bubble.className = "flex items-start gap-3 max-w-[85%]";
+            bubble.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-sm shadow-xs flex-shrink-0 animate-pulse">
+                    ✨
+                </div>
+                <div class="bg-white border border-indigo-200 rounded-2xl rounded-tl-none p-3 shadow-xs text-xs text-slate-600 flex items-center space-x-2">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
+                    <span class="font-bold text-indigo-700">जेमिनी 2.5 फ्लैश सोच रहा है व डेटाबेस टूल्स चला रहा है...</span>
+                </div>
+            `;
+            stream.appendChild(bubble);
+            stream.scrollTop = stream.scrollHeight;
+            return id;
+        }
+
+        function appendGeminiBubble(text, toolName, latencyMs) {
+            const stream = document.getElementById('live-conversation-stream');
+            const bubble = document.createElement('div');
+            bubble.className = "flex items-start gap-3 max-w-[85%]";
+            
+            const toolBadge = toolName ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 font-mono font-bold">${toolName}</span>` : '';
+            const latBadge = latencyMs ? `<span class="text-[9px] text-slate-400 font-mono">${Math.round(latencyMs)}ms</span>` : '';
+            
+            bubble.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-sm shadow-xs flex-shrink-0">
+                    ✨
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none p-3.5 shadow-xs text-xs sm:text-sm text-slate-800 space-y-1.5">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="font-bold text-indigo-700 text-[11px] uppercase tracking-wide">Gemini Live Voice</span>
+                            ${toolBadge}
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            ${latBadge}
+                            <button onclick="speakHindiText('${escapeAttr(text)}')" class="hover:bg-slate-100 p-1 rounded text-slate-500 hover:text-indigo-600 transition" title="फिर से सुनें">
+                                🔊
+                            </button>
+                        </div>
+                    </div>
+                    <p class="font-medium text-slate-900 leading-relaxed">${escapeHtml(text)}</p>
+                </div>
+            `;
+            stream.appendChild(bubble);
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function toggleContinuousListening() {
+            const micBtn = document.getElementById('btn-voice-mic');
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!SpeechRec) {
+                alert("इस ब्राउज़र में Web Speech Recognition उपलब्ध नहीं है। कृपया Chrome का उपयोग करें या टेक्स्ट बॉक्स में लिखें।");
+                return;
+            }
+
+            if (isListening) {
+                if (speechRecognizer) {
+                    speechRecognizer.stop();
+                }
+                isListening = false;
+                micBtn.classList.remove('animate-pulse', 'bg-red-500', 'text-white');
+                setVoiceStatus('● माइक बंद (बोलने के लिए माइक दबाएं)', 'bg-slate-400', false);
+                return;
+            }
 
             try {
-                const res = await fetch('/api/agent/dispatch', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({household_id: "w7_h79", phone: "9828579249"})
-                });
-                const data = await res.json();
-                document.getElementById('slip-dispatch-feedback').classList.remove('hidden');
-                fetchTraces();
+                speechRecognizer = new SpeechRec();
+                speechRecognizer.lang = 'hi-IN';
+                speechRecognizer.continuous = false;
+                speechRecognizer.interimResults = true;
+
+                speechRecognizer.onstart = () => {
+                    isListening = true;
+                    micBtn.classList.add('animate-pulse', 'bg-red-500', 'text-white');
+                    setVoiceStatus('● सुन रहे हैं... कृपया हिंदी में बोलें', 'bg-red-500 animate-pulse', true);
+                };
+
+                speechRecognizer.onresult = (event) => {
+                    let interim = '';
+                    let finalTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        } else {
+                            interim += event.results[i][0].transcript;
+                        }
+                    }
+                    if (interim) {
+                        document.getElementById('gemini-voice-input').value = interim;
+                    }
+                    if (finalTranscript) {
+                        document.getElementById('gemini-voice-input').value = finalTranscript.trim();
+                        sendVoiceMessage(finalTranscript.trim());
+                    }
+                };
+
+                speechRecognizer.onerror = (event) => {
+                    console.warn("Speech recognition notice:", event.error);
+                    isListening = false;
+                    micBtn.classList.remove('animate-pulse', 'bg-red-500', 'text-white');
+                    setVoiceStatus('● सुनने के लिए तैयार', 'bg-slate-400', false);
+                };
+
+                speechRecognizer.onend = () => {
+                    isListening = false;
+                    micBtn.classList.remove('animate-pulse', 'bg-red-500', 'text-white');
+                    setVoiceStatus('● सुनने के लिए तैयार', 'bg-slate-400', false);
+                };
+
+                speechRecognizer.start();
             } catch (err) {
-                alert("पर्ची भेजने में त्रुटि: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<span>📲 परिवार को व्हाट्सएप पर्ची भेजें</span>`;
+                console.error("Speech rec init error:", err);
+                isListening = false;
+                micBtn.classList.remove('animate-pulse', 'bg-red-500', 'text-white');
             }
         }
 
-        function toggleVoiceRecording() {
-            const micBtn = document.getElementById('btn-mic');
-            micBtn.classList.toggle('animate-pulse');
-            micBtn.classList.toggle('bg-red-500');
-            micBtn.classList.toggle('text-white');
-            
-            setTimeout(() => {
-                micBtn.classList.remove('animate-pulse', 'bg-red-500', 'text-white');
-                executeVoterLookup();
-            }, 1200);
+        function escapeHtml(str) {
+            return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function escapeAttr(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
         }
 
         // 4. Personalized Video Generation

@@ -24,6 +24,22 @@ def get_traces():
         "traces": buildathon_agent.get_recent_traces()
     })
 
+@agent_bp.route("/converse_voice", methods=["POST"])
+def converse_voice():
+    data = request.get_json() or {}
+    utterance = data.get("utterance", "").strip()
+    history = data.get("history", [])
+    phone = data.get("phone", "9828579249")
+    constituency = data.get("constituency", "Sarana")
+    
+    res = buildathon_agent.converse_gemini_voice(
+        user_utterance=utterance,
+        session_history=history,
+        phone=phone,
+        constituency=constituency
+    )
+    return jsonify(res)
+
 @agent_bp.route("/lookup", methods=["POST"])
 def lookup_voter():
     data = request.get_json() or {}

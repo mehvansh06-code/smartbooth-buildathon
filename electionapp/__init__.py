@@ -278,7 +278,7 @@ def create_app(tenant_slug: str = "ward82", storage_backend: Optional[str] = Non
 
         # Whitelist public assets & auth endpoints
         is_public = (
-            path in ['/login', '/logout', '/healthz', '/favicon.ico', '/manifest.json', '/sw.js', '/free-slips', '/parchi', '/photoparchi', '/terms', '/privacy', '/refund', '/shipping', '/delivery', '/about', '/pricing', '/contact', '/demo']
+            path in ['/login', '/logout', '/healthz', '/favicon.ico', '/manifest.json', '/sw.js', '/free-slips', '/parchi', '/photoparchi', '/terms', '/privacy', '/refund', '/shipping', '/delivery', '/about', '/pricing', '/contact']
             or path.startswith('/static/')
             or path.startswith('/tenant_assets/')
             or path.startswith('/k/')
@@ -294,7 +294,7 @@ def create_app(tenant_slug: str = "ward82", storage_backend: Optional[str] = Non
         )
 
         if (
-            path in ['/login', '/logout', '/free-slips', '/parchi', '/photoparchi', '/terms', '/privacy', '/refund', '/shipping', '/delivery', '/about', '/pricing', '/contact', '/demo']
+            path in ['/login', '/logout', '/free-slips', '/parchi', '/photoparchi', '/terms', '/privacy', '/refund', '/shipping', '/delivery', '/about', '/pricing', '/contact']
             or path.startswith('/logout/')
             or path.startswith('/login/')
             or path.startswith('/k/')
@@ -819,11 +819,6 @@ def create_app(tenant_slug: str = "ward82", storage_backend: Optional[str] = Non
     app.register_blueprint(voice_bp)
     app.register_blueprint(voice_agent_bp)
     app.register_blueprint(agent_bp)
-
-    @app.route('/demo')
-    def demo_console():
-        from flask import render_template
-        return render_template('demo_console.html')
 
     @app.context_processor
     def inject_symbol_catalog():
