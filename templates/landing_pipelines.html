@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartBooth Autonomous AI Ecosystem — 3 Core Pipelines</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>SmartBooth AI — 3 Autonomous Electoral Pipelines | Google Buildathon</title>
     
-    <!-- Fonts -->
+    <!-- PWA & Meta -->
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="icon" type="image/png" href="/static/icons/icon-192.png">
+
+    <!-- Fonts matching smartbooth.vedmap.com -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Mukta:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Mukta:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
         // Suppress Tailwind CDN dev warning in console
@@ -25,17 +29,17 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Mukta', 'sans-serif'],
+                        sans: ['Inter', 'Mukta', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
                         brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            900: '#064e3b',
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
                         }
                     }
                 }
@@ -43,63 +47,66 @@
         }
     </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', 'Mukta', sans-serif; }
-        .glow-emerald { box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.3); }
-        .glow-indigo { box-shadow: 0 0 35px -5px rgba(99, 102, 241, 0.3); }
-        .glow-cyan { box-shadow: 0 0 35px -5px rgba(6, 182, 212, 0.3); }
+        body { font-family: 'Inter', 'Mukta', sans-serif; }
+        .tricolor-stripe {
+            background: linear-gradient(90deg, #f97316 0%, #fb923c 33%, #ffffff 50%, #22c55e 66%, #16a34a 100%);
+        }
         .pulse-live { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .5; transform: scale(1.05); } }
         .smooth-scroll { scroll-behavior: smooth; }
+        .shadow-soft { box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03); }
+        .shadow-hover { box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.1), 0 4px 12px -2px rgba(15, 23, 42, 0.05); }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased smooth-scroll selection:bg-emerald-500 selection:text-slate-950">
+<body class="bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-50/40 text-slate-800 min-h-screen flex flex-col font-sans antialiased smooth-scroll selection:bg-indigo-500 selection:text-white">
 
-    <!-- Ambient Gradient Background -->
-    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
-        <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-600/30 rounded-full blur-[120px]"></div>
-        <div class="absolute top-1/3 -right-40 w-[30rem] h-[30rem] bg-indigo-600/25 rounded-full blur-[140px]"></div>
-        <div class="absolute -bottom-40 left-1/3 w-[32rem] h-[32rem] bg-cyan-600/20 rounded-full blur-[140px]"></div>
-    </div>
+    <!-- Top Subtle National Tricolor Stripe (smartbooth.vedmap.com signature) -->
+    <div class="fixed top-0 left-0 right-0 h-1.5 tricolor-stripe shadow-xs z-50"></div>
 
-    <!-- Header Navigation -->
-    <header class="relative z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3.5 sticky top-0 shadow-xl">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-            <!-- Brand -->
+    <!-- UNIVERSAL TOP NAVIGATION BAR -->
+    <header class="bg-slate-900 text-white px-3 sm:px-6 py-2.5 sm:py-3 border-b border-slate-800 flex items-center justify-between sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-3">
+            
+            <!-- Left Brand -->
             <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
-                <a href="/" class="flex items-center space-x-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-                        ⚡
+                <a href="/" class="flex items-center space-x-2.5 group">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-black text-white text-base shadow-xs shrink-0 group-hover:bg-indigo-500 transition">
+                        🗳️
                     </div>
                     <div>
                         <div class="flex items-center space-x-2">
-                            <span class="text-lg font-extrabold tracking-tight text-white">SmartBooth <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">Autonomous AI</span></span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 font-semibold border border-emerald-500/30">v2.0 Stage</span>
+                            <span class="text-sm sm:text-base font-black text-white tracking-tight">SmartBooth <span class="text-indigo-400 font-extrabold">Autonomous AI</span></span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-400/30">v2.0 Stage</span>
                         </div>
-                        <p class="text-[11px] text-slate-400">Google DeepMind × Google Cloud Startup Buildathon India 2026</p>
+                        <p class="text-[11px] text-slate-400 hidden sm:block">Google DeepMind × Google Cloud Startup Buildathon India 2026</p>
                     </div>
                 </a>
 
-                <!-- Mobile Action Pill -->
-                <a href="/hub?tenant=sarana" class="md:hidden text-xs px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold flex items-center space-x-1 shadow-md">
-                    <span>War Room</span>
+                <!-- Mobile War Room Quick Link -->
+                <a href="/hub?tenant=sarana" class="md:hidden text-xs px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center space-x-1 shadow-xs transition">
+                    <span>वॉर रूम (War Room)</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
             </div>
 
             <!-- Server Status & Navigation Links -->
             <div class="flex items-center space-x-3 text-xs w-full md:w-auto justify-end">
-                <div class="hidden sm:flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/80 text-slate-300">
+                <div class="hidden sm:flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-live"></span>
                     <span>Google Cloud Mumbai (GCE)</span>
                     <span class="text-slate-500">•</span>
                     <span class="text-emerald-400 font-medium font-mono">8.231.107.200</span>
                 </div>
 
-                <a href="#pipelines-overview" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                <a href="#pipelines-overview" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition font-medium">
                     3 Pipelines
                 </a>
-                <a href="/hub?tenant=sarana" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                <a href="/hub?tenant=sarana" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 font-semibold transition">
                     War Room
+                </a>
+                <a href="/voters?tenant=sarana" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-xs flex items-center space-x-1">
+                    <span>मतदाता पर्ची (Search)</span>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
             </div>
         </div>
@@ -109,66 +116,66 @@
     <main class="relative z-10 flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 sm:py-12 space-y-12">
 
         <!-- Hero Section -->
-        <section class="text-center space-y-5 max-w-4xl mx-auto pt-2 sm:pt-6">
-            <div class="inline-flex items-center space-x-2 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 border border-emerald-500/30 px-3.5 py-1.5 rounded-full text-xs font-semibold text-emerald-300">
+        <section class="text-center space-y-5 max-w-4xl mx-auto pt-2 sm:pt-4">
+            <div class="inline-flex items-center space-x-2 bg-white border border-slate-200/90 px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 shadow-xs">
                 <span class="flex h-2 w-2 relative">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span>Google DeepMind × Google Cloud Startup Buildathon India 2026</span>
-                <span class="text-slate-500">•</span>
-                <span class="text-slate-400">GUSEC Ahmedabad</span>
+                <span class="text-indigo-700 font-bold">Google DeepMind × Google Cloud Startup Buildathon India 2026</span>
+                <span class="text-slate-300">•</span>
+                <span class="text-slate-500 font-medium">GUSEC Ahmedabad</span>
             </div>
 
-            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                Autonomous Multimodal AI for <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
-                    Indian Grassroots Democracy
+            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 leading-tight">
+                भारत का स्वायत्त मल्टीमॉडल AI चुनाव मंच <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-indigo-700 to-teal-600">
+                    SmartBooth AI Operating System
                 </span>
             </h1>
 
-            <p class="text-sm sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
-                Empowering <strong class="text-white">960 Million voters</strong> and <strong class="text-white">2.5 Million candidates</strong> through an interconnected tripartite AI ecosystem: eliminating zero-UI onboarding friction, dialectic variance, and impersonal outreach.
+            <p class="text-sm sm:text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Empowering <strong class="text-slate-900">960 Million voters</strong> and <strong class="text-slate-900">2.5 Million candidates</strong> through three interconnected autonomous AI pipelines: eliminating dialectic variance, zero-UI onboarding friction, and impersonal campaign spam.
             </p>
 
             <!-- Metrics Pills -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-3 text-left">
-                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-                    <div class="text-[11px] text-slate-400 font-medium">Speech Latency</div>
-                    <div class="text-base sm:text-lg font-bold text-cyan-400 font-mono">~300–600ms</div>
-                    <div class="text-[10px] text-slate-400">Gemini Live API</div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2 text-left">
+                <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-soft">
+                    <div class="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Speech Latency</div>
+                    <div class="text-lg sm:text-xl font-black text-cyan-600 font-mono">~300–600ms</div>
+                    <div class="text-[11px] text-slate-500 font-medium">Gemini Live API</div>
                 </div>
-                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-                    <div class="text-[11px] text-slate-400 font-medium">Video Synthesis</div>
-                    <div class="text-base sm:text-lg font-bold text-indigo-400 font-mono">&lt; 3.3 MB</div>
-                    <div class="text-[10px] text-slate-400">WhatsApp Faststart H.264</div>
+                <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-soft">
+                    <div class="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Video Synthesis</div>
+                    <div class="text-lg sm:text-xl font-black text-indigo-600 font-mono">&lt; 3.3 MB</div>
+                    <div class="text-[11px] text-slate-500 font-medium">WhatsApp Faststart H.264</div>
                 </div>
-                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-                    <div class="text-[11px] text-slate-400 font-medium">Household Clustering</div>
-                    <div class="text-base sm:text-lg font-bold text-emerald-400 font-mono">100% Devanagari</div>
-                    <div class="text-[10px] text-slate-400">Gruhastha Family Graph</div>
+                <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-soft">
+                    <div class="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Household Graph</div>
+                    <div class="text-lg sm:text-xl font-black text-emerald-600 font-mono">100% Devanagari</div>
+                    <div class="text-[11px] text-slate-500 font-medium">Gruhastha Family Graph</div>
                 </div>
-                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-                    <div class="text-[11px] text-slate-400 font-medium">Autonomous Ops</div>
-                    <div class="text-base sm:text-lg font-bold text-amber-400 font-mono">Zero-UI Chat</div>
-                    <div class="text-[10px] text-slate-400">Gemini 2.5 Flash on Vertex</div>
+                <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-soft">
+                    <div class="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Autonomous Ops</div>
+                    <div class="text-lg sm:text-xl font-black text-amber-600 font-mono">Zero-UI Chat</div>
+                    <div class="text-[11px] text-slate-500 font-medium">Gemini 2.5 Flash on Vertex</div>
                 </div>
             </div>
         </section>
 
         <!-- 3 Pipelines Master Grid -->
         <section id="pipelines-overview" class="space-y-6">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-4">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200 pb-4">
                 <div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center space-x-2">
-                        <span>Our Three Autonomous AI Pipelines</span>
-                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-normal">Click any card to inspect how it works</span>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center space-x-2">
+                        <span>तीन स्वायत्त AI पाइपलाइन (Three Core Pipelines)</span>
+                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold border border-slate-200">Click card to inspect</span>
                     </h2>
-                    <p class="text-xs sm:text-sm text-slate-400">Explore the exact architecture, core capabilities, and live operational endpoints of each pipeline.</p>
+                    <p class="text-xs sm:text-sm text-slate-500">Explore the exact architecture, live operational endpoints, and capabilities of each pipeline.</p>
                 </div>
                 <div class="flex items-center space-x-2 text-xs">
-                    <span class="text-slate-400">Active Campaign:</span>
-                    <span class="font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">ग्राम पंचायत सराना (Sarana, Ajmer)</span>
+                    <span class="text-slate-500 font-medium">सक्रिय पंचायत:</span>
+                    <span class="font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">ग्राम पंचायत सराना (Sarana, Ajmer)</span>
                 </div>
             </div>
 
@@ -176,65 +183,65 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 <!-- ================= CARD 1: build.smartbooth.in ================= -->
-                <div onclick="selectPipeline('pipeline1')" id="card-pipeline1" class="group relative cursor-pointer rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border-2 border-emerald-500/50 hover:border-emerald-400 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between glow-emerald">
+                <div onclick="selectPipeline('pipeline1')" id="card-pipeline1" class="group relative cursor-pointer rounded-2xl bg-white border-2 border-emerald-500 p-6 shadow-hover transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
                     <div class="space-y-4">
                         <!-- Top Tag -->
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center space-x-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center space-x-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                 <span>PIPELINE 01</span>
                             </span>
-                            <span class="text-xs font-mono text-emerald-400 bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800">
+                            <span class="text-xs font-mono font-bold text-emerald-700 bg-slate-50 px-2.5 py-1 rounded border border-slate-200">
                                 build.smartbooth.in
                             </span>
                         </div>
 
                         <!-- Header -->
                         <div>
-                            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-2xl text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-2xl text-emerald-600 mb-3 group-hover:scale-110 transition-transform">
                                 ⚡
                             </div>
-                            <h3 class="text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">
-                                SmartBooth Autonomous Electoral Engine
+                            <h3 class="text-xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors">
+                                Zero-Search Household Voter Graph & Digital Parchi
                             </h3>
-                            <p class="text-xs text-emerald-400/90 font-medium mt-0.5">
-                                Ground Operations, Household Clustering & Analytics Cockpit
+                            <p class="text-xs text-emerald-700 font-bold mt-0.5">
+                                Ground Operations, Household Clustering & Analytics
                             </p>
                         </div>
 
                         <!-- Description -->
-                        <p class="text-xs text-slate-300 leading-relaxed">
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
                             The centralized operational brain. Ingests raw electoral rolls, groups voters into unified household family units, enables Devanagari dialectic search, and powers natural language Text-to-SQL analytics.
                         </p>
 
                         <!-- Key Highlights -->
-                        <ul class="text-xs text-slate-400 space-y-1.5 border-t border-slate-800/80 pt-3">
+                        <ul class="text-xs text-slate-600 space-y-1.5 border-t border-slate-100 pt-3">
                             <li class="flex items-center space-x-2">
-                                <span class="text-emerald-400 font-bold">✓</span>
-                                <span><strong>Household Graph:</strong> Gruhastha cluster mapping</span>
+                                <span class="text-emerald-600 font-bold">✓</span>
+                                <span><strong>Household Graph:</strong> Gruhastha cluster mapping by house & ward</span>
                             </li>
                             <li class="flex items-center space-x-2">
-                                <span class="text-emerald-400 font-bold">✓</span>
-                                <span><strong>Gemini 2.5 Flash:</strong> Natural language Text-to-SQL</span>
+                                <span class="text-emerald-600 font-bold">✓</span>
+                                <span><strong>Gemini 2.5 Flash:</strong> Natural language Text-to-SQL on Vertex AI</span>
                             </li>
                             <li class="flex items-center space-x-2">
-                                <span class="text-emerald-400 font-bold">✓</span>
+                                <span class="text-emerald-600 font-bold">✓</span>
                                 <span><strong>Field Dispatch:</strong> Dual digital & 58mm POS thermal slips</span>
                             </li>
                         </ul>
                     </div>
 
                     <!-- Bottom Actions -->
-                    <div class="pt-5 border-t border-slate-800/80 mt-4 space-y-2">
-                        <div class="flex items-center justify-between text-xs font-medium text-emerald-400">
+                    <div class="pt-5 border-t border-slate-100 mt-4 space-y-2">
+                        <div class="flex items-center justify-between text-xs font-medium text-emerald-700">
                             <span>Inspect How It Works →</span>
                             <span class="text-[10px] text-slate-400 font-mono">GCE Mumbai</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2 pt-1">
-                            <a href="/demo" onclick="event.stopPropagation();" class="text-center py-2 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow">
-                                Launch Demo
+                            <a href="/voters?tenant=sarana" onclick="event.stopPropagation();" class="text-center py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-xs">
+                                Search Voters
                             </a>
-                            <a href="/hub?tenant=sarana" onclick="event.stopPropagation();" class="text-center py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
+                            <a href="/hub?tenant=sarana" onclick="event.stopPropagation();" class="text-center py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 transition">
                                 Open War Room
                             </a>
                         </div>
@@ -242,66 +249,66 @@
                 </div>
 
                 <!-- ================= CARD 2: AI Campaign Video Engine ================= -->
-                <div onclick="selectPipeline('pipeline2')" id="card-pipeline2" class="group relative cursor-pointer rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border border-slate-800 hover:border-indigo-500 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+                <div onclick="selectPipeline('pipeline2')" id="card-pipeline2" class="group relative cursor-pointer rounded-2xl bg-white border border-slate-200/90 hover:border-indigo-400 p-6 shadow-soft transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
                     <div class="space-y-4">
                         <!-- Top Tag -->
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center space-x-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-800 border border-indigo-200 flex items-center space-x-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
                                 <span>PIPELINE 02</span>
                             </span>
-                            <span class="text-xs font-mono text-indigo-400 bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800">
+                            <span class="text-xs font-mono font-bold text-indigo-700 bg-slate-50 px-2.5 py-1 rounded border border-slate-200">
                                 video.smartbooth.in
                             </span>
                         </div>
 
                         <!-- Header -->
                         <div>
-                            <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-2xl text-indigo-400 mb-3 group-hover:scale-110 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-2xl text-indigo-600 mb-3 group-hover:scale-110 transition-transform">
                                 🎥
                             </div>
-                            <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">
+                            <h3 class="text-xl font-black text-slate-900 group-hover:text-indigo-700 transition-colors">
                                 Hyper-Personalized Video Synthesis
                             </h3>
-                            <p class="text-xs text-indigo-400/90 font-medium mt-0.5">
+                            <p class="text-xs text-indigo-700 font-bold mt-0.5">
                                 Surgical Splice Voice & Devanagari WhatsApp Video
                             </p>
                         </div>
 
                         <!-- Description -->
-                        <p class="text-xs text-slate-300 leading-relaxed">
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
                             High-throughput automated video pipeline addressing each voter individually by name in candidate's authentic voice, composited with Devanagari honorific badges and ballot symbol banners.
                         </p>
 
                         <!-- Key Highlights -->
-                        <ul class="text-xs text-slate-400 space-y-1.5 border-t border-slate-800/80 pt-3">
+                        <ul class="text-xs text-slate-600 space-y-1.5 border-t border-slate-100 pt-3">
                             <li class="flex items-center space-x-2">
-                                <span class="text-indigo-400 font-bold">✓</span>
+                                <span class="text-indigo-600 font-bold">✓</span>
                                 <span><strong>Surgical Splice:</strong> Calibrated 3.700s acoustic cut</span>
                             </li>
                             <li class="flex items-center space-x-2">
-                                <span class="text-indigo-400 font-bold">✓</span>
+                                <span class="text-indigo-600 font-bold">✓</span>
                                 <span><strong>Dynamic Typography:</strong> Pillow Devanagari badge overlays</span>
                             </li>
                             <li class="flex items-center space-x-2">
-                                <span class="text-indigo-400 font-bold">✓</span>
+                                <span class="text-indigo-600 font-bold">✓</span>
                                 <span><strong>WhatsApp Compliant:</strong> &lt;3.3MB faststart H.264/AAC</span>
                             </li>
                         </ul>
                     </div>
 
                     <!-- Bottom Actions -->
-                    <div class="pt-5 border-t border-slate-800/80 mt-4 space-y-2">
-                        <div class="flex items-center justify-between text-xs font-medium text-indigo-400">
+                    <div class="pt-5 border-t border-slate-100 mt-4 space-y-2">
+                        <div class="flex items-center justify-between text-xs font-medium text-indigo-700">
                             <span>Inspect How It Works →</span>
                             <span class="text-[10px] text-slate-400 font-mono">video.smartbooth.in</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2 pt-1">
-                            <button onclick="event.stopPropagation(); openVideoModal();" class="text-center py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition shadow flex items-center justify-center space-x-1">
+                            <button onclick="event.stopPropagation(); openVideoModal();" class="text-center py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1">
                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
                                 <span>Play Sample</span>
                             </button>
-                            <a href="https://video.smartbooth.in" target="_blank" onclick="event.stopPropagation();" class="text-center py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition flex items-center justify-center space-x-1">
+                            <a href="https://video.smartbooth.in" target="_blank" onclick="event.stopPropagation();" class="text-center py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 transition flex items-center justify-center space-x-1">
                                 <span>Studio Portal</span>
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                             </a>
@@ -310,66 +317,66 @@
                 </div>
 
                 <!-- ================= CARD 3: voiceagent.smartbooth.in ================= -->
-                <div onclick="selectPipeline('pipeline3')" id="card-pipeline3" class="group relative cursor-pointer rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border border-slate-800 hover:border-cyan-500 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+                <div onclick="selectPipeline('pipeline3')" id="card-pipeline3" class="group relative cursor-pointer rounded-2xl bg-white border border-slate-200/90 hover:border-cyan-500 p-6 shadow-soft transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
                     <div class="space-y-4">
                         <!-- Top Tag -->
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center space-x-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-cyan-50 text-cyan-800 border border-cyan-200 flex items-center space-x-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
                                 <span>PIPELINE 03</span>
                             </span>
-                            <span class="text-xs font-mono text-cyan-400 bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800">
+                            <span class="text-xs font-mono font-bold text-cyan-700 bg-slate-50 px-2.5 py-1 rounded border border-slate-200">
                                 voiceagent.smartbooth.in
                             </span>
                         </div>
 
                         <!-- Header -->
                         <div>
-                            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-2xl text-cyan-400 mb-3 group-hover:scale-110 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-2xl text-cyan-600 mb-3 group-hover:scale-110 transition-transform">
                                 🎙️
                             </div>
-                            <h3 class="text-xl font-bold text-white group-hover:text-cyan-300 transition-colors">
+                            <h3 class="text-xl font-black text-slate-900 group-hover:text-cyan-700 transition-colors">
                                 Real-Time Multimodal Voice Agent
                             </h3>
-                            <p class="text-xs text-cyan-400/90 font-medium mt-0.5">
+                            <p class="text-xs text-cyan-700 font-bold mt-0.5">
                                 Sub-Second Speech-to-Speech Grievance AI via Gemini Live
                             </p>
                         </div>
 
                         <!-- Description -->
-                        <p class="text-xs text-slate-300 leading-relaxed">
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
                             Two-way real-time conversational telephony agent. Converses fluently in Hinglish & rural dialects, listens to civic grievances, allows natural barge-in, and auto-executes database tools.
                         </p>
 
                         <!-- Key Highlights -->
-                        <ul class="text-xs text-slate-400 space-y-1.5 border-t border-slate-800/80 pt-3">
+                        <ul class="text-xs text-slate-600 space-y-1.5 border-t border-slate-100 pt-3">
                             <li class="flex items-center space-x-2">
-                                <span class="text-cyan-400 font-bold">✓</span>
+                                <span class="text-cyan-600 font-bold">✓</span>
                                 <span><strong>Sub-Second Latency:</strong> ~300-600ms via Gemini Live WebSockets</span>
                             </li>
                             <li class="flex items-center space-x-2">
-                                <span class="text-cyan-400 font-bold">✓</span>
+                                <span class="text-cyan-600 font-bold">✓</span>
                                 <span><strong>Natural Barge-In:</strong> Fluid interrupt handling without audio overlap</span>
                             </li>
                             <li class="flex items-center space-x-2">
-                                <span class="text-cyan-400 font-bold">✓</span>
-                                <span><strong>Tool Calling:</strong> <code class="text-cyan-300 font-mono">record_voter_issue</code> to database</span>
+                                <span class="text-cyan-600 font-bold">✓</span>
+                                <span><strong>Tool Calling:</strong> <code class="text-cyan-700 font-mono bg-cyan-50 px-1 py-0.5 rounded">record_voter_issue</code> to database</span>
                             </li>
                         </ul>
                     </div>
 
                     <!-- Bottom Actions -->
-                    <div class="pt-5 border-t border-slate-800/80 mt-4 space-y-2">
-                        <div class="flex items-center justify-between text-xs font-medium text-cyan-400">
+                    <div class="pt-5 border-t border-slate-100 mt-4 space-y-2">
+                        <div class="flex items-center justify-between text-xs font-medium text-cyan-700">
                             <span>Inspect How It Works →</span>
                             <span class="text-[10px] text-slate-400 font-mono">FastAPI + Twilio</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2 pt-1">
-                            <a href="https://voiceagent.smartbooth.in" target="_blank" onclick="event.stopPropagation();" class="text-center py-2 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition shadow flex items-center justify-center space-x-1">
+                            <a href="https://voiceagent.smartbooth.in" target="_blank" onclick="event.stopPropagation();" class="text-center py-2 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1">
                                 <span>Open Portal</span>
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                             </a>
-                            <a href="/voiceagent/" target="_blank" onclick="event.stopPropagation();" class="text-center py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
+                            <a href="/voiceagent/" target="_blank" onclick="event.stopPropagation();" class="text-center py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-200 transition">
                                 Test Mic Live
                             </a>
                         </div>
@@ -380,27 +387,27 @@
         </section>
 
         <!-- ================= DETAILED PIPELINE DEEP DIVE SECTION ================= -->
-        <section id="pipeline-details-section" class="scroll-mt-24 space-y-6 pt-6">
+        <section id="pipeline-details-section" class="scroll-mt-24 space-y-6 pt-4">
             <!-- Section Header & Switcher Tabs -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6">
+            <div class="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-8 shadow-soft space-y-6">
                 
-                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
                     <div>
-                        <span class="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">Architecture Deep-Dive & Functionality</span>
-                        <h2 class="text-2xl font-bold text-white mt-1">
+                        <span class="text-xs font-mono uppercase text-indigo-700 font-bold tracking-wider">Architecture Deep-Dive & Functionality</span>
+                        <h2 class="text-2xl font-black text-slate-900 mt-1">
                             How Each Pipeline Operates
                         </h2>
                     </div>
 
                     <!-- Pipeline Selector Tabs -->
-                    <div class="flex items-center space-x-1 bg-slate-950 p-1.5 rounded-xl border border-slate-800 w-full md:w-auto">
-                        <button onclick="selectPipeline('pipeline1')" id="tab-pipeline1" class="flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-2 bg-emerald-500 text-slate-950 shadow">
+                    <div class="flex items-center space-x-1 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 w-full md:w-auto">
+                        <button onclick="selectPipeline('pipeline1')" id="tab-pipeline1" class="flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2 bg-emerald-600 text-white shadow-sm">
                             <span>⚡ Pipeline 1: build.smartbooth.in</span>
                         </button>
-                        <button onclick="selectPipeline('pipeline2')" id="tab-pipeline2" class="flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-2 text-slate-400 hover:text-white">
+                        <button onclick="selectPipeline('pipeline2')" id="tab-pipeline2" class="flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900">
                             <span>🎥 Pipeline 2: video.smartbooth.in</span>
                         </button>
-                        <button onclick="selectPipeline('pipeline3')" id="tab-pipeline3" class="flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-2 text-slate-400 hover:text-white">
+                        <button onclick="selectPipeline('pipeline3')" id="tab-pipeline3" class="flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900">
                             <span>🎙️ Pipeline 3: voiceagent.smartbooth.in</span>
                         </button>
                     </div>
@@ -409,17 +416,20 @@
                 <!-- ================= DETAIL VIEW 1: build.smartbooth.in ================= -->
                 <div id="detail-pipeline1" class="space-y-8">
                     <!-- Title Bar -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-950/30 border border-emerald-500/30 p-4 rounded-xl">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50 border border-emerald-200 p-5 rounded-2xl">
                         <div class="flex items-center space-x-3">
                             <span class="text-3xl">⚡</span>
                             <div>
-                                <h3 class="text-lg font-bold text-white">SmartBooth Autonomous Electoral Operations & Field Cockpit</h3>
-                                <p class="text-xs text-emerald-400 font-mono">Domain: build.smartbooth.in • Engine: Gemini 2.5 Flash + PostgreSQL 16</p>
+                                <h3 class="text-lg font-black text-slate-900">SmartBooth Autonomous Electoral Operations & Field Cockpit</h3>
+                                <p class="text-xs text-emerald-800 font-mono font-medium">Domain: build.smartbooth.in • Engine: Gemini 2.5 Flash + PostgreSQL 16</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <a href="/demo" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow">
-                                Open Live Demo Cockpit →
+                            <a href="/voters?tenant=sarana" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-xs">
+                                Open Voter Search →
+                            </a>
+                            <a href="/hub?tenant=sarana" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-semibold text-xs transition shadow-2xs">
+                                Open War Room
                             </a>
                         </div>
                     </div>
@@ -427,89 +437,89 @@
                     <!-- 3 Core Pillars: What it is, Main Function, How it Works -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- What it is -->
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-3">
-                            <div class="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
-                                <span class="w-6 h-6 rounded-md bg-emerald-500/20 flex items-center justify-center text-xs">01</span>
+                        <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center space-x-2 text-emerald-700 font-bold text-sm">
+                                <span class="w-6 h-6 rounded-md bg-emerald-100 flex items-center justify-center text-xs">01</span>
                                 <h4>What Is This Pipeline?</h4>
                             </div>
-                            <p class="text-xs text-slate-300 leading-relaxed">
+                            <p class="text-xs text-slate-700 leading-relaxed">
                                 <strong>SmartBooth Core</strong> is the mission-critical operations cockpit for Indian democratic elections. It eliminates the manual chaos of electoral voter lists by converting raw, unindexed PDF rolls into an intelligent, structured multi-tenant database.
                             </p>
-                            <p class="text-xs text-slate-400 leading-relaxed">
+                            <p class="text-xs text-slate-500 leading-relaxed">
                                 Candidates and booth karyakartas can search, cluster, dispatch slips, and query campaign statistics using natural conversational voice and text without any specialized technical training.
                             </p>
                         </div>
 
                         <!-- Main Function -->
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-3">
-                            <div class="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
-                                <span class="w-6 h-6 rounded-md bg-emerald-500/20 flex items-center justify-center text-xs">02</span>
+                        <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center space-x-2 text-emerald-700 font-bold text-sm">
+                                <span class="w-6 h-6 rounded-md bg-emerald-100 flex items-center justify-center text-xs">02</span>
                                 <h4>Main Function & Purpose</h4>
                             </div>
-                            <ul class="text-xs text-slate-300 space-y-2">
+                            <ul class="text-xs text-slate-700 space-y-2">
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-emerald-400 font-bold mt-0.5">•</span>
+                                    <span class="text-emerald-600 font-bold mt-0.5">•</span>
                                     <span><strong>Gruhastha Household Clustering:</strong> Resolves house numbers & family heads into cohesive voter units.</span>
                                 </li>
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-emerald-400 font-bold mt-0.5">•</span>
+                                    <span class="text-emerald-600 font-bold mt-0.5">•</span>
                                     <span><strong>Phonetic Devanagari Search:</strong> Tolerates colloquial pronunciation shifts ($w \leftrightarrow v, s \leftrightarrow sh, ee \leftrightarrow i$).</span>
                                 </li>
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-emerald-400 font-bold mt-0.5">•</span>
+                                    <span class="text-emerald-600 font-bold mt-0.5">•</span>
                                     <span><strong>Text-to-SQL Analytics:</strong> Translates Hindi questions into PostgreSQL queries via Gemini 2.5 Flash.</span>
                                 </li>
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-emerald-400 font-bold mt-0.5">•</span>
+                                    <span class="text-emerald-600 font-bold mt-0.5">•</span>
                                     <span><strong>Instant Slip Dispatch:</strong> WhatsApp digital cards & Bluetooth 58mm POS thermal slips.</span>
                                 </li>
                             </ul>
                         </div>
 
                         <!-- How it works -->
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-3">
-                            <div class="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
-                                <span class="w-6 h-6 rounded-md bg-emerald-500/20 flex items-center justify-center text-xs">03</span>
+                        <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center space-x-2 text-emerald-700 font-bold text-sm">
+                                <span class="w-6 h-6 rounded-md bg-emerald-100 flex items-center justify-center text-xs">03</span>
                                 <h4>How It Works (Under the Hood)</h4>
                             </div>
-                            <p class="text-xs text-slate-300 leading-relaxed">
-                                When a user asks: <em class="text-emerald-300">"सराना में कितने 60+ वरिष्ठ नागरिक अभी वोट नहीं डाले हैं?"</em>
+                            <p class="text-xs text-slate-700 leading-relaxed">
+                                When a user asks: <em class="text-emerald-800 font-semibold">"सराना में कितने 60+ वरिष्ठ नागरिक अभी वोट नहीं डाले हैं?"</em>
                             </p>
-                            <ol class="text-xs text-slate-400 space-y-1.5 list-decimal list-inside">
+                            <ol class="text-xs text-slate-600 space-y-1.5 list-decimal list-inside">
                                 <li>User input passes through tenancy & scope resolvers.</li>
                                 <li>Gemini 2.5 Flash inspects verified PostgreSQL schema and drafts safe parameterized SQL.</li>
-                                <li>Query executes on tenant partition (<code class="text-emerald-300">voters_t5</code>) in ~45ms.</li>
+                                <li>Query executes on tenant partition (<code class="text-emerald-800 font-mono bg-emerald-50 px-1 rounded">voters_t5</code>) in ~45ms.</li>
                                 <li>Synthesizes natural Devanagari conversational response with actionable follow-up buttons.</li>
                             </ol>
                         </div>
                     </div>
 
                     <!-- Step-by-Step Architecture Flowchart -->
-                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4">
+                    <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-4">
                         <div class="flex items-center justify-between">
-                            <h4 class="text-sm font-bold text-white uppercase tracking-wider font-mono">End-to-End Operational Workflow</h4>
-                            <span class="text-[11px] text-emerald-400 font-mono">Status: 100% Operational (PostgreSQL + Gemini 2.5)</span>
+                            <h4 class="text-sm font-black text-slate-900 uppercase tracking-wider font-mono">End-to-End Operational Workflow</h4>
+                            <span class="text-[11px] text-emerald-700 font-mono font-bold">Status: 100% Operational (PostgreSQL + Gemini 2.5)</span>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-emerald-400">STAGE 1: INGESTION</div>
-                                <div class="font-bold text-white">Electoral Roll Normalization</div>
-                                <p class="text-slate-400 text-[11px]">Parses voter serials, Devanagari names, parentage, age, gender, and EPIC identity numbers.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-emerald-700">STAGE 1: INGESTION</div>
+                                <div class="font-bold text-slate-900">Electoral Roll Normalization</div>
+                                <p class="text-slate-500 text-[11px]">Parses voter serials, Devanagari names, parentage, age, gender, and EPIC identity numbers.</p>
                             </div>
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-emerald-400">STAGE 2: CLUSTERING</div>
-                                <div class="font-bold text-white">Gruhastha Family Graph</div>
-                                <p class="text-slate-400 text-[11px]">Links fragmented individuals into single household voting blocks by address & relation matching.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-emerald-700">STAGE 2: CLUSTERING</div>
+                                <div class="font-bold text-slate-900">Gruhastha Family Graph</div>
+                                <p class="text-slate-500 text-[11px]">Links fragmented individuals into single household voting blocks by address & relation matching.</p>
                             </div>
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-emerald-400">STAGE 3: REASONING</div>
-                                <div class="font-bold text-white">Gemini 2.5 Flash Text-to-SQL</div>
-                                <p class="text-slate-400 text-[11px]">Converts voice or text questions into instant aggregated booth & demographic metrics.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-emerald-700">STAGE 3: REASONING</div>
+                                <div class="font-bold text-slate-900">Gemini 2.5 Flash Text-to-SQL</div>
+                                <p class="text-slate-500 text-[11px]">Converts voice or text questions into instant aggregated booth & demographic metrics.</p>
                             </div>
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-emerald-400">STAGE 4: DISPATCH</div>
-                                <div class="font-bold text-white">Omnichannel Slip Generation</div>
-                                <p class="text-slate-400 text-[11px]">Generates digital WhatsApp cards and ESC/POS thermal printer slips for booth agents.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-emerald-700">STAGE 4: DISPATCH</div>
+                                <div class="font-bold text-slate-900">Omnichannel Slip Generation</div>
+                                <p class="text-slate-500 text-[11px]">Generates digital WhatsApp cards and ESC/POS thermal printer slips for booth agents.</p>
                             </div>
                         </div>
                     </div>
@@ -518,25 +528,22 @@
                 <!-- ================= DETAIL VIEW 2: video.smartbooth.in ================= -->
                 <div id="detail-pipeline2" class="space-y-8 hidden">
                     <!-- Title Bar -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-indigo-950/30 border border-indigo-500/30 p-4 rounded-xl">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-indigo-50 border border-indigo-200 p-5 rounded-2xl">
                         <div class="flex items-center space-x-3">
                             <span class="text-3xl">🎥</span>
                             <div>
-                                <h3 class="text-lg font-bold text-white">SmartBooth Hyper-Personalized AI Campaign Video Engine</h3>
-                                <p class="text-xs text-indigo-400 font-mono">Domain: video.smartbooth.in • Engine: Surgical Splice + ElevenLabs + FFmpeg H.264</p>
+                                <h3 class="text-lg font-black text-slate-900">SmartBooth Hyper-Personalized AI Campaign Video Engine</h3>
+                                <p class="text-xs text-indigo-800 font-mono font-medium">Domain: video.smartbooth.in • Engine: Surgical Splice + ElevenLabs + FFmpeg H.264</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <button onclick="openVideoModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition shadow flex items-center space-x-1.5">
+                            <button onclick="openVideoModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-xs flex items-center space-x-1.5">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
                                 <span>Watch Video Demo</span>
                             </button>
-                            <a href="https://video.smartbooth.in" target="_blank" class="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs transition shadow flex items-center space-x-1">
+                            <a href="https://video.smartbooth.in" target="_blank" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-200 font-bold text-xs transition shadow-2xs flex items-center space-x-1">
                                 <span>Open Video Portal</span>
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                            </a>
-                            <a href="/video/" target="_blank" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
-                                Local Mirror
                             </a>
                         </div>
                     </div>
@@ -544,55 +551,55 @@
                     <!-- 3 Core Pillars -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- What it is -->
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-3">
-                            <div class="flex items-center space-x-2 text-indigo-400 font-bold text-sm">
-                                <span class="w-6 h-6 rounded-md bg-indigo-500/20 flex items-center justify-center text-xs">01</span>
+                        <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center space-x-2 text-indigo-700 font-bold text-sm">
+                                <span class="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center text-xs">01</span>
                                 <h4>What Is This Pipeline?</h4>
                             </div>
-                            <p class="text-xs text-slate-300 leading-relaxed">
-                                <strong>video.smartbooth.in</strong> (Our AI Campaign Video Engine) is a high-speed video rendering system built to deliver 1-to-1 personal campaign appeals from political candidates to individual voters at grassroots scale.
+                            <p class="text-xs text-slate-700 leading-relaxed">
+                                <strong>video.smartbooth.in</strong> is a high-speed video rendering system built to deliver 1-to-1 personal campaign appeals from political candidates to individual voters at grassroots scale.
                             </p>
-                            <p class="text-xs text-slate-400 leading-relaxed">
+                            <p class="text-xs text-slate-500 leading-relaxed">
                                 Instead of expensive, slow full-body AI re-renders that hallucinate or look uncanny, this pipeline uses an authentic candidate master recording and splices personalized Devanagari audio & graphics in seconds.
                             </p>
                         </div>
 
                         <!-- Main Function -->
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-3">
-                            <div class="flex items-center space-x-2 text-indigo-400 font-bold text-sm">
-                                <span class="w-6 h-6 rounded-md bg-indigo-500/20 flex items-center justify-center text-xs">02</span>
+                        <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center space-x-2 text-indigo-700 font-bold text-sm">
+                                <span class="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center text-xs">02</span>
                                 <h4>Main Function & Purpose</h4>
                             </div>
-                            <ul class="text-xs text-slate-300 space-y-2">
+                            <ul class="text-xs text-slate-700 space-y-2">
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-indigo-400 font-bold mt-0.5">•</span>
+                                    <span class="text-indigo-600 font-bold mt-0.5">•</span>
                                     <span><strong>Individual Voter Recognition:</strong> Candidate warmly calls the voter by their exact Devanagari name (*"रामलाल जी", "सुनीता देवी"*).</span>
                                 </li>
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-indigo-400 font-bold mt-0.5">•</span>
+                                    <span class="text-indigo-600 font-bold mt-0.5">•</span>
                                     <span><strong>Devanagari Honorific Badges:</strong> Dynamic graphic overlay displays voter serial, ward, and booth details.</span>
                                 </li>
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-indigo-400 font-bold mt-0.5">•</span>
+                                    <span class="text-indigo-600 font-bold mt-0.5">•</span>
                                     <span><strong>Ballot Symbol Banner:</strong> Persistent high-contrast election symbol banner (*"प्रेस चुनाव चिन्ह #1 - अलमारी"*).</span>
                                 </li>
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-indigo-400 font-bold mt-0.5">•</span>
-                                    <span><strong>WhatsApp Optimization:</strong> Enforces 720x1280 @ 30fps H.264 &lt;3.3MB with <code class="text-indigo-300 font-mono">+faststart</code>.</span>
+                                    <span class="text-indigo-600 font-bold mt-0.5">•</span>
+                                    <span><strong>WhatsApp Optimization:</strong> Enforces 720x1280 @ 30fps H.264 &lt;3.3MB with <code class="text-indigo-700 font-mono bg-indigo-50 px-1 rounded">+faststart</code>.</span>
                                 </li>
                             </ul>
                         </div>
 
                         <!-- How it works -->
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-3">
-                            <div class="flex items-center space-x-2 text-indigo-400 font-bold text-sm">
-                                <span class="w-6 h-6 rounded-md bg-indigo-500/20 flex items-center justify-center text-xs">03</span>
+                        <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center space-x-2 text-indigo-700 font-bold text-sm">
+                                <span class="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center text-xs">03</span>
                                 <h4>How It Works (Under the Hood)</h4>
                             </div>
-                            <p class="text-xs text-slate-300 leading-relaxed">
+                            <p class="text-xs text-slate-700 leading-relaxed">
                                 Rather than re-generating an entire 30-second video per voter, our <strong>Surgical Splice Architecture</strong> works in 4 coordinated steps:
                             </p>
-                            <ol class="text-xs text-slate-400 space-y-1.5 list-decimal list-inside">
+                            <ol class="text-xs text-slate-600 space-y-1.5 list-decimal list-inside">
                                 <li>ElevenLabs Multilingual v2 generates candidate-cloned personalized greeting audio.</li>
                                 <li>Acoustic cut stitches intro greeting seamlessly into authentic candidate speech body at 3.700s.</li>
                                 <li>Pillow engine renders custom typography overlay with candidate ballot symbol.</li>
@@ -602,31 +609,31 @@
                     </div>
 
                     <!-- Step-by-Step Architecture Flowchart -->
-                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4">
+                    <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-4">
                         <div class="flex items-center justify-between">
-                            <h4 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Surgical Splice Media Pipeline</h4>
-                            <span class="text-[11px] text-indigo-400 font-mono">Acoustic Cut: 3.700s • 720×1280 MP4</span>
+                            <h4 class="text-sm font-black text-slate-900 uppercase tracking-wider font-mono">Surgical Splice Media Pipeline</h4>
+                            <span class="text-[11px] text-indigo-700 font-mono font-bold">Acoustic Cut: 3.700s • 720×1280 MP4</span>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-indigo-400">STEP 1: AUDIO SYNTHESIS</div>
-                                <div class="font-bold text-white">ElevenLabs Multilingual v2</div>
-                                <p class="text-slate-400 text-[11px]">Generates targeted Devanagari audio greeting with authentic candidate vocal timbre.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-indigo-700">STEP 1: AUDIO SYNTHESIS</div>
+                                <div class="font-bold text-slate-900">ElevenLabs Multilingual v2</div>
+                                <p class="text-slate-500 text-[11px]">Generates targeted Devanagari audio greeting with authentic candidate vocal timbre.</p>
                             </div>
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-indigo-400">STEP 2: ACOUSTIC SPLICE</div>
-                                <div class="font-bold text-white">Harmonic Splice at 3.700s</div>
-                                <p class="text-slate-400 text-[11px]">Splices intro greeting into authentic master speech video with micro-crossfade to eliminate pops.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-indigo-700">STEP 2: ACOUSTIC SPLICE</div>
+                                <div class="font-bold text-slate-900">Harmonic Splice at 3.700s</div>
+                                <p class="text-slate-500 text-[11px]">Splices intro greeting into authentic master speech video with micro-crossfade to eliminate pops.</p>
                             </div>
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-indigo-400">STEP 3: DEVANAGARI BADGES</div>
-                                <div class="font-bold text-white">Dynamic Pillow Overlay</div>
-                                <p class="text-slate-400 text-[11px]">Renders crisp Devanagari voter badge + persistent top ballot banner with candidate symbol.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-indigo-700">STEP 3: DEVANAGARI BADGES</div>
+                                <div class="font-bold text-slate-900">Dynamic Pillow Overlay</div>
+                                <p class="text-slate-500 text-[11px]">Renders crisp Devanagari voter badge + persistent top ballot banner with candidate symbol.</p>
                             </div>
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-indigo-400">STEP 4: HARDWARE ENCODING</div>
-                                <div class="font-bold text-white">WhatsApp Gate &lt; 3.3MB</div>
-                                <p class="text-slate-400 text-[11px]">Compiles via FFmpeg H.264 Baseline, AAC 48kHz, +faststart for instant playback on 2G/3G.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-indigo-700">STEP 4: HARDWARE ENCODING</div>
+                                <div class="font-bold text-slate-900">WhatsApp Gate &lt; 3.3MB</div>
+                                <p class="text-slate-500 text-[11px]">Compiles via FFmpeg H.264 Baseline, AAC 48kHz, +faststart for instant playback on 2G/3G.</p>
                             </div>
                         </div>
                     </div>
@@ -635,20 +642,20 @@
                 <!-- ================= DETAIL VIEW 3: voiceagent.smartbooth.in ================= -->
                 <div id="detail-pipeline3" class="space-y-8 hidden">
                     <!-- Title Bar -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-cyan-950/30 border border-cyan-500/30 p-4 rounded-xl">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-cyan-50 border border-cyan-200 p-5 rounded-2xl">
                         <div class="flex items-center space-x-3">
                             <span class="text-3xl">🎙️</span>
                             <div>
-                                <h3 class="text-lg font-bold text-white">Real-Time Multimodal Voice Agent (Conversational Telephony)</h3>
-                                <p class="text-xs text-cyan-400 font-mono">Domain: voiceagent.smartbooth.in • Engine: Google Cloud Gemini Live API</p>
+                                <h3 class="text-lg font-black text-slate-900">Real-Time Multimodal Voice Agent (Conversational Telephony)</h3>
+                                <p class="text-xs text-cyan-800 font-mono font-medium">Domain: voiceagent.smartbooth.in • Engine: Google Cloud Gemini Live API</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <a href="https://voiceagent.smartbooth.in" target="_blank" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition shadow flex items-center space-x-1">
+                            <a href="https://voiceagent.smartbooth.in" target="_blank" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs transition shadow-xs flex items-center space-x-1">
                                 <span>Open Voice Portal</span>
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                             </a>
-                            <a href="/voiceagent/" target="_blank" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
+                            <a href="/voiceagent/" target="_blank" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold border border-slate-200 transition shadow-2xs">
                                 Test Mic Live
                             </a>
                         </div>
@@ -657,55 +664,55 @@
                     <!-- 3 Core Pillars -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- What it is -->
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-3">
-                            <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
-                                <span class="w-6 h-6 rounded-md bg-cyan-500/20 flex items-center justify-center text-xs">01</span>
+                        <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center space-x-2 text-cyan-700 font-bold text-sm">
+                                <span class="w-6 h-6 rounded-md bg-cyan-100 flex items-center justify-center text-xs">01</span>
                                 <h4>What Is This Pipeline?</h4>
                             </div>
-                            <p class="text-xs text-slate-300 leading-relaxed">
+                            <p class="text-xs text-slate-700 leading-relaxed">
                                 <strong>voiceagent.smartbooth.in</strong> is an interactive, real-time Speech-to-Speech conversational voice agent for mass citizen feedback and ward grievance collection.
                             </p>
-                            <p class="text-xs text-slate-400 leading-relaxed">
+                            <p class="text-xs text-slate-500 leading-relaxed">
                                 Unlike static robocalls that blast a pre-recorded monologue, this agent engages citizens in natural two-way conversation, listens empathetically to ground grievances, and files complaints into the campaign database.
                             </p>
                         </div>
 
                         <!-- Main Function -->
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-3">
-                            <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
-                                <span class="w-6 h-6 rounded-md bg-cyan-500/20 flex items-center justify-center text-xs">02</span>
+                        <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center space-x-2 text-cyan-700 font-bold text-sm">
+                                <span class="w-6 h-6 rounded-md bg-cyan-100 flex items-center justify-center text-xs">02</span>
                                 <h4>Main Function & Purpose</h4>
                             </div>
-                            <ul class="text-xs text-slate-300 space-y-2">
+                            <ul class="text-xs text-slate-700 space-y-2">
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-cyan-400 font-bold mt-0.5">•</span>
-                                    <span><strong>Sub-Second Response Latency (~300–600ms):</strong> Direct speech-to-speech audio streaming over WebSockets without cascaded STT $\rightarrow$ LLM $\rightarrow$ TTS delays.</span>
+                                    <span class="text-cyan-600 font-bold mt-0.5">•</span>
+                                    <span><strong>Sub-Second Response Latency (~300–600ms):</strong> Direct speech-to-speech audio streaming over WebSockets without cascaded STT delays.</span>
                                 </li>
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-cyan-400 font-bold mt-0.5">•</span>
+                                    <span class="text-cyan-600 font-bold mt-0.5">•</span>
                                     <span><strong>Natural Barge-In & Interruption:</strong> Voters can speak over the agent naturally; audio buffers clear instantly without robotic overlap.</span>
                                 </li>
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-cyan-400 font-bold mt-0.5">•</span>
+                                    <span class="text-cyan-600 font-bold mt-0.5">•</span>
                                     <span><strong>Colloquial Hinglish Understanding:</strong> Handles everyday citizen phrases (*"bijli, paani, naali, sadak, kisan samman"*).</span>
                                 </li>
                                 <li class="flex items-start space-x-2">
-                                    <span class="text-cyan-400 font-bold mt-0.5">•</span>
-                                    <span><strong>Autonomous Tool Calling:</strong> Calls <code class="text-cyan-300 font-mono">record_voter_issue</code> to record ward complaints directly into PostgreSQL.</span>
+                                    <span class="text-cyan-600 font-bold mt-0.5">•</span>
+                                    <span><strong>Autonomous Tool Calling:</strong> Calls <code class="text-cyan-800 font-mono bg-cyan-50 px-1 rounded">record_voter_issue</code> to record ward complaints directly into PostgreSQL.</span>
                                 </li>
                             </ul>
                         </div>
 
                         <!-- How it works -->
-                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-5 space-y-3">
-                            <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
-                                <span class="w-6 h-6 rounded-md bg-cyan-500/20 flex items-center justify-center text-xs">03</span>
+                        <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center space-x-2 text-cyan-700 font-bold text-sm">
+                                <span class="w-6 h-6 rounded-md bg-cyan-100 flex items-center justify-center text-xs">03</span>
                                 <h4>How It Works (Under the Hood)</h4>
                             </div>
-                            <p class="text-xs text-slate-300 leading-relaxed">
+                            <p class="text-xs text-slate-700 leading-relaxed">
                                 The voice pipeline connects standard telephone lines (PSTN) and browser microphones directly to <strong>Google Cloud Vertex AI</strong>:
                             </p>
-                            <ol class="text-xs text-slate-400 space-y-1.5 list-decimal list-inside">
+                            <ol class="text-xs text-slate-600 space-y-1.5 list-decimal list-inside">
                                 <li>Twilio / Exotel streams 8kHz G.711 μ-law audio via WebSockets to FastAPI bridge server.</li>
                                 <li>Audio Transcoder upsamples audio to 16kHz PCM and streams to Gemini Live Multimodal session.</li>
                                 <li>Gemini Live processes tone and intent, generating 24kHz PCM voice response.</li>
@@ -715,31 +722,31 @@
                     </div>
 
                     <!-- Step-by-Step Architecture Flowchart -->
-                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4">
+                    <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-4">
                         <div class="flex items-center justify-between">
-                            <h4 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Gemini Live Telephony Bridge Architecture</h4>
-                            <span class="text-[11px] text-cyan-400 font-mono">FastAPI Bridge • Port 8010 • WebSockets</span>
+                            <h4 class="text-sm font-black text-slate-900 uppercase tracking-wider font-mono">Gemini Live Telephony Bridge Architecture</h4>
+                            <span class="text-[11px] text-cyan-700 font-mono font-bold">FastAPI Bridge • Port 8010 • WebSockets</span>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-cyan-400">INBOUND / CALL</div>
-                                <div class="font-bold text-white">Telephony Media Stream</div>
-                                <p class="text-slate-400 text-[11px]">Voter speaks on mobile or landline; audio stream captured via Twilio/Exotel WebSockets.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-cyan-700">INBOUND / CALL</div>
+                                <div class="font-bold text-slate-900">Telephony Media Stream</div>
+                                <p class="text-slate-500 text-[11px]">Voter speaks on mobile or landline; audio stream captured via Twilio/Exotel WebSockets.</p>
                             </div>
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-cyan-400">FASTAPI BRIDGE</div>
-                                <div class="font-bold text-white">Audio Transcoding</div>
-                                <p class="text-slate-400 text-[11px]">Resamples 8kHz μ-law $\leftrightarrow$ 16kHz/24kHz PCM with real-time barge-in buffer flush.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-cyan-700">FASTAPI BRIDGE</div>
+                                <div class="font-bold text-slate-900">Audio Transcoding</div>
+                                <p class="text-slate-500 text-[11px]">Resamples 8kHz μ-law $\leftrightarrow$ 16kHz/24kHz PCM with real-time barge-in buffer flush.</p>
                             </div>
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-cyan-400">GEMINI LIVE API</div>
-                                <div class="font-bold text-white">Vertex AI Multimodal</div>
-                                <p class="text-slate-400 text-[11px]">Direct speech-to-speech comprehension with sub-second (~300-600ms) conversational turnaround.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-cyan-700">GEMINI LIVE API</div>
+                                <div class="font-bold text-slate-900">Vertex AI Multimodal</div>
+                                <p class="text-slate-500 text-[11px]">Direct speech-to-speech comprehension with sub-second (~300-600ms) conversational turnaround.</p>
                             </div>
-                            <div class="bg-slate-900/80 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
-                                <div class="text-[10px] font-mono font-bold text-cyan-400">ACTION / CRM</div>
-                                <div class="font-bold text-white">record_voter_issue Tool</div>
-                                <p class="text-slate-400 text-[11px]">Automatically writes categorized grievance (water, roads, power) to PostgreSQL database.</p>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl space-y-1.5 shadow-2xs">
+                                <div class="text-[10px] font-mono font-bold text-cyan-700">ACTION / CRM</div>
+                                <div class="font-bold text-slate-900">record_voter_issue Tool</div>
+                                <p class="text-slate-500 text-[11px]">Automatically writes categorized grievance (water, roads, power) to PostgreSQL database.</p>
                             </div>
                         </div>
                     </div>
@@ -749,45 +756,45 @@
         </section>
 
         <!-- ================= TRIPARTITE SYNERGY: HOW THE 3 PIPELINES CONNECT ================= -->
-        <section class="bg-gradient-to-r from-emerald-950/20 via-indigo-950/20 to-cyan-950/20 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6">
+        <section class="bg-gradient-to-r from-emerald-50 via-indigo-50 to-cyan-50 border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-soft">
             <div class="text-center space-y-2 max-w-2xl mx-auto">
-                <span class="text-xs font-mono font-semibold uppercase text-emerald-400 tracking-wider">Unified Tripartite Ecosystem</span>
-                <h3 class="text-xl sm:text-2xl font-bold text-white">How the Three Pipelines Amplify Each Other</h3>
-                <p class="text-xs sm:text-sm text-slate-400">
+                <span class="text-xs font-mono font-bold uppercase text-indigo-700 tracking-wider">Unified Tripartite Ecosystem</span>
+                <h3 class="text-xl sm:text-2xl font-black text-slate-900">How the Three Pipelines Amplify Each Other</h3>
+                <p class="text-xs sm:text-sm text-slate-600">
                     The three pipelines are not isolated experiments—they form a closed-loop autonomous campaign flywheel.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
                 <!-- Synergy 1 -->
-                <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-xl space-y-3">
-                    <div class="flex items-center space-x-2 text-xs font-mono font-bold text-emerald-400">
+                <div class="bg-white border border-slate-200 p-5 rounded-2xl space-y-3 shadow-2xs">
+                    <div class="flex items-center space-x-2 text-xs font-mono font-bold text-emerald-700">
                         <span>PIPELINE 1 ➔ PIPELINE 2</span>
                     </div>
-                    <h4 class="text-sm font-bold text-white">Electoral Roll to Video Personalization</h4>
-                    <p class="text-xs text-slate-300 leading-relaxed">
+                    <h4 class="text-sm font-bold text-slate-900">Electoral Roll to Video Personalization</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
                         Pipeline 1 extracts Devanagari voter names, honorific titles, and booth numbers, feeding clean structured data directly into Pipeline 2's video rendering queue.
                     </p>
                 </div>
 
                 <!-- Synergy 2 -->
-                <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-xl space-y-3">
-                    <div class="flex items-center space-x-2 text-xs font-mono font-bold text-indigo-400">
+                <div class="bg-white border border-slate-200 p-5 rounded-2xl space-y-3 shadow-2xs">
+                    <div class="flex items-center space-x-2 text-xs font-mono font-bold text-indigo-700">
                         <span>PIPELINE 2 ➔ PIPELINE 3</span>
                     </div>
-                    <h4 class="text-sm font-bold text-white">Video Outreach to Voice Grievance Call</h4>
-                    <p class="text-xs text-slate-300 leading-relaxed">
+                    <h4 class="text-sm font-bold text-slate-900">Video Outreach to Voice Grievance Call</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
                         After personalized WhatsApp campaign videos are delivered, Pipeline 3 triggers empathetic two-way voice calls asking if the citizen has local civic concerns.
                     </p>
                 </div>
 
                 <!-- Synergy 3 -->
-                <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-xl space-y-3">
-                    <div class="flex items-center space-x-2 text-xs font-mono font-bold text-cyan-400">
+                <div class="bg-white border border-slate-200 p-5 rounded-2xl space-y-3 shadow-2xs">
+                    <div class="flex items-center space-x-2 text-xs font-mono font-bold text-cyan-700">
                         <span>PIPELINE 3 ➔ PIPELINE 1</span>
                     </div>
-                    <h4 class="text-sm font-bold text-white">Grievances Back to War Room Intelligence</h4>
-                    <p class="text-xs text-slate-300 leading-relaxed">
+                    <h4 class="text-sm font-bold text-slate-900">Grievances Back to War Room Intelligence</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
                         When Pipeline 3 collects civic complaints (*"Ward 3 water pipeline broken"*), it auto-executes database tools that update Pipeline 1's war room dashboard in real time.
                     </p>
                 </div>
@@ -797,51 +804,51 @@
     </main>
 
     <!-- Video Modal for Pipeline 2 -->
-    <div id="videoModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-indigo-500/50 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl relative">
-            <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+    <div id="videoModal" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative">
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                 <div>
-                    <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+                    <h4 class="text-sm font-black text-slate-900 flex items-center space-x-2">
                         <span>🎥 Authentic Personalized Candidate Video</span>
                     </h4>
-                    <p class="text-[11px] text-indigo-300 font-mono">Sarana Candidate • Press Symbol #1 • Almirah</p>
+                    <p class="text-[11px] text-indigo-700 font-mono font-bold">Sarana Candidate • Press Symbol #1 • Almirah</p>
                 </div>
-                <button onclick="closeVideoModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold">
+                <button onclick="closeVideoModal()" class="w-8 h-8 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center text-sm font-bold transition">
                     ✕
                 </button>
             </div>
             <div class="p-4 flex flex-col items-center justify-center bg-black">
-                <video id="sampleVideoPlayer" controls playsinline class="w-full max-h-[65vh] rounded-lg shadow-lg border border-slate-800">
+                <video id="sampleVideoPlayer" controls playsinline class="w-full max-h-[65vh] rounded-xl shadow-lg border border-slate-800">
                     <source src="/static/videos/personalized_sample.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
-            <div class="p-3.5 bg-slate-950 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+            <div class="p-3.5 bg-slate-50 border-t border-slate-200 text-[11px] text-slate-600 flex items-center justify-between">
                 <span>WhatsApp Faststart H.264 (&lt;3.3MB)</span>
                 <div class="flex items-center space-x-3">
-                    <a href="https://video.smartbooth.in" target="_blank" class="text-indigo-400 hover:underline font-bold">Open video.smartbooth.in Studio →</a>
-                    <a href="/demo#pipeline2" class="text-slate-400 hover:text-white">Stage Lab</a>
+                    <a href="https://video.smartbooth.in" target="_blank" class="text-indigo-600 hover:text-indigo-700 font-bold">Open video.smartbooth.in Studio →</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="relative z-10 border-t border-slate-800/80 bg-slate-950 py-8 px-4 sm:px-8 text-xs text-slate-400">
+    <!-- UNIVERSAL FOOTER (matching smartbooth.vedmap.com) -->
+    <footer class="relative z-10 border-t border-slate-800 bg-slate-900 py-8 px-4 sm:px-8 text-xs text-slate-400">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
-                <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
-                    ⚡
+                <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                    🗳️
                 </div>
                 <div>
-                    <span class="text-slate-200 font-bold">SmartBooth Autonomous AI Platform</span>
-                    <span class="text-slate-500">• Google Cloud × Google DeepMind Startup Buildathon India 2026</span>
+                    <span class="text-white font-bold">SmartBooth Autonomous AI Platform</span>
+                    <span class="text-slate-400">• Google Cloud × Google DeepMind Startup Buildathon India 2026</span>
                 </div>
             </div>
-            <div class="flex items-center space-x-4">
-                <a href="/demo" class="hover:text-emerald-400 transition">build.smartbooth.in</a>
+            <div class="flex items-center space-x-5 font-semibold">
+                <a href="/" class="hover:text-white transition">build.smartbooth.in</a>
                 <a href="https://video.smartbooth.in" target="_blank" class="hover:text-indigo-400 transition">video.smartbooth.in</a>
                 <a href="https://voiceagent.smartbooth.in" target="_blank" class="hover:text-cyan-400 transition">voiceagent.smartbooth.in</a>
+                <a href="/hub?tenant=sarana" class="hover:text-emerald-400 transition">War Room</a>
             </div>
         </div>
     </footer>
@@ -859,19 +866,19 @@
                 if (id === pipeId) {
                     detail.classList.remove('hidden');
                     if (id === 'pipeline1') {
-                        card.className = "group relative cursor-pointer rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border-2 border-emerald-500/50 hover:border-emerald-400 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between glow-emerald";
-                        tab.className = "flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-2 bg-emerald-500 text-slate-950 shadow";
+                        card.className = "group relative cursor-pointer rounded-2xl bg-white border-2 border-emerald-500 p-6 shadow-hover transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between";
+                        tab.className = "flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2 bg-emerald-600 text-white shadow-sm";
                     } else if (id === 'pipeline2') {
-                        card.className = "group relative cursor-pointer rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border-2 border-indigo-500/50 hover:border-indigo-400 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between glow-indigo";
-                        tab.className = "flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-2 bg-indigo-600 text-white shadow";
+                        card.className = "group relative cursor-pointer rounded-2xl bg-white border-2 border-indigo-500 p-6 shadow-hover transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between";
+                        tab.className = "flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2 bg-indigo-600 text-white shadow-sm";
                     } else if (id === 'pipeline3') {
-                        card.className = "group relative cursor-pointer rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border-2 border-cyan-500/50 hover:border-cyan-400 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between glow-cyan";
-                        tab.className = "flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-2 bg-cyan-500 text-slate-950 shadow";
+                        card.className = "group relative cursor-pointer rounded-2xl bg-white border-2 border-cyan-500 p-6 shadow-hover transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between";
+                        tab.className = "flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2 bg-cyan-600 text-white shadow-sm";
                     }
                 } else {
                     detail.classList.add('hidden');
-                    card.className = "group relative cursor-pointer rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border border-slate-800 hover:border-slate-700 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between opacity-80 hover:opacity-100";
-                    tab.className = "flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-2 text-slate-400 hover:text-white";
+                    card.className = "group relative cursor-pointer rounded-2xl bg-white border border-slate-200/90 hover:border-slate-300 p-6 shadow-soft transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between opacity-80 hover:opacity-100";
+                    tab.className = "flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900";
                 }
             });
 
